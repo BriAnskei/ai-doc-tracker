@@ -595,29 +595,29 @@ export default function IncomingDocumentsTable() {
       </div>
 
       {/* ── Desktop Table (≥ md) ── */}
-      <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] @container">
         <div className="w-full overflow-x-auto">
-          <div className="min-w-[860px]">
+          <div className="min-w-0">
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
                   {[
-                    "Code",
-                    "Subject",
-                    "From",
-                    "To",
-                    "Routed To",
-                    "Date Received",
-                    "Status",
-                    "File",
-                    "Action",
+                    { label: "Code", hide: "" },
+                    { label: "Subject", hide: "" },
+                    { label: "From", hide: "" },
+                    { label: "To", hide: "hidden @4xl:table-cell" },
+                    { label: "Routed To", hide: "hidden @4xl:table-cell" },
+                    { label: "Date Received", hide: "" },
+                    { label: "Status", hide: "" },
+                    { label: "File", hide: "" },
+                    { label: "Action", hide: "" },
                   ].map((col) => (
                     <TableCell
-                      key={col}
+                      key={col.label}
                       isHeader
-                      className="px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap"
+                      className={`px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap ${col.hide}`}
                     >
-                      {col}
+                      {col.label}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -667,7 +667,7 @@ export default function IncomingDocumentsTable() {
                       </TableCell>
 
                       {/* To */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                         <span
                           className="block truncate max-w-[130px]"
                           title={record.to}
@@ -677,7 +677,7 @@ export default function IncomingDocumentsTable() {
                       </TableCell>
 
                       {/* Routed To */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {record.routedTo}
                       </TableCell>
 

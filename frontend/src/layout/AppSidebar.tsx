@@ -17,6 +17,7 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import CompanyLogo from "../components/logo/CompanyLogo";
 
 type NavItem = {
   name: string;
@@ -35,7 +36,7 @@ const navItems: NavItem[] = [
     name: "Documents",
     icon: <ListIcon />,
     subItems: [
-      { name: "Upload", path: "/upload", pro: false },
+      { name: "Upload", path: "/incoming-upload", pro: false },
       { name: "Incoming", path: "/incoming", pro: false },
       { name: "Outgoing", path: "/outgoing", pro: false },
     ],
@@ -187,6 +188,10 @@ const AppSidebar: React.FC = () => {
                 to={nav.path}
                 className={`menu-item group ${
                   isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                } ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center lg:px-0 lg:gap-0"
+                    : "lg:justify-start"
                 }`}
               >
                 <span
@@ -285,31 +290,10 @@ const AppSidebar: React.FC = () => {
         }`}
       >
         <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
+          <CompanyLogo
+            size={isExpanded || isHovered || isMobileOpen ? 150 : 32}
+            className="mx-auto"
+          />
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
