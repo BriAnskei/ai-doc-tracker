@@ -15,68 +15,37 @@ import {
   TableIcon,
   UserCircleIcon,
 } from "../icons";
+import { NavItem } from "../config/navConfig";
+import { useFilteredOthersNav } from "../hooks/useFilteredOthersNav";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
+
 import CompanyLogo from "../components/logo/CompanyLogo";
-
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
-
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  {
-    name: "Documents",
-    icon: <ListIcon />,
-    subItems: [
-      { name: "Upload", path: "/incoming-upload", pro: false },
-      { name: "Incoming", path: "/incoming", pro: false },
-      { name: "Outgoing", path: "/outgoing", pro: false },
-    ],
-  },
-];
-
-const othersItems: NavItem[] = [
-  // {
-  //   icon: <PieChartIcon />,
-  //   name: "Charts",
-  //   subItems: [
-  //     { name: "Line Chart", path: "/line-chart", pro: false },
-  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/badge", pro: false },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Authentication",
-  //   subItems: [
-  //     { name: "Sign In", path: "/signin", pro: false },
-  //     { name: "Sign Up", path: "/signup", pro: false },
-  //   ],
-  // },
-];
+import { useFilteredNav } from "../hooks/useFilteredNav";
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+
+  const othersItems = useFilteredOthersNav();
   const location = useLocation();
+
+  // const navItems: NavItem[] = [
+  //   {
+  //     icon: <GridIcon />,
+  //     name: "Dashboard",
+  //     path: "/",
+  //   },
+  //   {
+  //     name: "Documents",
+  //     icon: <ListIcon />,
+  //     subItems: [
+  //       { name: "Upload", path: "/incoming-upload", pro: false },
+  //       { name: "Incoming", path: "/incoming", pro: false },
+  //       { name: "Outgoing", path: "/outgoing", pro: false },
+  //     ],
+  //   },
+  // ];
+
+  const navItems = useFilteredNav();
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -234,30 +203,7 @@ const AppSidebar: React.FC = () => {
                       }`}
                     >
                       {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge text-[10px]`}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge text-[10px]`}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
+                      <span className="flex items-center gap-1 ml-auto"></span>
                     </Link>
                   </li>
                 ))}
@@ -333,7 +279,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );

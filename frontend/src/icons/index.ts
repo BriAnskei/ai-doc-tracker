@@ -1,4 +1,9 @@
 import { ReactComponent as PlusIcon } from "./plus.svg?react";
+import { ReactComponent as AdministrationIcon } from "./administration.svg?react";
+import { ReactComponent as UserManagementIcon } from "./user-management.svg?react";
+import { ReactComponent as AccessControlIcon } from "./access-control.svg?react";
+import { ReactComponent as SystemLogsIcon } from "./system-logs.svg?react";
+import { ReactComponent as SettingIcon } from "./setting.svg?react";
 import { ReactComponent as CloseIcon } from "./close.svg?react";
 import { ReactComponent as BoxIcon } from "./box.svg?react";
 import { ReactComponent as CheckCircleIcon } from "./check-circle.svg?react";
@@ -55,8 +60,12 @@ import { ReactComponent as MoreDotIcon } from "./moredot.svg?react";
 import { ReactComponent as AlertHexaIcon } from "./alert-hexa.svg?react";
 import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 import { ReactComponent as Notification } from "./notification.svg?react";
+import { ReactComponent as Upload } from "./upload.svg?react";
+import { ReactComponent as Document } from "./document.svg?react";
 
 export {
+  Document,
+  Upload,
   Notification,
   ErrorHexaIcon,
   AlertHexaIcon,
@@ -114,4 +123,10 @@ export {
   ChatIcon,
   AngleLeftIcon,
   AngleRightIcon,
+  // newly added icons
+  UserManagementIcon,
+  AccessControlIcon,
+  SystemLogsIcon,
+  SettingIcon,
+  AdministrationIcon,
 };

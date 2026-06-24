@@ -1,17 +1,14 @@
 import { useMemo } from "react";
-import { NavItem, NAV_ITEMS } from "../config/navConfig";
+import { NavItem, OTHERS_NAV_ITEMS } from "../config/navConfig";
 import { Roles, userUser } from "../context/UserContext";
 
 /**
- * Convert the raw config items (which use the same NavItem shape) into the
- * filtered list based on the current role. This hook is tiny and memoised so
- * the sidebar re‑renders only when the role changes.
+ * Mirrors useFilteredNav but operates on the "others" navigation items.
+ * It filters based on the current user role, keeping only items (and sub‑items)
+ * that include the role in their `roles` array.
  */
-export const useFilteredNav = (): NavItem[] => {
+export const useFilteredOthersNav = (): NavItem[] => {
   const { role } = userUser();
-
-  // If no role is set (e.g., not logged in) we return an empty array – the UI
-  // can decide to show a guest navigation set elsewhere.
   const currentRole = role as Roles | undefined;
 
   return useMemo(() => {
@@ -19,17 +16,15 @@ export const useFilteredNav = (): NavItem[] => {
 
     const filterItem = (item: NavItem): NavItem | null => {
       if (!item.roles.includes(currentRole)) return null;
-
       const filteredSub = item.subItems?.filter((sub) =>
         sub.roles.includes(currentRole),
       );
-
       return {
         ...item,
         subItems: filteredSub,
-      };
+      } as NavItem;
     };
 
-    return NAV_ITEMS.map(filterItem).filter(Boolean) as NavItem[];
+    return OTHERS_NAV_ITEMS.map(filterItem).filter(Boolean) as NavItem[];
   }, [currentRole]);
 };

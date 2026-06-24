@@ -9,9 +9,9 @@ export default function ProtectedRoute({
 }) {
   const user = userUser();
 
-  // if (!user.role) {
-  //   return <Navigate to="/signin" />;
-  // }
+  if (!user.role) {
+    return <Navigate to="/signin" />;
+  }
 
   return children;
 }

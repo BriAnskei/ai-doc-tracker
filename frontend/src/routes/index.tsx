@@ -5,11 +5,17 @@ import ProtectedRoute from "./protectedRoute";
 import Home from "../pages/Dashboard/Home";
 
 import RoleRoute from "./RoleRoutes";
+import NotificationPage from "../pages/notification/NotificationPage";
 import IncomingDocPage from "../pages/document/IncomingDocPage";
 import DocumentUploadPage from "../pages/document/DocumentUploadPage";
 import AppLayout from "../layout/AppLayout";
-import DashboardRedirect from "./Redirect";
+import { DashboardRedirect, UploadRedirect } from "./Redirect";
 import Unauthorized from "../pages/OtherPage/Unauthorized";
+import OutgoingDocPage from "../pages/document/OutgoingDocPage";
+import ValudationQueue from "../pages/document/ValidationQueue";
+import IncomingDocumentUploadPage from "../pages/document/IncomingDocumentUploadPage";
+import UploadedIncomingDoc from "../pages/document/UploadedIncomingDocPage";
+import UploadedIncomingDocPage from "../pages/document/UploadedIncomingDocPage";
 
 type RouteType = {
   path: string;
@@ -19,7 +25,11 @@ type RouteType = {
 const GLOBAL_ROUTES: RouteType[] = [
   {
     path: "/notification",
-    element: <>Notification Settings</>,
+    element: <NotificationPage />,
+  },
+  {
+    path: "/upload",
+    element: <UploadRedirect />,
   },
 ];
 
@@ -37,25 +47,26 @@ const ADMINISTRATION_ROUTES: RouteType[] = [
     path: "/outgoing",
     element: (
       <RoleRoute allowedRoles={[1, 2]}>
-        <IncomingDocPage />
+        <OutgoingDocPage />
       </RoleRoute>
     ),
   },
 
   // Upload Routes
   {
-    path: "/incoming-upload-direct",
+    path: "/upload-direct",
     element: (
       <RoleRoute allowedRoles={[1, 2]}>
-        <>Upload Outgoing Documents</>{" "}
+        <DocumentUploadPage />
       </RoleRoute>
     ),
   },
+
   {
-    path: "/outgoing-upload",
+    path: "/validation-queue",
     element: (
       <RoleRoute allowedRoles={[1, 2]}>
-        <>Direct Upload to Incoming</>
+        <ValudationQueue />
       </RoleRoute>
     ),
   },
@@ -64,24 +75,43 @@ const ADMINISTRATION_ROUTES: RouteType[] = [
 const SUPER_ADMIN_ROUTES: RouteType[] = [
   {
     path: "/super-admin/dashboard",
-    element: <>Super Admin Dashboard Overview</>,
+    element: (
+      <RoleRoute allowedRoles={[1]}>
+        <>Super Admin Dashboard Overview</>
+      </RoleRoute>
+    ),
   },
   {
     path: "/user-management",
-    element: <>Manage Users & Roles</>,
+    element: (
+      <RoleRoute allowedRoles={[1]}>
+        <>Manage Users & Roles</>
+      </RoleRoute>
+    ),
   },
   {
     path: "/access",
-    element: <>Access Control & Permissions</>,
+    element: (
+      <RoleRoute allowedRoles={[1]}>
+        <>Access Control & Permissions</>
+      </RoleRoute>
+    ),
   },
-
   {
     path: "/activities",
-    element: <>Audit Trail & Logs</>,
+    element: (
+      <RoleRoute allowedRoles={[1]}>
+        <>Audit Trail & Logs</>
+      </RoleRoute>
+    ),
   },
   {
-    path: "setting",
-    element: <>System Configuration</>,
+    path: "/setting",
+    element: (
+      <RoleRoute allowedRoles={[1]}>
+        <>System Configuration</>
+      </RoleRoute>
+    ),
   },
 ];
 
@@ -90,20 +120,20 @@ const ADMIN_ROUTES: RouteType[] = [
     path: "/admin/dashboard",
     element: <>this is the admin dashboard</>,
   },
-  {
-    path: "/validation-queue",
-    element: <>this is the admin dashboard</>,
-  },
 ];
 
 const RECEIVER_ROUTES: RouteType[] = [
   {
-    path: "upload",
-    element: <>System Configuration</>,
+    path: "/receiver/dashboard",
+    element: <>Receiver Dashboard</>,
   },
   {
-    path: "uploads",
-    element: <>System Configuration</>,
+    path: "/incoming-upload",
+    element: <IncomingDocumentUploadPage />,
+  },
+  {
+    path: "/uploads",
+    element: <UploadedIncomingDocPage />,
   },
 ];
 

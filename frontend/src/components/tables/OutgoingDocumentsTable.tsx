@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import Badge from "../ui/badge/Badge";
 import {
   Table,
   TableHeader,
@@ -10,14 +9,12 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type StatusType = "Completed" | "On-Going" | "Pending";
-
 interface OutgoingDocument {
   id: number;
   code: string;
   subject: string;
   to: string;
-  status: StatusType;
+  receivedBy: string;
   fileUrl: string;
   dateReleased: string;
   dateReceived: string;
@@ -28,60 +25,60 @@ interface OutgoingDocument {
 const mockData: OutgoingDocument[] = [
   {
     id: 1,
-    code: "OUT-2024-001",
+    code: "2024-08-001",
     subject: "Budget Proposal FY2024",
     to: "Finance Department",
-    status: "Completed",
+    receivedBy: "John Doe",
     fileUrl: "/files/budget-proposal-2024.pdf",
     dateReleased: "2024-01-08",
     dateReceived: "2024-01-10",
   },
   {
     id: 2,
-    code: "OUT-2024-002",
+    code: "2024-12-002",
     subject: "Infrastructure Maintenance Request",
     to: "Facilities Management",
-    status: "On-Going",
+    receivedBy: "Pedro Reyes",
     fileUrl: "/files/maintenance-request.pdf",
     dateReleased: "2024-01-12",
     dateReceived: "2024-01-14",
   },
   {
     id: 3,
-    code: "OUT-2024-003",
+    code: "2024-16-003",
     subject: "Staff Regularization Endorsement",
     to: "HR Department",
-    status: "Pending",
+    receivedBy: "Ana Cruz",
     fileUrl: "/files/regularization-endorsement.pdf",
     dateReleased: "2024-01-16",
     dateReceived: "2024-01-18",
   },
   {
     id: 4,
-    code: "OUT-2024-004",
+    code: "2024-20-004",
     subject: "Procurement of Office Supplies",
     to: "Administrative Office",
-    status: "Pending",
+    receivedBy: "Carlos Mendoza",
     fileUrl: "/files/procurement-supplies.pdf",
     dateReleased: "2024-01-20",
     dateReceived: "2024-01-22",
   },
   {
     id: 5,
-    code: "OUT-2024-005",
+    code: "2024-23-005",
     subject: "Annual Performance Review Results",
     to: "HR Department",
-    status: "Completed",
+    receivedBy: "Maria Santos",
     fileUrl: "/files/performance-review.pdf",
     dateReleased: "2024-01-23",
     dateReceived: "2024-01-25",
   },
   {
     id: 6,
-    code: "OUT-2024-006",
+    code: "2024-30-006",
     subject: "Legal Compliance Audit Report",
     to: "Legal Affairs",
-    status: "On-Going",
+    receivedBy: "Ramon Garcia",
     fileUrl: "/files/audit-report.pdf",
     dateReleased: "2024-01-30",
     dateReceived: "2024-02-01",
@@ -90,98 +87,12 @@ const mockData: OutgoingDocument[] = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const ALL_STATUSES: StatusType[] = ["Completed", "On-Going", "Pending"];
-
-function getBadgeColor(status: StatusType) {
-  if (status === "Completed") return "success";
-  if (status === "On-Going") return "warning";
-  return "error";
-}
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-PH", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-}
-
-// ─── Status Dropdown ──────────────────────────────────────────────────────────
-
-function StatusDropdown({
-  status,
-  onChangeStatus,
-}: {
-  status: StatusType;
-  onChangeStatus: (s: StatusType) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const others = ALL_STATUSES.filter((s) => s !== status);
-
-  return (
-    <div ref={ref} className="relative inline-block">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="cursor-pointer focus:outline-none"
-        title="Change status"
-      >
-        <Badge size="sm" color={getBadgeColor(status)}>
-          {status}
-          <svg
-            className="ml-1 inline w-3 h-3 opacity-70"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </Badge>
-      </button>
-
-      {open && (
-        <div className="absolute z-50 mt-1 left-0 min-w-[130px] rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
-          {others.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                onChangeStatus(s);
-                setOpen(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-theme-xs hover:bg-gray-50 dark:hover:bg-white/[0.05] first:rounded-t-lg last:rounded-b-lg transition-colors"
-            >
-              <span
-                className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  s === "Completed"
-                    ? "bg-success"
-                    : s === "On-Going"
-                      ? "bg-warning"
-                      : "bg-danger"
-                }`}
-              />
-              <span className="text-gray-700 dark:text-gray-300">{s}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 }
 
 // ─── Kebab Menu ───────────────────────────────────────────────────────────────
@@ -316,11 +227,9 @@ function KebabMenu({ record }: { record: OutgoingDocument }) {
 
 function MobileCard({
   record,
-  onChangeStatus,
   onViewFile,
 }: {
   record: OutgoingDocument;
-  onChangeStatus: (id: number, s: StatusType) => void;
   onViewFile: (r: OutgoingDocument) => void;
 }) {
   return (
@@ -350,7 +259,7 @@ function MobileCard({
         </div>
         <div>
           <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
-            Date Released
+            Date Prepared/Released
           </p>
           <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
             {formatDate(record.dateReleased)}
@@ -364,14 +273,18 @@ function MobileCard({
             {formatDate(record.dateReceived)}
           </p>
         </div>
+        <div>
+          <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+            Received By
+          </p>
+          <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
+            {record.receivedBy}
+          </p>
+        </div>
       </div>
 
-      {/* Bottom row: status + file button */}
-      <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-white/[0.05]">
-        <StatusDropdown
-          status={record.status}
-          onChangeStatus={(s) => onChangeStatus(record.id, s)}
-        />
+      {/* Bottom row: file button */}
+      <div className="flex items-center justify-end pt-1 border-t border-gray-100 dark:border-white/[0.05]">
         <button
           onClick={() => onViewFile(record)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150"
@@ -402,16 +315,8 @@ function MobileCard({
 export default function OutgoingDocumentsTable() {
   const [records, setRecords] = useState<OutgoingDocument[]>(mockData);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<StatusType | "All">("All");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
-
-  function handleStatusChange(id: number, newStatus: StatusType) {
-    console.log(`[Status Change] Record ID ${id}: → ${newStatus}`);
-    setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r)),
-    );
-  }
 
   function handleViewFile(record: OutgoingDocument) {
     console.log(
@@ -427,21 +332,19 @@ export default function OutgoingDocumentsTable() {
       !q ||
       r.code.toLowerCase().includes(q) ||
       r.subject.toLowerCase().includes(q);
-    const matchesStatus = filterStatus === "All" || r.status === filterStatus;
     const date = new Date(r.dateReceived);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
-    return matchesSearch && matchesStatus && matchesFrom && matchesTo;
+    return matchesSearch && matchesFrom && matchesTo;
   });
 
-  const hasFilters =
-    search || filterStatus !== "All" || filterDateFrom || filterDateTo;
+  const hasFilters = search || filterDateFrom || filterDateTo;
 
   return (
     <div className="space-y-4">
       {/* ── Filters ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        {/* Search — full width on mobile, flex-1 on sm+ */}
+        {/* Search */}
         <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
           <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
             <svg
@@ -467,24 +370,7 @@ export default function OutgoingDocumentsTable() {
           />
         </div>
 
-        {/* Status + Date row on mobile (side by side), inline on sm+ */}
         <div className="flex gap-3 flex-wrap items-end">
-          {/* Status filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value as StatusType | "All")
-            }
-            className="flex-1 min-w-[130px] px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
-          >
-            <option value="All">All Statuses</option>
-            {ALL_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-
           {/* Date From */}
           <div className="flex flex-col gap-1">
             <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -516,7 +402,6 @@ export default function OutgoingDocumentsTable() {
             <button
               onClick={() => {
                 setSearch("");
-                setFilterStatus("All");
                 setFilterDateFrom("");
                 setFilterDateTo("");
               }}
@@ -539,7 +424,6 @@ export default function OutgoingDocumentsTable() {
             <MobileCard
               key={record.id}
               record={record}
-              onChangeStatus={handleStatusChange}
               onViewFile={handleViewFile}
             />
           ))
@@ -560,28 +444,31 @@ export default function OutgoingDocumentsTable() {
       </div>
 
       {/* ── Desktop Table (≥ md) ── */}
-      <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] @container">
         <div className="w-full overflow-x-auto">
-          <div className="min-w-[760px]">
+          <div className="min-w-0">
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
                   {[
-                    "Code",
-                    "Subject",
-                    "To",
-                    "Date Released",
-                    "Date Received",
-                    "Status",
-                    "File",
-                    "Action",
+                    { label: "ID Code", hide: "" },
+                    { label: "To", hide: "" },
+                    {
+                      label: "Date Prepared/Released",
+                      hide: "hidden @4xl:table-cell",
+                    },
+                    { label: "Subject", hide: "" },
+                    { label: "Date Received", hide: "hidden @4xl:table-cell" },
+                    { label: "Received By", hide: "hidden @4xl:table-cell" },
+                    { label: "Link (PDF/Softcopy)", hide: "" },
+                    { label: "Action", hide: "" },
                   ].map((col) => (
                     <TableCell
-                      key={col}
+                      key={col.label}
                       isHeader
-                      className="px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap"
+                      className={`px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap ${col.hide}`}
                     >
-                      {col}
+                      {col.label}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -610,16 +497,6 @@ export default function OutgoingDocumentsTable() {
                         </span>
                       </TableCell>
 
-                      {/* Subject — fixed width, truncate with title tooltip */}
-                      <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
-                        <span
-                          className="block truncate max-w-[200px]"
-                          title={record.subject}
-                        >
-                          {record.subject}
-                        </span>
-                      </TableCell>
-
                       {/* To */}
                       <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                         <span
@@ -630,27 +507,32 @@ export default function OutgoingDocumentsTable() {
                         </span>
                       </TableCell>
 
-                      {/* Date Released */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {/* Date Prepared/Released */}
+                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {formatDate(record.dateReleased)}
                       </TableCell>
 
+                      {/* Subject */}
+                      <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
+                        <span
+                          className="block truncate max-w-[200px]"
+                          title={record.subject}
+                        >
+                          {record.subject}
+                        </span>
+                      </TableCell>
+
                       {/* Date Received */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {formatDate(record.dateReceived)}
                       </TableCell>
 
-                      {/* Status */}
-                      <TableCell className="px-3 py-3 whitespace-nowrap">
-                        <StatusDropdown
-                          status={record.status}
-                          onChangeStatus={(s) =>
-                            handleStatusChange(record.id, s)
-                          }
-                        />
+                      {/* Received By */}
+                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                        {record.receivedBy}
                       </TableCell>
 
-                      {/* File */}
+                      {/* Link (PDF/Softcopy) */}
                       <TableCell className="px-3 py-3 whitespace-nowrap">
                         <button
                           onClick={() => handleViewFile(record)}

@@ -5,6 +5,7 @@ export type Roles = 1 | 2 | 3; // super admin, admin, receiver
 type UserContextType = {
   role: Roles | undefined;
   setCurrUser: (role: string) => void;
+  logout: () => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -12,7 +13,11 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [role, setRole] = useState<Roles | undefined>(undefined);
+  const [role, setRole] = useState<Roles | undefined>(() => {
+    const storedRole = sessionStorage.getItem("role");
+
+    return storedRole ? (Number(storedRole) as Roles) : undefined;
+  });
 
   const setCurrUser = (role: string) => {
     const roles: Record<string, Roles> = {
@@ -21,8 +26,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       receiver: 3,
     };
 
-    setRole(roles[role]);
-    console.log("current user: ", roles[role]);
+    const currRole = roles[role];
+
+    setRole(currRole);
+
+    if (currRole) {
+      sessionStorage.setItem("role", currRole.toString());
+    }
+  };
+
+  const logout = () => {
+    sessionStorage.clear();
   };
 
   return (
@@ -30,6 +44,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         role,
         setCurrUser,
+        logout,
       }}
     >
       {children}
