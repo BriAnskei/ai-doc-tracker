@@ -6,11 +6,13 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import Badge from "../ui/badge/Badge";
+import StatusUpdateModal, {
+  StatusType,
+  StatusUpdatePayload,
+} from "../ui/modal/document/StatusUpdateModal";
+import IncomingAuditModal from "../ui/modal/document/IncomingAuditModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type StatusType = "Completed" | "On-Going" | "Pending";
 
 interface IncomingDocument {
   id: number;
@@ -99,10 +101,19 @@ const mockData: IncomingDocument[] = [
 
 const ALL_STATUSES: StatusType[] = ["Completed", "On-Going", "Pending"];
 
-function getBadgeColor(status: StatusType) {
-  if (status === "Completed") return "success";
-  if (status === "On-Going") return "warning";
-  return "error";
+/** Plain colored text — no badge, no interactivity */
+function StatusText({ status }: { status: StatusType }) {
+  const colorClass =
+    status === "Completed"
+      ? "text-success"
+      : status === "On-Going"
+        ? "text-warning"
+        : "text-danger";
+  return (
+    <span className={`text-theme-xs font-semibold ${colorClass}`}>
+      {status}
+    </span>
+  );
 }
 
 function formatDate(iso: string) {
@@ -113,87 +124,23 @@ function formatDate(iso: string) {
   });
 }
 
-// ─── Status Dropdown ──────────────────────────────────────────────────────────
-
-function StatusDropdown({
-  status,
-  onChangeStatus,
-}: {
-  status: StatusType;
-  onChangeStatus: (s: StatusType) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const others = ALL_STATUSES.filter((s) => s !== status);
-
-  return (
-    <div ref={ref} className="relative inline-block">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="cursor-pointer focus:outline-none"
-        title="Change status"
-      >
-        <Badge size="sm" color={getBadgeColor(status)}>
-          {status}
-          <svg
-            className="ml-1 inline w-3 h-3 opacity-70"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </Badge>
-      </button>
-
-      {open && (
-        <div className="absolute z-50 mt-1 left-0 min-w-[130px] rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
-          {others.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                onChangeStatus(s);
-                setOpen(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-theme-xs hover:bg-gray-50 dark:hover:bg-white/[0.05] first:rounded-t-lg last:rounded-b-lg transition-colors"
-            >
-              <span
-                className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                  s === "Completed"
-                    ? "bg-success"
-                    : s === "On-Going"
-                      ? "bg-warning"
-                      : "bg-danger"
-                }`}
-              />
-              <span className="text-gray-700 dark:text-gray-300">{s}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Kebab Menu ───────────────────────────────────────────────────────────────
 
-function KebabMenu({ record }: { record: IncomingDocument }) {
+function KebabMenu({
+  record,
+  onUpdateStatus,
+}: {
+  record: IncomingDocument;
+  onUpdateStatus: (record: IncomingDocument) => void;
+}) {
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
+  const [auditRecord, setAuditRecord] = useState<IncomingDocument | null>(null);
+
+  function openAuditModal(record: IncomingDocument) {
+    setAuditRecord(record);
+    setAuditModalOpen(true);
+  }
+
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -238,6 +185,25 @@ function KebabMenu({ record }: { record: IncomingDocument }) {
       handler: () => console.log("[View] Record:", record),
     },
     {
+      label: "Update Status",
+      icon: (
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+          />
+        </svg>
+      ),
+      handler: () => onUpdateStatus(record),
+    },
+    {
       label: "History",
       icon: (
         <svg
@@ -254,7 +220,7 @@ function KebabMenu({ record }: { record: IncomingDocument }) {
           />
         </svg>
       ),
-      handler: () => console.log("[History] Audit log for record:", record),
+      handler: () => openAuditModal(record),
     },
     {
       label: "Archive",
@@ -298,29 +264,30 @@ function KebabMenu({ record }: { record: IncomingDocument }) {
   ];
 
   return (
-    <div ref={ref} className="relative inline-block">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/[0.06] dark:hover:text-gray-200 transition-colors focus:outline-none"
-        title="More actions"
-      >
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="1.5" />
-          <circle cx="12" cy="12" r="1.5" />
-          <circle cx="12" cy="19" r="1.5" />
-        </svg>
-      </button>
+    <>
+      <div ref={ref} className="relative inline-block">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/[0.06] dark:hover:text-gray-200 transition-colors focus:outline-none"
+          title="More actions"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="5" r="1.5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="12" cy="19" r="1.5" />
+          </svg>
+        </button>
 
-      {open && (
-        <div className="absolute z-50 right-0 mt-1 w-40 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
-          {actions.map((action, idx) => (
-            <button
-              key={action.label}
-              onClick={() => {
-                action.handler();
-                setOpen(false);
-              }}
-              className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-theme-xs transition-colors
+        {open && (
+          <div className="absolute z-50 right-0 mt-1 w-44 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
+            {actions.map((action, idx) => (
+              <button
+                key={action.label}
+                onClick={() => {
+                  action.handler();
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-theme-xs transition-colors
                 ${idx === 0 ? "rounded-t-lg" : ""}
                 ${idx === actions.length - 1 ? "rounded-b-lg" : ""}
                 ${
@@ -328,14 +295,24 @@ function KebabMenu({ record }: { record: IncomingDocument }) {
                     ? "text-danger hover:bg-red-50 dark:hover:bg-red-500/10"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]"
                 }`}
-            >
-              {action.icon}
-              {action.label}
-            </button>
-          ))}
-        </div>
+              >
+                {action.icon}
+                {action.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {auditRecord && (
+        <IncomingAuditModal
+          isOpen={auditModalOpen}
+          onClose={() => setAuditModalOpen(false)}
+          documentCode={auditRecord.code}
+          documentSubject={auditRecord.subject}
+        />
       )}
-    </div>
+    </>
   );
 }
 
@@ -343,11 +320,11 @@ function KebabMenu({ record }: { record: IncomingDocument }) {
 
 function MobileCard({
   record,
-  onChangeStatus,
+  onUpdateStatus,
   onViewFile,
 }: {
   record: IncomingDocument;
-  onChangeStatus: (id: number, s: StatusType) => void;
+  onUpdateStatus: (record: IncomingDocument) => void;
   onViewFile: (r: IncomingDocument) => void;
 }) {
   return (
@@ -357,7 +334,7 @@ function MobileCard({
         <span className="font-mono text-theme-xs font-semibold text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 px-2 py-0.5 rounded">
           {record.code}
         </span>
-        <KebabMenu record={record} />
+        <KebabMenu record={record} onUpdateStatus={onUpdateStatus} />
       </div>
 
       {/* Subject */}
@@ -403,10 +380,7 @@ function MobileCard({
 
       {/* Bottom row: status + file button */}
       <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-white/[0.05]">
-        <StatusDropdown
-          status={record.status}
-          onChangeStatus={(s) => onChangeStatus(record.id, s)}
-        />
+        <StatusText status={record.status} />
         <button
           onClick={() => onViewFile(record)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150"
@@ -441,10 +415,27 @@ export default function IncomingDocumentsTable() {
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
 
-  function handleStatusChange(id: number, newStatus: StatusType) {
-    console.log(`[Status Change] Record ID ${id}: → ${newStatus}`);
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<IncomingDocument | null>(
+    null,
+  );
+
+  function openUpdateModal(record: IncomingDocument) {
+    setSelectedRecord(record);
+    setModalOpen(true);
+  }
+
+  function handleStatusUpdate(payload: StatusUpdatePayload) {
+    if (!selectedRecord) return;
+    console.log(
+      `[Status Update] Record ${selectedRecord.code}: ${selectedRecord.status} → ${payload.newStatus}`,
+      payload.reason ? `Reason: ${payload.reason}` : "",
+    );
     setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r)),
+      prev.map((r) =>
+        r.id === selectedRecord.id ? { ...r, status: payload.newStatus } : r,
+      ),
     );
   }
 
@@ -473,269 +464,126 @@ export default function IncomingDocumentsTable() {
     search || filterStatus !== "All" || filterDateFrom || filterDateTo;
 
   return (
-    <div className="space-y-4">
-      {/* ── Filters ── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        {/* Search — full width on mobile, flex-1 on sm+ */}
-        <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
-          <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+    <>
+      {/* ── Status Update Modal ── */}
+      {selectedRecord && (
+        <StatusUpdateModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleStatusUpdate}
+          currentStatus={selectedRecord.status}
+          documentCode={selectedRecord.code}
+          documentSubject={selectedRecord.subject}
+        />
+      )}
+
+      <div className="space-y-4">
+        {/* ── Filters ── */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          {/* Search */}
+          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
+            <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
+                />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by code or subject…"
+              className="w-full pl-9 pr-4 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:placeholder-gray-500 transition"
+            />
+          </div>
+
+          <div className="flex gap-3 flex-wrap items-end">
+            {/* Status filter */}
+            <select
+              value={filterStatus}
+              onChange={(e) =>
+                setFilterStatus(e.target.value as StatusType | "All")
+              }
+              className="flex-1 min-w-[130px] px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
+              <option value="All">All Statuses</option>
+              {ALL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+
+            {/* Date From */}
+            <div className="flex flex-col gap-1">
+              <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
+                From
+              </label>
+              <input
+                type="date"
+                value={filterDateFrom}
+                onChange={(e) => setFilterDateFrom(e.target.value)}
+                className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
               />
-            </svg>
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by code or subject…"
-            className="w-full pl-9 pr-4 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:placeholder-gray-500 transition"
-          />
+            </div>
+
+            {/* Date To */}
+            <div className="flex flex-col gap-1">
+              <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
+                To
+              </label>
+              <input
+                type="date"
+                value={filterDateTo}
+                onChange={(e) => setFilterDateTo(e.target.value)}
+                className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
+              />
+            </div>
+
+            {/* Clear */}
+            {hasFilters && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setFilterStatus("All");
+                  setFilterDateFrom("");
+                  setFilterDateTo("");
+                }}
+                className="px-3 py-2 text-theme-sm text-gray-500 hover:text-danger border border-gray-200 rounded-lg hover:border-danger/40 transition-colors dark:border-white/[0.08] dark:text-gray-400 dark:hover:text-danger whitespace-nowrap"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Status + Date row on mobile (side by side), inline on sm+ */}
-        <div className="flex gap-3 flex-wrap items-end">
-          {/* Status filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value as StatusType | "All")
-            }
-            className="flex-1 min-w-[130px] px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
-          >
-            <option value="All">All Statuses</option>
-            {ALL_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-
-          {/* Date From */}
-          <div className="flex flex-col gap-1">
-            <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
-              From
-            </label>
-            <input
-              type="date"
-              value={filterDateFrom}
-              onChange={(e) => setFilterDateFrom(e.target.value)}
-              className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
-            />
-          </div>
-
-          {/* Date To */}
-          <div className="flex flex-col gap-1">
-            <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
-              To
-            </label>
-            <input
-              type="date"
-              value={filterDateTo}
-              onChange={(e) => setFilterDateTo(e.target.value)}
-              className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
-            />
-          </div>
-
-          {/* Clear */}
-          {hasFilters && (
-            <button
-              onClick={() => {
-                setSearch("");
-                setFilterStatus("All");
-                setFilterDateFrom("");
-                setFilterDateTo("");
-              }}
-              className="px-3 py-2 text-theme-sm text-gray-500 hover:text-danger border border-gray-200 rounded-lg hover:border-danger/40 transition-colors dark:border-white/[0.08] dark:text-gray-400 dark:hover:text-danger whitespace-nowrap"
-            >
-              Clear
-            </button>
+        {/* ── Mobile Cards (< md) ── */}
+        <div className="md:hidden space-y-3">
+          {filtered.length === 0 ? (
+            <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] px-5 py-10 text-center text-gray-400 text-theme-sm">
+              No records match your filters.
+            </div>
+          ) : (
+            filtered.map((record) => (
+              <MobileCard
+                key={record.id}
+                record={record}
+                onUpdateStatus={openUpdateModal}
+                onViewFile={handleViewFile}
+              />
+            ))
           )}
-        </div>
-      </div>
-
-      {/* ── Mobile Cards (< md) ── */}
-      <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] px-5 py-10 text-center text-gray-400 text-theme-sm">
-            No records match your filters.
-          </div>
-        ) : (
-          filtered.map((record) => (
-            <MobileCard
-              key={record.id}
-              record={record}
-              onChangeStatus={handleStatusChange}
-              onViewFile={handleViewFile}
-            />
-          ))
-        )}
-        {filtered.length > 0 && (
-          <p className="text-theme-xs text-gray-400 dark:text-gray-500 text-right px-1">
-            Showing{" "}
-            <span className="font-medium text-gray-600 dark:text-gray-300">
-              {filtered.length}
-            </span>{" "}
-            of{" "}
-            <span className="font-medium text-gray-600 dark:text-gray-300">
-              {records.length}
-            </span>{" "}
-            records
-          </p>
-        )}
-      </div>
-
-      {/* ── Desktop Table (≥ md) ── */}
-      <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] @container">
-        <div className="w-full overflow-x-auto">
-          <div className="min-w-0">
-            <Table>
-              <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                <TableRow>
-                  {[
-                    { label: "Code", hide: "" },
-                    { label: "Subject", hide: "" },
-                    { label: "From", hide: "" },
-                    { label: "To", hide: "hidden @4xl:table-cell" },
-                    { label: "Routed To", hide: "hidden @4xl:table-cell" },
-                    { label: "Date Received", hide: "" },
-                    { label: "Status", hide: "" },
-                    { label: "File", hide: "" },
-                    { label: "Action", hide: "" },
-                  ].map((col) => (
-                    <TableCell
-                      key={col.label}
-                      isHeader
-                      className={`px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap ${col.hide}`}
-                    >
-                      {col.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHeader>
-
-              <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="px-5 py-10 text-center text-gray-400 text-theme-sm"
-                    >
-                      No records match your filters.
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((record) => (
-                    <TableRow
-                      key={record.id}
-                      className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
-                    >
-                      {/* Code */}
-                      <TableCell className="px-3 py-3 whitespace-nowrap">
-                        <span className="font-mono text-theme-xs font-semibold text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 px-2 py-0.5 rounded">
-                          {record.code}
-                        </span>
-                      </TableCell>
-
-                      {/* Subject — fixed width, truncate with title tooltip */}
-                      <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
-                        <span
-                          className="block truncate max-w-[160px]"
-                          title={record.subject}
-                        >
-                          {record.subject}
-                        </span>
-                      </TableCell>
-
-                      {/* From */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                        <span
-                          className="block truncate max-w-[130px]"
-                          title={record.from}
-                        >
-                          {record.from}
-                        </span>
-                      </TableCell>
-
-                      {/* To */}
-                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                        <span
-                          className="block truncate max-w-[130px]"
-                          title={record.to}
-                        >
-                          {record.to}
-                        </span>
-                      </TableCell>
-
-                      {/* Routed To */}
-                      <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                        {record.routedTo}
-                      </TableCell>
-
-                      {/* Date Received */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                        {formatDate(record.dateReceived)}
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell className="px-3 py-3 whitespace-nowrap">
-                        <StatusDropdown
-                          status={record.status}
-                          onChangeStatus={(s) =>
-                            handleStatusChange(record.id, s)
-                          }
-                        />
-                      </TableCell>
-
-                      {/* File */}
-                      <TableCell className="px-3 py-3 whitespace-nowrap">
-                        <button
-                          onClick={() => handleViewFile(record)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150 whitespace-nowrap"
-                          title="Open PDF"
-                        >
-                          <svg
-                            className="w-3.5 h-3.5 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                            />
-                          </svg>
-                          View File
-                        </button>
-                      </TableCell>
-
-                      {/* Action */}
-                      <TableCell className="px-3 py-3">
-                        <KebabMenu record={record} />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Footer */}
-        {filtered.length > 0 && (
-          <div className="px-4 py-3 border-t border-gray-100 dark:border-white/[0.05]">
-            <span className="text-theme-xs text-gray-400 dark:text-gray-500">
+          {filtered.length > 0 && (
+            <p className="text-theme-xs text-gray-400 dark:text-gray-500 text-right px-1">
               Showing{" "}
               <span className="font-medium text-gray-600 dark:text-gray-300">
                 {filtered.length}
@@ -745,10 +593,164 @@ export default function IncomingDocumentsTable() {
                 {records.length}
               </span>{" "}
               records
-            </span>
+            </p>
+          )}
+        </div>
+
+        {/* ── Desktop Table (≥ md) ── */}
+        <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] @container">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-0">
+              <Table>
+                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                  <TableRow>
+                    {[
+                      { label: "Code", hide: "" },
+                      { label: "Subject", hide: "" },
+                      { label: "From", hide: "" },
+                      { label: "To", hide: "hidden @4xl:table-cell" },
+                      { label: "Routed To", hide: "hidden @4xl:table-cell" },
+                      { label: "Date Received", hide: "" },
+                      { label: "Status", hide: "" },
+                      { label: "File", hide: "" },
+                      { label: "Action", hide: "" },
+                    ].map((col) => (
+                      <TableCell
+                        key={col.label}
+                        isHeader
+                        className={`px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap ${col.hide}`}
+                      >
+                        {col.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="px-5 py-10 text-center text-gray-400 text-theme-sm"
+                      >
+                        No records match your filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map((record) => (
+                      <TableRow
+                        key={record.id}
+                        className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
+                      >
+                        {/* Code */}
+                        <TableCell className="px-3 py-3 whitespace-nowrap">
+                          <span className="font-mono text-theme-xs font-semibold text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 px-2 py-0.5 rounded">
+                            {record.code}
+                          </span>
+                        </TableCell>
+
+                        {/* Subject */}
+                        <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
+                          <span
+                            className="block truncate max-w-[160px]"
+                            title={record.subject}
+                          >
+                            {record.subject}
+                          </span>
+                        </TableCell>
+
+                        {/* From */}
+                        <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                          <span
+                            className="block truncate max-w-[130px]"
+                            title={record.from}
+                          >
+                            {record.from}
+                          </span>
+                        </TableCell>
+
+                        {/* To */}
+                        <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                          <span
+                            className="block truncate max-w-[130px]"
+                            title={record.to}
+                          >
+                            {record.to}
+                          </span>
+                        </TableCell>
+
+                        {/* Routed To */}
+                        <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                          {record.routedTo}
+                        </TableCell>
+
+                        {/* Date Received */}
+                        <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                          {formatDate(record.dateReceived)}
+                        </TableCell>
+
+                        {/* Status — plain colored text, no interaction */}
+                        <TableCell className="px-3 py-3 whitespace-nowrap">
+                          <StatusText status={record.status} />
+                        </TableCell>
+
+                        {/* File */}
+                        <TableCell className="px-3 py-3 whitespace-nowrap">
+                          <button
+                            onClick={() => handleViewFile(record)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150 whitespace-nowrap"
+                            title="Open PDF"
+                          >
+                            <svg
+                              className="w-3.5 h-3.5 flex-shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                              />
+                            </svg>
+                            View File
+                          </button>
+                        </TableCell>
+
+                        {/* Action */}
+                        <TableCell className="px-3 py-3">
+                          <KebabMenu
+                            record={record}
+                            onUpdateStatus={openUpdateModal}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        )}
+
+          {/* Footer */}
+          {filtered.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-white/[0.05]">
+              <span className="text-theme-xs text-gray-400 dark:text-gray-500">
+                Showing{" "}
+                <span className="font-medium text-gray-600 dark:text-gray-300">
+                  {filtered.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-gray-600 dark:text-gray-300">
+                  {records.length}
+                </span>{" "}
+                records
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

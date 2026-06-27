@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ValidationDocument {
   id: number;
   uploaderName: string;
+  senderName: string;
   uploadedAt: string;
   fileUrl: string;
 }
@@ -13,6 +14,27 @@ interface Props {
   onApprove: (record: ValidationDocument) => void;
   onReject: (record: ValidationDocument, reason: string) => void;
 }
+
+type AiVerdict = {
+  status: "valid" | "invalid";
+  reason: string;
+} | null;
+
+type AiState = "idle" | "loading" | "done";
+
+// ─── Mock AI analysis ────────────────────────────────────────────────────────
+// Replace this with your real API call (e.g. OpenRouter / Gemini / Claude).
+async function analyzeDocument(_fileUrl: string): Promise<AiVerdict> {
+  await new Promise((res) => setTimeout(res, 2000));
+
+  // Mock result — swap with real response when integrating
+  return {
+    status: "valid",
+    reason:
+      "This appears to be a properly structured letter with a sender, recipient, date, and signature block.",
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("en-PH", {
@@ -34,6 +56,29 @@ export default function ValidationModal({
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
+  const [aiState, setAiState] = useState<AiState>("idle");
+  const [aiVerdict, setAiVerdict] = useState<AiVerdict>(null);
+
+  // Run AI analysis whenever a new record is opened
+  useEffect(() => {
+    if (!record) return;
+
+    let cancelled = false;
+
+    setAiState("loading");
+    setAiVerdict(null);
+
+    analyzeDocument(record.fileUrl).then((result) => {
+      if (cancelled) return;
+      setAiVerdict(result);
+      setAiState("done");
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [record?.id]);
+
   if (!record) return null;
 
   function handleClose() {
@@ -47,13 +92,11 @@ export default function ValidationModal({
       setIsRejecting(true);
       return;
     }
-    // record is guaranteed to be non-null here due to the guard above
     onReject(record, rejectionReason);
     handleClose();
   }
 
   function handleApprove() {
-    // record is guaranteed to be non-null here due to the guard above
     onApprove(record);
     handleClose();
   }
@@ -76,6 +119,10 @@ export default function ValidationModal({
               Uploaded by{" "}
               <span className="font-medium text-gray-700 dark:text-gray-300">
                 {record.uploaderName}
+              </span>{" "}
+              · Sender{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                Brian Pogi
               </span>{" "}
               · {formatDateTime(record.uploadedAt)}
             </p>
@@ -120,6 +167,7 @@ export default function ValidationModal({
                 />
               </svg>
             </div>
+
             <div>
               <p className="text-theme-sm font-medium text-gray-800 dark:text-white/90">
                 {filename}
@@ -128,6 +176,7 @@ export default function ValidationModal({
                 PDF document · Uploaded {formatDateTime(record.uploadedAt)}
               </p>
             </div>
+
             <a
               href={record.fileUrl}
               target="_blank"
@@ -149,6 +198,93 @@ export default function ValidationModal({
               </svg>
               Open document
             </a>
+
+            {/* ── AI Verdict ─────────────────────────────────────────── */}
+            <div className="w-full border-t border-gray-200 dark:border-white/[0.06] pt-3">
+              {aiState === "loading" && (
+                <div className="flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500">
+                  <svg
+                    className="w-3.5 h-3.5 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                  <span className="text-theme-xs">Analyzing document…</span>
+                </div>
+              )}
+
+              {aiState === "done" && aiVerdict?.status === "valid" && (
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-[11px] font-medium text-success">
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Valid letter
+                    </span>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                      AI analysis
+                    </span>
+                  </div>
+                  <p className="text-theme-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                    {aiVerdict.reason}
+                  </p>
+                </div>
+              )}
+
+              {aiState === "done" && aiVerdict?.status === "invalid" && (
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-[11px] font-medium text-danger">
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Invalid letter
+                    </span>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                      AI analysis
+                    </span>
+                  </div>
+                  <p className="text-theme-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                    {aiVerdict.reason}
+                  </p>
+                </div>
+              )}
+            </div>
+            {/* ────────────────────────────────────────────────────────── */}
           </div>
 
           {/* Rejection reason (conditional) */}

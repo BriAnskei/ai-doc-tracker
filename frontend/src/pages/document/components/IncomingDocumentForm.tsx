@@ -140,23 +140,17 @@ export default function IncomingDocumentForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className={labelCls}>Receiver's name</span>
-          <div className={inputCls}>
-            <svg
-              className="w-4 h-4 text-gray-400 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            {MOCK_RECEIVER.name}
-          </div>
+          <span className="text-theme-sm font-medium text-gray-700 dark:text-gray-300">
+            Sender's name
+          </span>
+          <input
+            type="text"
+            placeholder="Enter sender's name"
+            className={
+              inputCls +
+              " w-full outline-none bg-white dark:bg-white/[0.03] focus:border-secondary focus:ring-1 focus:ring-secondary/30"
+            }
+          />
         </div>
       </div>
 

@@ -71,43 +71,40 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   {
-    name: "Document",
+    name: "Documents",
     icon: <Document />,
     roles: [1, 2, 3],
     subItems: [
+      // Super Admin, Admin
       {
-        name: "Validation",
+        name: "Validation Queue",
         path: "/validation-queue",
         roles: [1, 2],
       },
       {
-        name: "Upload",
+        name: "Upload Document",
         path: "/upload-direct",
         roles: [1, 2],
       },
-
       {
-        name: "Upload",
-        path: "/upload",
-        roles: [3],
-      },
-
-      // super admin, admin
-      {
-        name: "Incoming",
+        name: "Incoming Documents",
         path: "/incoming",
         roles: [1, 2],
       },
       {
-        name: "Outgoing",
+        name: "Outgoing Documents",
         path: "/outgoing",
         roles: [1, 2],
       },
 
-      // receiver
-
+      // Receiver
       {
-        name: "Uploads",
+        name: "Submit Document",
+        path: "/upload",
+        roles: [3],
+      },
+      {
+        name: "Submitted Documents",
         path: "/uploads",
         roles: [3],
       },
@@ -130,7 +127,7 @@ export const OTHERS_NAV_ITEMS: NavItem[] = [
     subItems: [
       {
         name: "User Management",
-        path: "/validate",
+        path: "/users",
         roles: [1],
       },
       {

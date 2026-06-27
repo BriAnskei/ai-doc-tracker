@@ -1,4 +1,3 @@
-// components/logo/CompanyLogo.tsx
 interface CompanyLogoProps {
   className?: string;
   size?: number;
@@ -36,12 +35,40 @@ export default function CompanyLogo({
       </defs>
 
       {/* Outer rings */}
-      <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" strokeOpacity="0.25" strokeWidth="1.5" />
-      <circle cx="100" cy="100" r="88" fill="none" stroke="var(--color-accent)" strokeWidth="2" />
-      <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeOpacity="0.4" strokeWidth="1" />
+      <circle
+        cx="100"
+        cy="100"
+        r="96"
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.25"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="100"
+        cy="100"
+        r="88"
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth="2"
+      />
+      <circle
+        cx="100"
+        cy="100"
+        r="80"
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.4"
+        strokeWidth="1"
+      />
 
       {/* Curved title */}
-      <text fill="currentColor" fontSize="10.5" fontWeight="600" letterSpacing="2">
+      <text
+        fill="currentColor"
+        fontSize="10.5"
+        fontWeight="600"
+        letterSpacing="2"
+      >
         <textPath href="#topArc" startOffset="50%" textAnchor="middle">
           PROVINCIAL ENGINEERING
         </textPath>
@@ -80,13 +107,42 @@ export default function CompanyLogo({
       })}
 
       {/* Base / steps */}
-      <line x1="55" y1="148" x2="145" y2="148" stroke="currentColor" strokeWidth="2" opacity="0.7" />
-      <rect x="62" y="140" width="76" height="8" fill="currentColor" opacity="0.85" />
-      <rect x="67" y="132" width="66" height="8" fill="currentColor" opacity="0.9" />
+      <line
+        x1="55"
+        y1="148"
+        x2="145"
+        y2="148"
+        stroke="currentColor"
+        strokeWidth="2"
+        opacity="0.7"
+      />
+      <rect
+        x="62"
+        y="140"
+        width="76"
+        height="8"
+        fill="currentColor"
+        opacity="0.85"
+      />
+      <rect
+        x="67"
+        y="132"
+        width="66"
+        height="8"
+        fill="currentColor"
+        opacity="0.9"
+      />
 
       {/* Columns */}
       {[0, 1, 2, 3, 4].map((i) => (
-        <rect key={`col-${i}`} x={72 + i * 14} y="100" width="6" height="32" fill="currentColor" />
+        <rect
+          key={`col-${i}`}
+          x={72 + i * 14}
+          y="100"
+          width="6"
+          height="32"
+          fill="currentColor"
+        />
       ))}
 
       {/* Entablature + pediment */}
@@ -95,7 +151,12 @@ export default function CompanyLogo({
 
       {/* Gear above the pediment — the "engineering" mark */}
       <g transform="translate(100,52)">
-        <circle r="13" fill="none" stroke="var(--color-accent)" strokeWidth="4" />
+        <circle
+          r="13"
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="4"
+        />
         <circle r="4.5" fill="var(--color-accent)" />
         {teeth.map((_, i) => {
           const angle = (360 / teeth.length) * i;

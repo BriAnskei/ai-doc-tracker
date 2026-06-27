@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import * as pdfjsLib from "pdfjs-dist";
@@ -22,13 +22,6 @@ import { useOutgoingExtraction } from "./components/useOutgoingExtraction";
 
 // Types
 import { DocumentType } from "./components/types";
-
-// Constants & PDF worker setup
-import {
-  PANEL_HEIGHT,
-  PDF_PAGE_WIDTH,
-  ACCEPTED_FILE_TYPES,
-} from "./components/constants";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -105,6 +98,16 @@ export default function DocumentUploadPage() {
                - To
                - Date recieved
                - Time recieved
+                
+              - Summary:
+                Write exactly 3 sentences summarizing the document.
+                The summary must explain:
+                1. What the document is about.
+                2. The main purpose, request, announcement, instruction, or action stated in the document.
+                3. What the document represents.
+                4. Highlight important information by making key words or phrases bold using Markdown format:
+                - Use **bold** for important names, organizations, dates, actions, requests, decisions, or main topics.
+                - Do not bold every word; only highlight the most relevant information.
 
                Return JSON only.
                Do not include explanations, markdown, or additional text.
@@ -117,6 +120,7 @@ export default function DocumentUploadPage() {
                  "to": "string",
                  "date_received": "YYYY-MM-DD",
                  "time_received": "HH:mm"
+                 "summary": "string"
                }
 
                If any field cannot be found in the document, return an empty string.
@@ -158,6 +162,8 @@ export default function DocumentUploadPage() {
       }
 
       const extractionRes = await extractMetadataAi(text!);
+
+      console.log("extracted: ", extractionRes);
       if (extractionRes) {
         incoming.setExtractionField(extractionRes);
         incoming.setStatus("done");

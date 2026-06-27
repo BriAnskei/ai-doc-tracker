@@ -16,6 +16,13 @@ import ValudationQueue from "../pages/document/ValidationQueue";
 import IncomingDocumentUploadPage from "../pages/document/IncomingDocumentUploadPage";
 import UploadedIncomingDoc from "../pages/document/UploadedIncomingDocPage";
 import UploadedIncomingDocPage from "../pages/document/UploadedIncomingDocPage";
+import UserManagementTable from "../components/tables/Administration/UserManagementTable";
+import UserManagementPage from "../pages/Administration/UserManagementPage";
+import AccessControlPage from "../pages/Administration/AcessControlPage";
+import SystemLogsPage from "../pages/Logs/SystemLogsPage";
+import ReceiverDashboard from "../pages/Dashboard/ReceiverDashboard";
+import AdminDashboard from "../pages/Dashboard/AdminDashboard";
+import SuperAdminDashboard from "../pages/Dashboard/SuperAdminDashboard";
 
 type RouteType = {
   path: string;
@@ -77,15 +84,15 @@ const SUPER_ADMIN_ROUTES: RouteType[] = [
     path: "/super-admin/dashboard",
     element: (
       <RoleRoute allowedRoles={[1]}>
-        <>Super Admin Dashboard Overview</>
+        <SuperAdminDashboard />
       </RoleRoute>
     ),
   },
   {
-    path: "/user-management",
+    path: "/users",
     element: (
       <RoleRoute allowedRoles={[1]}>
-        <>Manage Users & Roles</>
+        <UserManagementPage />
       </RoleRoute>
     ),
   },
@@ -93,7 +100,7 @@ const SUPER_ADMIN_ROUTES: RouteType[] = [
     path: "/access",
     element: (
       <RoleRoute allowedRoles={[1]}>
-        <>Access Control & Permissions</>
+        <AccessControlPage />
       </RoleRoute>
     ),
   },
@@ -101,7 +108,7 @@ const SUPER_ADMIN_ROUTES: RouteType[] = [
     path: "/activities",
     element: (
       <RoleRoute allowedRoles={[1]}>
-        <>Audit Trail & Logs</>
+        <SystemLogsPage />
       </RoleRoute>
     ),
   },
@@ -118,14 +125,18 @@ const SUPER_ADMIN_ROUTES: RouteType[] = [
 const ADMIN_ROUTES: RouteType[] = [
   {
     path: "/admin/dashboard",
-    element: <>this is the admin dashboard</>,
+    element: (
+      <RoleRoute allowedRoles={[2]}>
+        <AdminDashboard />
+      </RoleRoute>
+    ),
   },
 ];
 
 const RECEIVER_ROUTES: RouteType[] = [
   {
     path: "/receiver/dashboard",
-    element: <>Receiver Dashboard</>,
+    element: <ReceiverDashboard />,
   },
   {
     path: "/incoming-upload",

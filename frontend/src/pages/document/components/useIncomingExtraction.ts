@@ -1,6 +1,9 @@
 import { useCallback, useState } from "react";
-import { ExtractionStatus, IncomingMetadata, ExtractionResponseType } from "./types";
-import { generateIdCode, nowDateTimeLocal } from "./helpers";
+import {
+  ExtractionStatus,
+  IncomingMetadata,
+  ExtractionResponseType,
+} from "./types";
 
 export const useIncomingExtraction = () => {
   const [status, setStatus] = useState<ExtractionStatus>("idle");
@@ -13,6 +16,7 @@ export const useIncomingExtraction = () => {
     routedTo: "",
     noticeOfAction: "",
     actionTaken: "",
+    summary: "",
   });
 
   const extract = useCallback((_file: File) => {
@@ -25,12 +29,16 @@ export const useIncomingExtraction = () => {
       routedTo: "",
       noticeOfAction: "",
       actionTaken: "",
+      summary: "",
     });
   }, []);
 
-  const updateField = useCallback((field: keyof IncomingMetadata, value: string) => {
-    setMetadata((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const updateField = useCallback(
+    (field: keyof IncomingMetadata, value: string) => {
+      setMetadata((prev) => ({ ...prev, [field]: value }));
+    },
+    [],
+  );
 
   const reset = useCallback(() => {
     setStatus("idle");
@@ -43,6 +51,7 @@ export const useIncomingExtraction = () => {
       routedTo: "",
       noticeOfAction: "",
       actionTaken: "",
+      summary: "",
     });
   }, []);
 
@@ -63,9 +72,21 @@ export const useIncomingExtraction = () => {
       subject: payload.subject,
       from: payload.from,
       to: payload.to,
-      dateReceived: formatDateTimeLocal(payload.date_received, payload.time_received),
+      dateReceived: formatDateTimeLocal(
+        payload.date_received,
+        payload.time_received,
+      ),
+      summary: payload.summary,
     }));
   }, []);
 
-  return { status, metadata, extract, updateField, reset, setExtractionField, setStatus };
+  return {
+    status,
+    metadata,
+    extract,
+    updateField,
+    reset,
+    setExtractionField,
+    setStatus,
+  };
 };

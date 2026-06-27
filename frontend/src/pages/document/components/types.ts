@@ -7,6 +7,7 @@ export interface IncomingMetadata {
   from: string;
   to: string;
   dateReceived: string;
+  summary: string;
   routedTo: string;
   noticeOfAction: string;
   actionTaken: string;
@@ -27,4 +28,5 @@ export interface ExtractionResponseType {
   to: string;
   date_received: string;
   time_received: string;
+  summary: string;
 }

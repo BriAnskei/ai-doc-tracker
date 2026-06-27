@@ -4,6 +4,7 @@ import SectionDivider from "./SectionDivider";
 import EmptyState from "./EmptyState";
 import FieldSkeleton from "./FieldSkeleton";
 import { IncomingMetadata, ExtractionStatus } from "./types";
+import ReactMarkdown from "react-markdown";
 
 interface Props {
   status: ExtractionStatus;
@@ -35,8 +36,8 @@ export default function IncomingExtractionPanel({
           {isExtracting
             ? "Reading the document…"
             : isReady
-            ? "Review extracted fields and fill in the required inputs."
-            : "Upload a PDF to extract metadata."}
+              ? "Review extracted fields and fill in the required inputs."
+              : "Upload a PDF to extract metadata."}
         </p>
       </div>
 
@@ -69,15 +70,115 @@ export default function IncomingExtractionPanel({
               />
 
               <SectionDivider label="Extracted from document" />
-              <Field label="Subject" value={metadata.subject} placeholder="e.g. Memorandum on Budget Allocation" onChange={(v: string) => onFieldChange("subject", v)} />
-              <Field label="From" value={metadata.from} placeholder="e.g. Office of the Director" onChange={(v: string) => onFieldChange("from", v)} />
-              <Field label="To" value={metadata.to} placeholder="e.g. Finance Division" onChange={(v: string) => onFieldChange("to", v)} />
-              <Field label="Date Received" value={metadata.dateReceived} placeholder="" type="datetime-local" onChange={(v: string) => onFieldChange("dateReceived", v)} />
+              <Field
+                label="Subject"
+                value={metadata.subject}
+                placeholder="e.g. Memorandum on Budget Allocation"
+                onChange={(v: string) => onFieldChange("subject", v)}
+              />
+              <Field
+                label="From"
+                value={metadata.from}
+                placeholder="e.g. Office of the Director"
+                onChange={(v: string) => onFieldChange("from", v)}
+              />
+              <Field
+                label="To"
+                value={metadata.to}
+                placeholder="e.g. Finance Division"
+                onChange={(v: string) => onFieldChange("to", v)}
+              />
+              <Field
+                label="Date Received"
+                value={metadata.dateReceived}
+                placeholder=""
+                type="datetime-local"
+                onChange={(v: string) => onFieldChange("dateReceived", v)}
+              />
+
+              {/* Summary — AI-generated, read-only */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-theme-xs font-medium text-gray-700 dark:text-gray-400">
+                  Summary
+                </span>
+                <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                  {/* Card header */}
+                  <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+                    </svg>
+                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                      AI-generated summary
+                    </span>
+                    <span className="ml-auto text-[11px] text-gray-400 dark:text-gray-600">
+                      Read-only
+                    </span>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="px-3 py-3 text-sm leading-relaxed text-gray-800 dark:text-gray-200">
+                    {metadata.summary ? (
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => (
+                            <p className="mb-2 last:mb-0">{children}</p>
+                          ),
+                          strong: ({ children }) => (
+                            <strong className="font-semibold text-gray-900 dark:text-white">
+                              {children}
+                            </strong>
+                          ),
+                          ul: ({ children }) => (
+                            <ul className="mb-2 ml-4 list-disc last:mb-0">
+                              {children}
+                            </ul>
+                          ),
+                          li: ({ children }) => (
+                            <li className="mb-0.5">{children}</li>
+                          ),
+                        }}
+                      >
+                        {metadata.summary}
+                      </ReactMarkdown>
+                    ) : (
+                      <p className="text-gray-400 dark:text-gray-600">
+                        No summary extracted.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <SectionDivider label="Requires input" />
-              <Field label="Routed To" value={metadata.routedTo} placeholder="e.g. Records Section" onChange={(v: string) => onFieldChange("routedTo", v)} />
-              <Field label="Notice of Action" value={metadata.noticeOfAction} placeholder="Instructions given by PE…" textarea onChange={(v: string) => onFieldChange("noticeOfAction", v)} />
-              <Field label="Action Taken" value={metadata.actionTaken} placeholder="Personnel/Division action…" textarea onChange={(v: string) => onFieldChange("actionTaken", v)} />
+              <Field
+                label="Routed To"
+                value={metadata.routedTo}
+                placeholder="e.g. Records Section"
+                onChange={(v: string) => onFieldChange("routedTo", v)}
+              />
+              <Field
+                label="Notice of Action"
+                value={metadata.noticeOfAction}
+                placeholder="Instructions given by PE…"
+                textarea
+                onChange={(v: string) => onFieldChange("noticeOfAction", v)}
+              />
+              <Field
+                label="Action Taken"
+                value={metadata.actionTaken}
+                placeholder="Personnel/Division action…"
+                textarea
+                onChange={(v: string) => onFieldChange("actionTaken", v)}
+              />
             </>
           ) : (
             <EmptyState />

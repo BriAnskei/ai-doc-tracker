@@ -11,7 +11,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UploadStatus = "pending" | "approved" | "rejected";
+type UploadStatus = "pending" | "approved" | "rejected" | "archived";
 
 interface UploadedDocument {
   id: number;
@@ -75,8 +75,6 @@ const mockData: UploadedDocument[] = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("en-PH", {
     year: "numeric",
@@ -88,22 +86,13 @@ function formatDateTime(iso: string) {
   });
 }
 
-const STATUS_CONFIG: Record<
-  UploadStatus,
-  { label: string; className: string }
-> = {
-  pending: {
-    label: "Pending",
-    className: "text-warning font-medium",
-  },
-  approved: {
-    label: "Approved",
-    className: "text-success font-medium",
-  },
-  rejected: {
-    label: "Rejected",
-    className: "text-danger font-medium",
-  },
+type StatusConfigEntry = { label: string; className: string };
+
+const STATUS_CONFIG: Record<UploadStatus, StatusConfigEntry> = {
+  pending: { label: "Pending", className: "text-warning font-medium" },
+  approved: { label: "Approved", className: "text-success font-medium" },
+  rejected: { label: "Rejected", className: "text-danger font-medium" },
+  archived: { label: "Archived", className: "text-gray-400 font-medium" },
 };
 
 function StatusBadge({ status }: { status: UploadStatus }) {
@@ -117,9 +106,35 @@ function StatusBadge({ status }: { status: UploadStatus }) {
   );
 }
 
-// ─── Delete Confirm Modal ─────────────────────────────────────────────────────
+// ─── Archive SVG Icon ─────────────────────────────────────────────────────────
 
-function DeleteConfirmModal({
+function ArchiveIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M20 7H4a1 1 0 00-1 1v1a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 10v8a1 1 0 001 1h12a1 1 0 001-1v-8"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 14h4" />
+    </svg>
+  );
+}
+
+// ─── Archive Confirm Modal ────────────────────────────────────────────────────
+
+function ArchiveConfirmModal({
   file,
   onConfirm,
   onCancel,
@@ -136,30 +151,18 @@ function DeleteConfirmModal({
       <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-gray-900">
         <div className="px-6 py-5">
           {/* Icon */}
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-danger/10">
-            <svg
-              className="w-5 h-5 text-danger"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
+          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.06]">
+            <ArchiveIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </div>
 
           <h2 className="text-theme-sm font-semibold text-gray-900 dark:text-white/90">
-            Delete document?
+            Archive document?
           </h2>
           <p className="mt-1.5 text-theme-xs text-gray-500 dark:text-gray-400 leading-relaxed">
             <span className="font-medium text-gray-700 dark:text-gray-300">
               {file.fileName}
             </span>{" "}
-            will be permanently removed. This action cannot be undone.
+            will be moved to the archive. You can restore it later if needed.
           </p>
         </div>
 
@@ -172,22 +175,10 @@ function DeleteConfirmModal({
           </button>
           <button
             onClick={onConfirm}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-theme-sm font-medium bg-danger text-white hover:bg-danger/90 transition-opacity"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-theme-sm font-medium bg-gray-700 text-white hover:bg-gray-800 dark:bg-white/[0.10] dark:hover:bg-white/[0.15] transition-colors"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-            Delete
+            <ArchiveIcon className="w-4 h-4" />
+            Archive
           </button>
         </div>
       </div>
@@ -203,7 +194,7 @@ export default function UploadedIncomingDocTable() {
   const [filterStatus, setFilterStatus] = useState<UploadStatus | "">("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
-  const [pendingDelete, setPendingDelete] = useState<UploadedDocument | null>(
+  const [pendingArchive, setPendingArchive] = useState<UploadedDocument | null>(
     null,
   );
 
@@ -228,12 +219,16 @@ export default function UploadedIncomingDocTable() {
     setFilterDateTo("");
   }
 
-  // ── Delete ──
+  // ── Archive ──
 
-  function confirmDelete() {
-    if (!pendingDelete) return;
-    setRecords((prev) => prev.filter((r) => r.id !== pendingDelete.id));
-    setPendingDelete(null);
+  function confirmArchive() {
+    if (!pendingArchive) return;
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.id === pendingArchive.id ? { ...r, status: "archived" } : r,
+      ),
+    );
+    setPendingArchive(null);
   }
 
   // ── Shared class strings ──
@@ -243,13 +238,28 @@ export default function UploadedIncomingDocTable() {
 
   const labelCls = "text-theme-xs text-gray-500 dark:text-gray-400 font-medium";
 
+  // ── Archive Button ──
+
+  function ArchiveButton({ onClick }: { onClick: () => void }) {
+    return (
+      <button
+        onClick={onClick}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-white/[0.12] hover:bg-gray-700 hover:text-white hover:border-gray-700 dark:hover:bg-white/[0.10] dark:hover:border-white/[0.20] transition-colors duration-150 whitespace-nowrap"
+        title="Archive document"
+      >
+        <ArchiveIcon className="w-3.5 h-3.5 flex-shrink-0" />
+        Archive
+      </button>
+    );
+  }
+
   return (
     <>
-      {pendingDelete && (
-        <DeleteConfirmModal
-          file={pendingDelete}
-          onConfirm={confirmDelete}
-          onCancel={() => setPendingDelete(null)}
+      {pendingArchive && (
+        <ArchiveConfirmModal
+          file={pendingArchive}
+          onConfirm={confirmArchive}
+          onCancel={() => setPendingArchive(null)}
         />
       )}
 
@@ -297,6 +307,7 @@ export default function UploadedIncomingDocTable() {
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+                <option value="archived">Archived</option>
               </select>
             </div>
 
@@ -362,27 +373,11 @@ export default function UploadedIncomingDocTable() {
                   </p>
                 </div>
 
-                <div className="pt-1 border-t border-gray-100 dark:border-white/[0.05]">
-                  <button
-                    onClick={() => setPendingDelete(record)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-theme-xs font-medium text-danger border border-danger/30 hover:bg-danger hover:text-white transition-colors duration-150"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                    Delete
-                  </button>
-                </div>
+                {record.status !== "archived" && (
+                  <div className="pt-1 border-t border-gray-100 dark:border-white/[0.05]">
+                    <ArchiveButton onClick={() => setPendingArchive(record)} />
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -470,26 +465,15 @@ export default function UploadedIncomingDocTable() {
 
                       {/* Action */}
                       <TableCell className="px-3 py-3">
-                        <button
-                          onClick={() => setPendingDelete(record)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-danger border border-danger/30 hover:bg-danger hover:text-white transition-colors duration-150 whitespace-nowrap"
-                          title="Delete document"
-                        >
-                          <svg
-                            className="w-3.5 h-3.5 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                          Delete
-                        </button>
+                        {record.status !== "archived" ? (
+                          <ArchiveButton
+                            onClick={() => setPendingArchive(record)}
+                          />
+                        ) : (
+                          <span className="text-theme-xs text-gray-300 dark:text-gray-600 italic">
+                            Archived
+                          </span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
