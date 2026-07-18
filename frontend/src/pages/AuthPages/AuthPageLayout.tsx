@@ -12,22 +12,21 @@ export default function AuthLayout({
   forceLightLogo?: boolean;
 }) {
   return (
-    <div className="relative p-6 bg-background z-1 dark:bg-gray-900 sm:p-0">
-      <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900 sm:p-0">
+    <div className="bg-background relative z-1 p-6 sm:p-0 dark:bg-gray-900">
+      <div className="relative flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
         {children}
-        <div className="items-center hidden w-full h-full lg:w-1/2 bg-primary dark:bg-primary lg:grid">
-          <div className="relative flex items-center justify-center z-1">
+        <div className="bg-primary dark:bg-primary hidden h-full w-full items-center lg:grid lg:w-1/2">
+          <div className="relative z-1 flex items-center justify-center">
             <GridShape />
-            <div className="flex flex-col items-center max-w-xs">
-              <Link to="/" className="block mb-5">
+            <div className="flex max-w-xs flex-col items-center">
+              <Link to="/" className="mb-5 block">
                 <CompanyLogo size={176} forceLight={forceLightLogo} />
               </Link>
-              <h2 className="mb-2 text-lg font-semibold text-center text-white">
+              <h2 className="mb-2 text-center text-lg font-semibold text-white">
                 Document Tracking System
               </h2>
-              <p className="text-sm text-center text-white/70">
-                Provincial Engineering Office — internal records and document
-                routing portal
+              <p className="text-center text-sm text-white/70">
+                Provincial Engineering Office — internal records and document routing portal
               </p>
             </div>
           </div>

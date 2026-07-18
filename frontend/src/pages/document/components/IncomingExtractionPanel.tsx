@@ -19,20 +19,20 @@ export default function IncomingExtractionPanel({
   hasFile,
   onFieldChange,
 }: Props) {
-  const isExtracting = status === "extracting";
-  const isReady = status === "done";
+  // const isExtracting = status === "extracting";
+  //  const isReady = status === "done";
+
+  const isExtracting = false;
+  const isReady = true;
 
   return (
-    <div
-      className="flex flex-col gap-4"
-      style={hasFile ? { height: "640px" } : undefined}
-    >
+    <div className="flex flex-col gap-4" style={hasFile ? { height: "640px" } : undefined}>
       {/* Header */}
       <div className="shrink-0">
         <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">
           Document Details
         </h2>
-        <p className="mt-0.5 text-theme-xs text-gray-400 dark:text-gray-500">
+        <p className="text-theme-xs mt-0.5 text-gray-400 dark:text-gray-500">
           {isExtracting
             ? "Reading the document…"
             : isReady
@@ -42,12 +42,12 @@ export default function IncomingExtractionPanel({
       </div>
 
       {isExtracting && (
-        <div className="shrink-0 flex items-center gap-2 rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2 dark:border-secondary/20 dark:bg-secondary/10">
+        <div className="border-secondary/30 bg-secondary/5 dark:border-secondary/20 dark:bg-secondary/10 flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-secondary" />
+            <span className="bg-secondary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+            <span className="bg-secondary relative inline-flex h-2 w-2 rounded-full" />
           </span>
-          <span className="text-theme-xs font-medium text-secondary dark:text-secondary">
+          <span className="text-theme-xs text-secondary dark:text-secondary font-medium">
             Extracting metadata…
           </span>
         </div>
@@ -129,30 +129,22 @@ export default function IncomingExtractionPanel({
                     {metadata.summary ? (
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => (
-                            <p className="mb-2 last:mb-0">{children}</p>
-                          ),
+                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
                           strong: ({ children }) => (
                             <strong className="font-semibold text-gray-900 dark:text-white">
                               {children}
                             </strong>
                           ),
                           ul: ({ children }) => (
-                            <ul className="mb-2 ml-4 list-disc last:mb-0">
-                              {children}
-                            </ul>
+                            <ul className="mb-2 ml-4 list-disc last:mb-0">{children}</ul>
                           ),
-                          li: ({ children }) => (
-                            <li className="mb-0.5">{children}</li>
-                          ),
+                          li: ({ children }) => <li className="mb-0.5">{children}</li>,
                         }}
                       >
                         {metadata.summary}
                       </ReactMarkdown>
                     ) : (
-                      <p className="text-gray-400 dark:text-gray-600">
-                        No summary extracted.
-                      </p>
+                      <p className="text-gray-400 dark:text-gray-600">No summary extracted.</p>
                     )}
                   </div>
                 </div>
@@ -191,7 +183,7 @@ export default function IncomingExtractionPanel({
         <div className="shrink-0 border-t border-gray-100 pt-4 dark:border-gray-800">
           <button
             type="button"
-            className="w-full rounded-xl bg-primary px-4 py-2.5 text-theme-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-[0.98]"
+            className="bg-primary text-theme-sm hover:bg-primary/90 focus:ring-primary/30 w-full rounded-xl px-4 py-2.5 font-semibold text-white shadow-sm transition focus:ring-2 focus:outline-none active:scale-[0.98]"
           >
             Save Document
           </button>

@@ -8,28 +8,28 @@ import { Roles, userUser } from "../context/UserContext";
  * the sidebar re‑renders only when the role changes.
  */
 export const useFilteredNav = (): NavItem[] => {
-  const { role } = userUser();
+	const { role } = userUser();
 
-  // If no role is set (e.g., not logged in) we return an empty array – the UI
-  // can decide to show a guest navigation set elsewhere.
-  const currentRole = role as Roles | undefined;
+	// If no role is set (e.g., not logged in) we return an empty array – the UI
+	// can decide to show a guest navigation set elsewhere.
+	const currentRole = role as Roles | undefined;
 
-  return useMemo(() => {
-    if (!currentRole) return [];
+	return useMemo(() => {
+		if (!currentRole) return [];
 
-    const filterItem = (item: NavItem): NavItem | null => {
-      if (!item.roles.includes(currentRole)) return null;
+		const filterItem = (item: NavItem): NavItem | null => {
+			if (!item.roles.includes(currentRole)) return null;
 
-      const filteredSub = item.subItems?.filter((sub) =>
-        sub.roles.includes(currentRole),
-      );
+			const filteredSub = item.subItems?.filter((sub) =>
+				sub.roles.includes(currentRole),
+			);
 
-      return {
-        ...item,
-        subItems: filteredSub,
-      };
-    };
+			return {
+				...item,
+				subItems: filteredSub,
+			};
+		};
 
-    return NAV_ITEMS.map(filterItem).filter(Boolean) as NavItem[];
-  }, [currentRole]);
+		return NAV_ITEMS.map(filterItem).filter(Boolean) as NavItem[];
+	}, [currentRole]);
 };

@@ -1,17 +1,12 @@
 // ─── MyUploadsTable.tsx ───────────────────────────────────────────────────────
 
-import { useState } from "react";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableBody,
-} from "../../../components/ui/table";
+import { useState, useRef, useEffect } from "react";
+import { Table, TableHeader, TableRow, TableCell, TableBody } from "../../../components/ui/table";
+import QRCodeModal from "../../../components/receiver/QRCodeModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UploadStatus = "pending" | "approved" | "rejected" | "archived";
+type UploadStatus = "on-queue" | "received" | "archived";
 
 interface UploadedDocument {
   id: number;
@@ -27,49 +22,49 @@ const mockData: UploadedDocument[] = [
     id: 1,
     fileName: "barangay-clearance-001.pdf",
     uploadedAt: "2024-01-10T09:14:00",
-    status: "approved",
+    status: "received",
   },
   {
     id: 2,
     fileName: "engineering-permit-rev2.pdf",
     uploadedAt: "2024-01-14T14:30:00",
-    status: "rejected",
+    status: "received",
   },
   {
     id: 3,
     fileName: "site-inspection-report.pdf",
     uploadedAt: "2024-01-18T11:05:00",
-    status: "pending",
+    status: "on-queue",
   },
   {
     id: 4,
     fileName: "building-plan-floor1.docx",
     uploadedAt: "2024-01-22T08:47:00",
-    status: "approved",
+    status: "received",
   },
   {
     id: 5,
     fileName: "environmental-clearance.pdf",
     uploadedAt: "2024-01-25T16:20:00",
-    status: "pending",
+    status: "on-queue",
   },
   {
     id: 6,
     fileName: "occupancy-permit-req.pdf",
     uploadedAt: "2024-02-01T10:00:00",
-    status: "rejected",
+    status: "received",
   },
   {
     id: 7,
     fileName: "structural-analysis-v3.pdf",
     uploadedAt: "2024-02-05T13:22:00",
-    status: "approved",
+    status: "received",
   },
   {
     id: 8,
     fileName: "electrical-plan-final.docx",
     uploadedAt: "2024-02-10T09:50:00",
-    status: "pending",
+    status: "on-queue",
   },
 ];
 
@@ -86,12 +81,19 @@ function formatDateTime(iso: string) {
   });
 }
 
+// Mock tracking-info generator — replace with a real API call once
+// a tracking system / backend endpoint exists.
+function buildTrackingInfo(record: UploadedDocument) {
+  const trackingId = `DOC-${String(record.id).padStart(8, "0")}`;
+  const trackingUrl = `${window.location.origin}/document/track`;
+  return { trackingId, trackingUrl };
+}
+
 type StatusConfigEntry = { label: string; className: string };
 
 const STATUS_CONFIG: Record<UploadStatus, StatusConfigEntry> = {
-  pending: { label: "Pending", className: "text-warning font-medium" },
-  approved: { label: "Approved", className: "text-success font-medium" },
-  rejected: { label: "Rejected", className: "text-danger font-medium" },
+  "on-queue": { label: "On-Queue", className: "text-warning font-medium" },
+  received: { label: "Received", className: "text-success font-medium" },
   archived: { label: "Archived", className: "text-gray-400 font-medium" },
 };
 
@@ -99,14 +101,14 @@ function StatusBadge({ status }: { status: UploadStatus }) {
   const { label, className } = STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-theme-xs font-medium ${className}`}
+      className={`text-theme-xs inline-flex items-center rounded-full px-2.5 py-0.5 font-medium ${className}`}
     >
       {label}
     </span>
   );
 }
 
-// ─── Archive SVG Icon ─────────────────────────────────────────────────────────
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function ArchiveIcon({ className }: { className?: string }) {
   return (
@@ -132,6 +134,34 @@ function ArchiveIcon({ className }: { className?: string }) {
   );
 }
 
+function ShareIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.684 13.342a4 4 0 100 2.316m6.632-8.974a4 4 0 100-2.316m0 2.316L8.684 13.342m6.632 4.974a4 4 0 100-2.316m0 2.316L8.684 15.658m9.316-9.632a4 4 0 11-8 0 4 4 0 018 0zm0 12a4 4 0 11-8 0 4 4 0 018 0zM7 12a4 4 0 11-8 0 4 4 0 018 0z"
+      />
+    </svg>
+  );
+}
+
+function KebabIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <circle cx="10" cy="4" r="1.75" />
+      <circle cx="10" cy="10" r="1.75" />
+      <circle cx="10" cy="16" r="1.75" />
+    </svg>
+  );
+}
+
 // ─── Archive Confirm Modal ────────────────────────────────────────────────────
 
 function ArchiveConfirmModal({
@@ -150,38 +180,103 @@ function ArchiveConfirmModal({
     >
       <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-gray-900">
         <div className="px-6 py-5">
-          {/* Icon */}
           <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.06]">
-            <ArchiveIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <ArchiveIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </div>
 
           <h2 className="text-theme-sm font-semibold text-gray-900 dark:text-white/90">
             Archive document?
           </h2>
-          <p className="mt-1.5 text-theme-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              {file.fileName}
-            </span>{" "}
+          <p className="text-theme-xs mt-1.5 leading-relaxed text-gray-500 dark:text-gray-400">
+            <span className="font-medium text-gray-700 dark:text-gray-300">{file.fileName}</span>{" "}
             will be moved to the archive. You can restore it later if needed.
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-white/[0.05] px-6 py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.05]">
           <button
             onClick={onCancel}
-            className="px-3 py-2 text-theme-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/[0.08] rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors"
+            className="text-theme-sm rounded-lg border border-gray-200 px-3 py-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-400 dark:hover:bg-white/[0.04]"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-theme-sm font-medium bg-gray-700 text-white hover:bg-gray-800 dark:bg-white/[0.10] dark:hover:bg-white/[0.15] transition-colors"
+            className="text-theme-sm inline-flex items-center gap-1.5 rounded-lg bg-gray-700 px-3 py-2 font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white/[0.10] dark:hover:bg-white/[0.15]"
           >
-            <ArchiveIcon className="w-4 h-4" />
+            <ArchiveIcon className="h-4 w-4" />
             Archive
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Kebab Action Menu ────────────────────────────────────────────────────────
+
+function KebabActionMenu({
+  onArchive,
+  onShare,
+  disabled,
+}: {
+  onArchive: () => void;
+  onShare: () => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  if (disabled) {
+    return <span className="text-theme-xs text-gray-300 italic dark:text-gray-600">Archived</span>;
+  }
+
+  return (
+    <div className="relative inline-block text-left" ref={containerRef}>
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/[0.08]"
+        title="Actions"
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        <KebabIcon className="h-4 w-4" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-50 mt-1 w-40 origin-top-right overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
+          <button
+            onClick={() => {
+              setOpen(false);
+              onShare();
+            }}
+            className="text-theme-xs flex w-full items-center gap-2 px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.05]"
+          >
+            <ShareIcon className="h-3.5 w-3.5" />
+            Share
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false);
+              onArchive();
+            }}
+            className="text-theme-xs flex w-full items-center gap-2 border-t border-gray-100 px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.05]"
+          >
+            <ArchiveIcon className="h-3.5 w-3.5" />
+            Archive
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -194,9 +289,8 @@ export default function UploadedIncomingDocTable() {
   const [filterStatus, setFilterStatus] = useState<UploadStatus | "">("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
-  const [pendingArchive, setPendingArchive] = useState<UploadedDocument | null>(
-    null,
-  );
+  const [pendingArchive, setPendingArchive] = useState<UploadedDocument | null>(null);
+  const [shareTarget, setShareTarget] = useState<UploadedDocument | null>(null);
 
   // ── Filtering ──
 
@@ -224,12 +318,18 @@ export default function UploadedIncomingDocTable() {
   function confirmArchive() {
     if (!pendingArchive) return;
     setRecords((prev) =>
-      prev.map((r) =>
-        r.id === pendingArchive.id ? { ...r, status: "archived" } : r,
-      ),
+      prev.map((r) => (r.id === pendingArchive.id ? { ...r, status: "archived" } : r)),
     );
     setPendingArchive(null);
   }
+
+  // ── Share ──
+
+  function handleShare(record: UploadedDocument) {
+    setShareTarget(record);
+  }
+
+  const shareInfo = shareTarget ? buildTrackingInfo(shareTarget) : null;
 
   // ── Shared class strings ──
 
@@ -237,21 +337,6 @@ export default function UploadedIncomingDocTable() {
     "px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition";
 
   const labelCls = "text-theme-xs text-gray-500 dark:text-gray-400 font-medium";
-
-  // ── Archive Button ──
-
-  function ArchiveButton({ onClick }: { onClick: () => void }) {
-    return (
-      <button
-        onClick={onClick}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-white/[0.12] hover:bg-gray-700 hover:text-white hover:border-gray-700 dark:hover:bg-white/[0.10] dark:hover:border-white/[0.20] transition-colors duration-150 whitespace-nowrap"
-        title="Archive document"
-      >
-        <ArchiveIcon className="w-3.5 h-3.5 flex-shrink-0" />
-        Archive
-      </button>
-    );
-  }
 
   return (
     <>
@@ -263,14 +348,24 @@ export default function UploadedIncomingDocTable() {
         />
       )}
 
+      {shareTarget && shareInfo && (
+        <QRCodeModal
+          open={!!shareTarget}
+          onClose={() => setShareTarget(null)}
+          trackingId={shareInfo.trackingId}
+          trackingUrl={shareInfo.trackingUrl}
+          fileName={shareTarget.fileName}
+        />
+      )}
+
       <div className="space-y-4">
         {/* ── Filters ── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           {/* Search */}
-          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
-            <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
+          <div className="relative w-full sm:min-w-[200px] sm:flex-1">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -288,25 +383,22 @@ export default function UploadedIncomingDocTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by file name…"
-              className={`w-full pl-9 pr-4 ${inputCls}`}
+              className={`w-full pr-4 pl-9 ${inputCls}`}
             />
           </div>
 
-          <div className="flex gap-3 flex-wrap items-end">
+          <div className="flex flex-wrap items-end gap-3">
             {/* Status filter */}
             <div className="flex flex-col gap-1">
               <label className={labelCls}>Status</label>
               <select
                 value={filterStatus}
-                onChange={(e) =>
-                  setFilterStatus(e.target.value as UploadStatus | "")
-                }
+                onChange={(e) => setFilterStatus(e.target.value as UploadStatus | "")}
                 className={inputCls}
               >
                 <option value="">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="on-queue">On-Queue</option>
+                <option value="received">Received</option>
                 <option value="archived">Archived</option>
               </select>
             </div>
@@ -337,7 +429,7 @@ export default function UploadedIncomingDocTable() {
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="px-3 py-2 text-theme-sm text-gray-500 hover:text-danger border border-gray-200 rounded-lg hover:border-danger/40 transition-colors dark:border-white/[0.08] dark:text-gray-400 dark:hover:text-danger whitespace-nowrap"
+                className="text-theme-sm hover:text-danger hover:border-danger/40 dark:hover:text-danger rounded-lg border border-gray-200 px-3 py-2 whitespace-nowrap text-gray-500 transition-colors dark:border-white/[0.08] dark:text-gray-400"
               >
                 Clear
               </button>
@@ -346,84 +438,79 @@ export default function UploadedIncomingDocTable() {
         </div>
 
         {/* ── Mobile Cards (< md) ── */}
-        <div className="md:hidden space-y-3">
+        <div className="space-y-3 md:hidden">
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] px-5 py-10 text-center text-gray-400 text-theme-sm">
+            <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
               No records match your filters.
             </div>
           ) : (
             filtered.map((record) => (
               <div
                 key={record.id}
-                className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] p-4 space-y-3"
+                className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-white/[0.08] dark:bg-white/[0.03]"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90 break-all">
+                  <p className="text-theme-sm font-semibold break-all text-gray-800 dark:text-white/90">
                     {record.fileName}
                   </p>
                   <StatusBadge status={record.status} />
                 </div>
 
                 <div>
-                  <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+                  <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
                     Uploaded At
                   </p>
-                  <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
+                  <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
                     {formatDateTime(record.uploadedAt)}
                   </p>
                 </div>
 
-                {record.status !== "archived" && (
-                  <div className="pt-1 border-t border-gray-100 dark:border-white/[0.05]">
-                    <ArchiveButton onClick={() => setPendingArchive(record)} />
-                  </div>
-                )}
+                <div className="flex justify-end border-t border-gray-100 pt-1 dark:border-white/[0.05]">
+                  <KebabActionMenu
+                    onArchive={() => setPendingArchive(record)}
+                    onShare={() => handleShare(record)}
+                    disabled={record.status === "archived"}
+                  />
+                </div>
               </div>
             ))
           )}
 
           {filtered.length > 0 && (
-            <p className="text-theme-xs text-gray-400 dark:text-gray-500 text-right px-1">
+            <p className="text-theme-xs px-1 text-right text-gray-400 dark:text-gray-500">
               Showing{" "}
               <span className="font-medium text-gray-600 dark:text-gray-300">
                 {filtered.length}
               </span>{" "}
               of{" "}
-              <span className="font-medium text-gray-600 dark:text-gray-300">
-                {records.length}
-              </span>{" "}
+              <span className="font-medium text-gray-600 dark:text-gray-300">{records.length}</span>{" "}
               records
             </p>
           )}
         </div>
 
         {/* ── Desktop Table (≥ md) ── */}
-        <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="hidden rounded-xl border border-gray-200 bg-white md:block dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div className="w-full overflow-x-auto">
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
-                  {["File Name", "Uploaded At", "Status", "Action"].map(
-                    (col) => (
-                      <TableCell
-                        key={col}
-                        isHeader
-                        className="px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap"
-                      >
-                        {col}
-                      </TableCell>
-                    ),
-                  )}
+                  {["File Name", "Uploaded At", "Status", "Action"].map((col) => (
+                    <TableCell
+                      key={col}
+                      isHeader
+                      className="text-primary text-theme-xs px-3 py-3 text-start font-semibold whitespace-nowrap dark:text-gray-300"
+                    >
+                      {col}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="px-5 py-10 text-center text-gray-400 text-theme-sm"
-                    >
+                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
                       No records match your filters.
                     </td>
                   </tr>
@@ -431,13 +518,13 @@ export default function UploadedIncomingDocTable() {
                   filtered.map((record) => (
                     <TableRow
                       key={record.id}
-                      className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
+                      className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                     >
                       {/* File name */}
-                      <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
+                      <TableCell className="text-theme-sm px-3 py-3 font-medium text-gray-800 dark:text-white/90">
                         <div className="flex items-center gap-2">
                           <svg
-                            className="w-4 h-4 flex-shrink-0 text-gray-400"
+                            className="h-4 w-4 flex-shrink-0 text-gray-400"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -454,7 +541,7 @@ export default function UploadedIncomingDocTable() {
                       </TableCell>
 
                       {/* Date */}
-                      <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
                         {formatDateTime(record.uploadedAt)}
                       </TableCell>
 
@@ -465,15 +552,11 @@ export default function UploadedIncomingDocTable() {
 
                       {/* Action */}
                       <TableCell className="px-3 py-3">
-                        {record.status !== "archived" ? (
-                          <ArchiveButton
-                            onClick={() => setPendingArchive(record)}
-                          />
-                        ) : (
-                          <span className="text-theme-xs text-gray-300 dark:text-gray-600 italic">
-                            Archived
-                          </span>
-                        )}
+                        <KebabActionMenu
+                          onArchive={() => setPendingArchive(record)}
+                          onShare={() => handleShare(record)}
+                          disabled={record.status === "archived"}
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -483,7 +566,7 @@ export default function UploadedIncomingDocTable() {
           </div>
 
           {filtered.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-white/[0.05]">
+            <div className="border-t border-gray-100 px-4 py-3 dark:border-white/[0.05]">
               <span className="text-theme-xs text-gray-400 dark:text-gray-500">
                 Showing{" "}
                 <span className="font-medium text-gray-600 dark:text-gray-300">

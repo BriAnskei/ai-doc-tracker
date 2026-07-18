@@ -1,11 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import StatusUpdateModal, {
   StatusType,
   StatusUpdatePayload,
@@ -109,11 +103,7 @@ function StatusText({ status }: { status: StatusType }) {
       : status === "On-Going"
         ? "text-warning"
         : "text-danger";
-  return (
-    <span className={`text-theme-xs font-semibold ${colorClass}`}>
-      {status}
-    </span>
-  );
+  return <span className={`text-theme-xs font-semibold ${colorClass}`}>{status}</span>;
 }
 
 function formatDate(iso: string) {
@@ -164,17 +154,13 @@ function KebabMenu({
       label: "View",
       icon: (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={1.8}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -188,7 +174,7 @@ function KebabMenu({
       label: "Update Status",
       icon: (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -207,7 +193,7 @@ function KebabMenu({
       label: "History",
       icon: (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -226,7 +212,7 @@ function KebabMenu({
       label: "Archive",
       icon: (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -245,7 +231,7 @@ function KebabMenu({
       label: "Delete",
       icon: (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -268,10 +254,10 @@ function KebabMenu({
       <div ref={ref} className="relative inline-block">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/[0.06] dark:hover:text-gray-200 transition-colors focus:outline-none"
+          className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
           title="More actions"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="5" r="1.5" />
             <circle cx="12" cy="12" r="1.5" />
             <circle cx="12" cy="19" r="1.5" />
@@ -279,7 +265,7 @@ function KebabMenu({
         </button>
 
         {open && (
-          <div className="absolute z-50 right-0 mt-1 w-44 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
+          <div className="absolute right-0 z-50 mt-1 w-44 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
             {actions.map((action, idx) => (
               <button
                 key={action.label}
@@ -287,13 +273,10 @@ function KebabMenu({
                   action.handler();
                   setOpen(false);
                 }}
-                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-theme-xs transition-colors
-                ${idx === 0 ? "rounded-t-lg" : ""}
-                ${idx === actions.length - 1 ? "rounded-b-lg" : ""}
-                ${
+                className={`text-theme-xs flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors ${idx === 0 ? "rounded-t-lg" : ""} ${idx === actions.length - 1 ? "rounded-b-lg" : ""} ${
                   action.danger
                     ? "text-danger hover:bg-red-50 dark:hover:bg-red-500/10"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]"
+                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.05]"
                 }`}
               >
                 {action.icon}
@@ -328,66 +311,60 @@ function MobileCard({
   onViewFile: (r: IncomingDocument) => void;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] p-4 space-y-3">
+    <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-white/[0.08] dark:bg-white/[0.03]">
       {/* Top row: code + kebab */}
       <div className="flex items-start justify-between gap-2">
-        <span className="font-mono text-theme-xs font-semibold text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 px-2 py-0.5 rounded">
+        <span className="text-theme-xs text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 rounded px-2 py-0.5 font-mono font-semibold">
           {record.code}
         </span>
         <KebabMenu record={record} onUpdateStatus={onUpdateStatus} />
       </div>
 
       {/* Subject */}
-      <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90 leading-snug">
+      <p className="text-theme-sm leading-snug font-semibold text-gray-800 dark:text-white/90">
         {record.subject}
       </p>
 
       {/* Meta grid */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
-          <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
             From
           </p>
-          <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
-            {record.from}
-          </p>
+          <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">{record.from}</p>
         </div>
         <div>
-          <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
             To
           </p>
-          <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
-            {record.to}
-          </p>
+          <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">{record.to}</p>
         </div>
         <div>
-          <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
             Routed To
           </p>
-          <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
-            {record.routedTo}
-          </p>
+          <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">{record.routedTo}</p>
         </div>
         <div>
-          <p className="text-theme-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+          <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
             Date Received
           </p>
-          <p className="text-theme-xs text-gray-700 dark:text-gray-300 mt-0.5">
+          <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
             {formatDate(record.dateReceived)}
           </p>
         </div>
       </div>
 
       {/* Bottom row: status + file button */}
-      <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-white/[0.05]">
+      <div className="flex items-center justify-between border-t border-gray-100 pt-1 dark:border-white/[0.05]">
         <StatusText status={record.status} />
         <button
           onClick={() => onViewFile(record)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150"
+          className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
           title="Open PDF"
         >
           <svg
-            className="w-3.5 h-3.5"
+            className="h-3.5 w-3.5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -417,9 +394,7 @@ export default function IncomingDocumentsTable() {
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<IncomingDocument | null>(
-    null,
-  );
+  const [selectedRecord, setSelectedRecord] = useState<IncomingDocument | null>(null);
 
   function openUpdateModal(record: IncomingDocument) {
     setSelectedRecord(record);
@@ -433,26 +408,18 @@ export default function IncomingDocumentsTable() {
       payload.reason ? `Reason: ${payload.reason}` : "",
     );
     setRecords((prev) =>
-      prev.map((r) =>
-        r.id === selectedRecord.id ? { ...r, status: payload.newStatus } : r,
-      ),
+      prev.map((r) => (r.id === selectedRecord.id ? { ...r, status: payload.newStatus } : r)),
     );
   }
 
   function handleViewFile(record: IncomingDocument) {
-    console.log(
-      "[View File] Opening PDF for record:",
-      record.code,
-      record.fileUrl,
-    );
+    console.log("[View File] Opening PDF for record:", record.code, record.fileUrl);
   }
 
   const filtered = records.filter((r) => {
     const q = search.toLowerCase();
     const matchesSearch =
-      !q ||
-      r.code.toLowerCase().includes(q) ||
-      r.subject.toLowerCase().includes(q);
+      !q || r.code.toLowerCase().includes(q) || r.subject.toLowerCase().includes(q);
     const matchesStatus = filterStatus === "All" || r.status === filterStatus;
     const date = new Date(r.dateReceived);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
@@ -460,8 +427,7 @@ export default function IncomingDocumentsTable() {
     return matchesSearch && matchesStatus && matchesFrom && matchesTo;
   });
 
-  const hasFilters =
-    search || filterStatus !== "All" || filterDateFrom || filterDateTo;
+  const hasFilters = search || filterStatus !== "All" || filterDateFrom || filterDateTo;
 
   return (
     <>
@@ -481,10 +447,10 @@ export default function IncomingDocumentsTable() {
         {/* ── Filters ── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           {/* Search */}
-          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
-            <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
+          <div className="relative w-full sm:min-w-[200px] sm:flex-1">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
               <svg
-                className="w-4 h-4"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -502,18 +468,16 @@ export default function IncomingDocumentsTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by code or subject…"
-              className="w-full pl-9 pr-4 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:placeholder-gray-500 transition"
+              className="text-theme-sm focus:ring-secondary/40 focus:border-secondary w-full rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-9 text-gray-700 placeholder-gray-400 transition focus:ring-2 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:placeholder-gray-500"
             />
           </div>
 
-          <div className="flex gap-3 flex-wrap items-end">
+          <div className="flex flex-wrap items-end gap-3">
             {/* Status filter */}
             <select
               value={filterStatus}
-              onChange={(e) =>
-                setFilterStatus(e.target.value as StatusType | "All")
-              }
-              className="flex-1 min-w-[130px] px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
+              onChange={(e) => setFilterStatus(e.target.value as StatusType | "All")}
+              className="text-theme-sm focus:ring-secondary/40 focus:border-secondary min-w-[130px] flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-700 transition focus:ring-2 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200"
             >
               <option value="All">All Statuses</option>
               {ALL_STATUSES.map((s) => (
@@ -525,27 +489,27 @@ export default function IncomingDocumentsTable() {
 
             {/* Date From */}
             <div className="flex flex-col gap-1">
-              <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
+              <label className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
                 From
               </label>
               <input
                 type="date"
                 value={filterDateFrom}
                 onChange={(e) => setFilterDateFrom(e.target.value)}
-                className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
+                className="text-theme-sm focus:ring-secondary/40 focus:border-secondary rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-700 transition focus:ring-2 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200"
               />
             </div>
 
             {/* Date To */}
             <div className="flex flex-col gap-1">
-              <label className="text-theme-xs text-gray-500 dark:text-gray-400 font-medium">
+              <label className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
                 To
               </label>
               <input
                 type="date"
                 value={filterDateTo}
                 onChange={(e) => setFilterDateTo(e.target.value)}
-                className="px-3 py-2 text-theme-sm rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 transition"
+                className="text-theme-sm focus:ring-secondary/40 focus:border-secondary rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-700 transition focus:ring-2 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200"
               />
             </div>
 
@@ -558,7 +522,7 @@ export default function IncomingDocumentsTable() {
                   setFilterDateFrom("");
                   setFilterDateTo("");
                 }}
-                className="px-3 py-2 text-theme-sm text-gray-500 hover:text-danger border border-gray-200 rounded-lg hover:border-danger/40 transition-colors dark:border-white/[0.08] dark:text-gray-400 dark:hover:text-danger whitespace-nowrap"
+                className="text-theme-sm hover:text-danger hover:border-danger/40 dark:hover:text-danger rounded-lg border border-gray-200 px-3 py-2 whitespace-nowrap text-gray-500 transition-colors dark:border-white/[0.08] dark:text-gray-400"
               >
                 Clear
               </button>
@@ -567,9 +531,9 @@ export default function IncomingDocumentsTable() {
         </div>
 
         {/* ── Mobile Cards (< md) ── */}
-        <div className="md:hidden space-y-3">
+        <div className="space-y-3 md:hidden">
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] px-5 py-10 text-center text-gray-400 text-theme-sm">
+            <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
               No records match your filters.
             </div>
           ) : (
@@ -583,22 +547,20 @@ export default function IncomingDocumentsTable() {
             ))
           )}
           {filtered.length > 0 && (
-            <p className="text-theme-xs text-gray-400 dark:text-gray-500 text-right px-1">
+            <p className="text-theme-xs px-1 text-right text-gray-400 dark:text-gray-500">
               Showing{" "}
               <span className="font-medium text-gray-600 dark:text-gray-300">
                 {filtered.length}
               </span>{" "}
               of{" "}
-              <span className="font-medium text-gray-600 dark:text-gray-300">
-                {records.length}
-              </span>{" "}
+              <span className="font-medium text-gray-600 dark:text-gray-300">{records.length}</span>{" "}
               records
             </p>
           )}
         </div>
 
         {/* ── Desktop Table (≥ md) ── */}
-        <div className="hidden md:block rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] @container">
+        <div className="@container hidden rounded-xl border border-gray-200 bg-white md:block dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div className="w-full overflow-x-auto">
             <div className="min-w-0">
               <Table>
@@ -618,7 +580,7 @@ export default function IncomingDocumentsTable() {
                       <TableCell
                         key={col.label}
                         isHeader
-                        className={`px-3 py-3 font-semibold text-primary text-start text-theme-xs dark:text-gray-300 whitespace-nowrap ${col.hide}`}
+                        className={`text-primary text-theme-xs px-3 py-3 text-start font-semibold whitespace-nowrap dark:text-gray-300 ${col.hide}`}
                       >
                         {col.label}
                       </TableCell>
@@ -631,7 +593,7 @@ export default function IncomingDocumentsTable() {
                     <tr>
                       <td
                         colSpan={9}
-                        className="px-5 py-10 text-center text-gray-400 text-theme-sm"
+                        className="text-theme-sm px-5 py-10 text-center text-gray-400"
                       >
                         No records match your filters.
                       </td>
@@ -640,52 +602,43 @@ export default function IncomingDocumentsTable() {
                     filtered.map((record) => (
                       <TableRow
                         key={record.id}
-                        className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
+                        className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                       >
                         {/* Code */}
                         <TableCell className="px-3 py-3 whitespace-nowrap">
-                          <span className="font-mono text-theme-xs font-semibold text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 px-2 py-0.5 rounded">
+                          <span className="text-theme-xs text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 rounded px-2 py-0.5 font-mono font-semibold">
                             {record.code}
                           </span>
                         </TableCell>
 
                         {/* Subject */}
-                        <TableCell className="px-3 py-3 text-gray-800 dark:text-white/90 text-theme-sm font-medium">
-                          <span
-                            className="block truncate max-w-[160px]"
-                            title={record.subject}
-                          >
+                        <TableCell className="text-theme-sm px-3 py-3 font-medium text-gray-800 dark:text-white/90">
+                          <span className="block max-w-[160px] truncate" title={record.subject}>
                             {record.subject}
                           </span>
                         </TableCell>
 
                         {/* From */}
-                        <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                          <span
-                            className="block truncate max-w-[130px]"
-                            title={record.from}
-                          >
+                        <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                          <span className="block max-w-[130px] truncate" title={record.from}>
                             {record.from}
                           </span>
                         </TableCell>
 
                         {/* To */}
-                        <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                          <span
-                            className="block truncate max-w-[130px]"
-                            title={record.to}
-                          >
+                        <TableCell className="text-theme-sm hidden px-3 py-3 text-gray-500 @4xl:table-cell dark:text-gray-400">
+                          <span className="block max-w-[130px] truncate" title={record.to}>
                             {record.to}
                           </span>
                         </TableCell>
 
                         {/* Routed To */}
-                        <TableCell className="hidden @4xl:table-cell px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                        <TableCell className="text-theme-sm hidden px-3 py-3 whitespace-nowrap text-gray-500 @4xl:table-cell dark:text-gray-400">
                           {record.routedTo}
                         </TableCell>
 
                         {/* Date Received */}
-                        <TableCell className="px-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                        <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
                           {formatDate(record.dateReceived)}
                         </TableCell>
 
@@ -698,11 +651,11 @@ export default function IncomingDocumentsTable() {
                         <TableCell className="px-3 py-3 whitespace-nowrap">
                           <button
                             onClick={() => handleViewFile(record)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-theme-xs font-medium text-secondary border border-secondary/30 hover:bg-secondary hover:text-white transition-colors duration-150 whitespace-nowrap"
+                            className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors duration-150 hover:text-white"
                             title="Open PDF"
                           >
                             <svg
-                              className="w-3.5 h-3.5 flex-shrink-0"
+                              className="h-3.5 w-3.5 flex-shrink-0"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -720,10 +673,7 @@ export default function IncomingDocumentsTable() {
 
                         {/* Action */}
                         <TableCell className="px-3 py-3">
-                          <KebabMenu
-                            record={record}
-                            onUpdateStatus={openUpdateModal}
-                          />
+                          <KebabMenu record={record} onUpdateStatus={openUpdateModal} />
                         </TableCell>
                       </TableRow>
                     ))
@@ -735,7 +685,7 @@ export default function IncomingDocumentsTable() {
 
           {/* Footer */}
           {filtered.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-white/[0.05]">
+            <div className="border-t border-gray-100 px-4 py-3 dark:border-white/[0.05]">
               <span className="text-theme-xs text-gray-400 dark:text-gray-500">
                 Showing{" "}
                 <span className="font-medium text-gray-600 dark:text-gray-300">

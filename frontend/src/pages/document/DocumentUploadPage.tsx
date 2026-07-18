@@ -81,64 +81,64 @@ export default function DocumentUploadPage() {
 
   const extractMetadataAi = async (documentText: string) => {
     try {
-      const res = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          model: "openai/gpt-oss-120b:free",
-          messages: [
-            {
-              role: "system",
-              content: `
-               You are a document information extraction assistant.
+      // const res = await axios.post(
+      // 	"https://openrouter.ai/api/v1/chat/completions",
+      // 	{
+      // 		model: "openai/gpt-oss-120b:free",
+      // 		messages: [
+      // 			{
+      // 				role: "system",
+      // 				content: `
+      //             You are a document information extraction assistant.
 
-               Extract the following information from the document:
+      //             Extract the following information from the document:
 
-               - Subject
-               - From
-               - To
-               - Date recieved
-               - Time recieved
-                
-              - Summary:
-                Write exactly 3 sentences summarizing the document.
-                The summary must explain:
-                1. What the document is about.
-                2. The main purpose, request, announcement, instruction, or action stated in the document.
-                3. What the document represents.
-                4. Highlight important information by making key words or phrases bold using Markdown format:
-                - Use **bold** for important names, organizations, dates, actions, requests, decisions, or main topics.
-                - Do not bold every word; only highlight the most relevant information.
+      //             - Subject
+      //             - From
+      //             - To
+      //             - Date recieved
+      //             - Time recieved
 
-               Return JSON only.
-               Do not include explanations, markdown, or additional text.
+      //            - Summary:
+      //              Write exactly 3 sentences summarizing the document.
+      //              The summary must explain:
+      //              1. What the document is about.
+      //              2. The main purpose, request, announcement, instruction, or action stated in the document.
+      //              3. What the document represents.
+      //              4. Highlight important information by making key words or phrases bold using Markdown format:
+      //              - Use **bold** for important names, organizations, dates, actions, requests, decisions, or main topics.
+      //              - Do not bold every word; only highlight the most relevant information.
 
-               Use this exact JSON format:
+      //             Return JSON only.
+      //             Do not include explanations, markdown, or additional text.
 
-               {
-                 "subject": "string",
-                 "from": "string",
-                 "to": "string",
-                 "date_received": "YYYY-MM-DD",
-                 "time_received": "HH:mm"
-                 "summary": "string"
-               }
+      //             Use this exact JSON format:
 
-               If any field cannot be found in the document, return an empty string.
-               `,
-            },
-            {
-              role: "user",
-              content: `Extract the information from this document:\n\n${documentText}`,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_KEY}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      //             {
+      //               "subject": "string",
+      //               "from": "string",
+      //               "to": "string",
+      //               "date_received": "YYYY-MM-DD",
+      //               "time_received": "HH:mm"
+      //               "summary": "string"
+      //             }
+
+      //             If any field cannot be found in the document, return an empty string.
+      //             `,
+      // 			},
+      // 			{
+      // 				role: "user",
+      // 				content: `Extract the information from this document:\n\n${documentText}`,
+      // 			},
+      // 		],
+      // 	},
+      // 	{
+      // 		headers: {
+      // 			Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_KEY}`,
+      // 			"Content-Type": "application/json",
+      // 		},
+      // 	},
+      // );
       return JSON.parse(res.data.choices[0].message.content) as any;
     } catch (error) {
       console.error(error);
@@ -161,7 +161,7 @@ export default function DocumentUploadPage() {
         text = await extractOCR(file);
       }
 
-      const extractionRes = await extractMetadataAi(text!);
+      // const extractionRes = await extractMetadataAi(text!);
 
       console.log("extracted: ", extractionRes);
       if (extractionRes) {
@@ -210,15 +210,13 @@ export default function DocumentUploadPage() {
           }`}
         >
           <span
-            className={`text-theme-xs font-semibold uppercase tracking-widest ${
+            className={`text-theme-xs font-semibold tracking-widest uppercase ${
               docType === "incoming"
                 ? "text-primary dark:text-secondary"
                 : "text-secondary dark:text-secondary"
             }`}
           >
-            {docType === "incoming"
-              ? "▼ Incoming Document"
-              : "▲ Outgoing Document"}
+            {docType === "incoming" ? "▼ Incoming Document" : "▲ Outgoing Document"}
           </span>
           <span
             className={`text-theme-xs ${

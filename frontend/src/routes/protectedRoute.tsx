@@ -3,15 +3,15 @@ import { userUser } from "../context/UserContext";
 import { Navigate } from "react-router";
 
 export default function ProtectedRoute({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const user = userUser();
+	const user = userUser();
 
-  if (!user.role) {
-    return <Navigate to="/signin" />;
-  }
+	if (!user.role) {
+		return <Navigate to="/signin" />;
+	}
 
-  return children;
+	return children;
 }

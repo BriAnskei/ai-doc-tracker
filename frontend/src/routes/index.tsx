@@ -23,6 +23,7 @@ import SystemLogsPage from "../pages/Logs/SystemLogsPage";
 import ReceiverDashboard from "../pages/Dashboard/ReceiverDashboard";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdminDashboard";
+import PublicTrackingPage from "../pages/Public/PublicTrackingPage";
 
 type RouteType = {
   path: string;
@@ -152,6 +153,11 @@ export const router = createBrowserRouter([
   {
     path: "/signin",
     element: <SignIn />,
+  },
+
+  {
+    path: "/document/track",
+    element: <PublicTrackingPage />,
   },
 
   {
