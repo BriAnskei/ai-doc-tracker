@@ -62,9 +62,11 @@ import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 import { ReactComponent as Notification } from "./notification.svg?react";
 import { ReactComponent as Upload } from "./upload.svg?react";
 import { ReactComponent as Document } from "./document.svg?react";
+import { ReactComponent as AssignedDocumentsIcon } from "./assigned-documents.svg?react";
 
 export {
 	Document,
+	AssignedDocumentsIcon,
 	Upload,
 	Notification,
 	ErrorHexaIcon,

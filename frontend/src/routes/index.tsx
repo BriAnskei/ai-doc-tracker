@@ -12,7 +12,7 @@ import AppLayout from "../layout/AppLayout";
 import { DashboardRedirect, UploadRedirect } from "./Redirect";
 import Unauthorized from "../pages/OtherPage/Unauthorized";
 import OutgoingDocPage from "../pages/document/OutgoingDocPage";
-import ValudationQueue from "../pages/document/ValidationQueue";
+import ValudationQueue from "../pages/document/UploadQueue";
 import IncomingDocumentUploadPage from "../pages/document/IncomingDocumentUploadPage";
 import UploadedIncomingDoc from "../pages/document/UploadedIncomingDocPage";
 import UploadedIncomingDocPage from "../pages/document/UploadedIncomingDocPage";
@@ -24,6 +24,8 @@ import ReceiverDashboard from "../pages/Dashboard/ReceiverDashboard";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdminDashboard";
 import PublicTrackingPage from "../pages/Public/PublicTrackingPage";
+
+import AssignedDocumentPage from "../pages/Division/AssignedDocumentPage";
 
 type RouteType = {
   path: string;
@@ -71,7 +73,7 @@ const ADMINISTRATION_ROUTES: RouteType[] = [
   },
 
   {
-    path: "/validation-queue",
+    path: "/upload-queue",
     element: (
       <RoleRoute allowedRoles={[1, 2]}>
         <ValudationQueue />
@@ -134,9 +136,9 @@ const ADMIN_ROUTES: RouteType[] = [
   },
 ];
 
-const RECEIVER_ROUTES: RouteType[] = [
+const RECEIVING_OFFICER_ROUTES: RouteType[] = [
   {
-    path: "/receiver/dashboard",
+    path: "/receiving-officer/dashboard",
     element: <ReceiverDashboard />,
   },
   {
@@ -146,6 +148,13 @@ const RECEIVER_ROUTES: RouteType[] = [
   {
     path: "/uploads",
     element: <UploadedIncomingDocPage />,
+  },
+];
+
+const DIVISION_ROUTE: RouteType[] = [
+  {
+    path: "/division/assigned-documents",
+    element: <AssignedDocumentPage />,
   },
 ];
 
@@ -171,7 +180,8 @@ export const router = createBrowserRouter([
       ...ADMINISTRATION_ROUTES,
       ...SUPER_ADMIN_ROUTES,
       ...ADMIN_ROUTES,
-      ...RECEIVER_ROUTES,
+      ...RECEIVING_OFFICER_ROUTES,
+      ...DIVISION_ROUTE,
       {
         path: "/",
         element: <DashboardRedirect />,

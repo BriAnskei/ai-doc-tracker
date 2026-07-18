@@ -1,27 +1,28 @@
 import { Roles } from "../context/UserContext";
 import {
-	GridIcon,
-	Notification,
-	Upload,
-	PieChartIcon,
-	BoxCubeIcon,
-	PlugInIcon,
-	UserManagementIcon,
-	AccessControlIcon,
-	Document,
-	SystemLogsIcon,
-	SettingIcon,
-	AdministrationIcon,
+  GridIcon,
+  Notification,
+  Upload,
+  PieChartIcon,
+  BoxCubeIcon,
+  PlugInIcon,
+  UserManagementIcon,
+  AccessControlIcon,
+  Document,
+  SystemLogsIcon,
+  AssignedDocumentsIcon,
+  SettingIcon,
+  AdministrationIcon,
 } from "../icons";
 
 export interface NavItem {
-	name: string;
-	icon: React.ReactNode;
-	path?: string;
+  name: string;
+  icon: React.ReactNode;
+  path?: string;
 
-	roles: Roles[];
+  roles: Roles[];
 
-	subItems?: (Omit<NavItem, "subItems" | "icon"> & { path: string })[];
+  subItems?: (Omit<NavItem, "subItems" | "icon"> & { path: string })[];
 }
 
 // Super Admin
@@ -48,94 +49,104 @@ export interface NavItem {
 // Notification	–
 
 const SUPER_ADMIN_ROUTES: NavItem[] = [
-	{
-		name: "System Logs",
-		path: "/activities",
-		icon: <SystemLogsIcon />, // consistent size/color
-		roles: [1],
-	},
-	{
-		name: "Setting",
-		path: "/Seting",
-		icon: <SettingIcon />, // consistent size/color
-		roles: [1],
-	},
+  {
+    name: "System Logs",
+    path: "/activities",
+    icon: <SystemLogsIcon />, // consistent size/color
+    roles: [1],
+  },
+  {
+    name: "Setting",
+    path: "/Seting",
+    icon: <SettingIcon />, // consistent size/color
+    roles: [1],
+  },
+];
+
+const DIVISION_ROUTES: NavItem[] = [
+  {
+    name: "Assigned Documents",
+    path: "division/assigned-documents",
+    icon: <AssignedDocumentsIcon />,
+    roles: [4],
+  },
 ];
 
 export const NAV_ITEMS: NavItem[] = [
-	{
-		name: "Dashboard",
-		icon: <GridIcon />,
-		path: "/",
-		roles: [1, 2, 3],
-	},
+  {
+    name: "Dashboard",
+    icon: <GridIcon />,
+    path: "/",
+    roles: [1, 2, 3],
+  },
 
-	{
-		name: "Documents",
-		icon: <Document />,
-		roles: [1, 2, 3],
-		subItems: [
-			// Super Admin, Admin
-			{
-				name: "Validation Queue",
-				path: "/validation-queue",
-				roles: [1, 2],
-			},
-			{
-				name: "Upload Document",
-				path: "/upload-direct",
-				roles: [1, 2],
-			},
-			{
-				name: "Incoming Documents",
-				path: "/incoming",
-				roles: [1, 2],
-			},
-			{
-				name: "Outgoing Documents",
-				path: "/outgoing",
-				roles: [1, 2],
-			},
+  {
+    name: "Documents",
+    icon: <Document />,
+    roles: [1, 2, 3],
+    subItems: [
+      // Super Admin, Admin
+      {
+        name: "Upload Queue",
+        path: "/upload-queue",
+        roles: [1, 2],
+      },
+      {
+        name: "Upload Document",
+        path: "/upload-direct",
+        roles: [1, 2],
+      },
+      {
+        name: "Incoming Documents",
+        path: "/incoming",
+        roles: [1, 2],
+      },
+      {
+        name: "Outgoing Documents",
+        path: "/outgoing",
+        roles: [1, 2],
+      },
 
-			// Receiver
-			{
-				name: "Submit Document",
-				path: "/upload",
-				roles: [3],
-			},
-			{
-				name: "Submitted Documents",
-				path: "/uploads",
-				roles: [3],
-			},
-		],
-	},
+      {
+        name: "Submit Document",
+        path: "/upload",
+        roles: [3],
+      },
+      {
+        name: "Submitted Documents",
+        path: "/uploads",
+        roles: [3],
+      },
+    ],
+  },
 
-	{
-		name: "Notification",
-		icon: <Notification />,
-		path: "/notification",
-		roles: [1, 2, 3],
-	},
+  ...DIVISION_ROUTES,
+
+  {
+    name: "Notification",
+    icon: <Notification />,
+    path: "/notification",
+    roles: [1, 2, 3, 4],
+  },
 ];
 
 export const OTHERS_NAV_ITEMS: NavItem[] = [
-	{
-		name: "Administration",
-		icon: <AdministrationIcon />,
-		roles: [1],
-		subItems: [
-			{
-				name: "User Management",
-				path: "/users",
-				roles: [1],
-			},
-			{
-				name: "Access Control",
-				path: "/access",
-				roles: [1],
-			},
-		],
-	},
-	...SUPER_ADMIN_ROUTES,
+  {
+    name: "Administration",
+    icon: <AdministrationIcon />,
+    roles: [1],
+    subItems: [
+      {
+        name: "User Management",
+        path: "/users",
+        roles: [1],
+      },
+      {
+        name: "Access Control",
+        path: "/access",
+        roles: [1],
+      },
+    ],
+  },
+  ...SUPER_ADMIN_ROUTES,
 ];

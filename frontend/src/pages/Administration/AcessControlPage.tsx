@@ -5,7 +5,7 @@ import PageMeta from "../../components/common/PageMeta";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type RoleKey = "receiver" | "admin";
+type RoleKey = "receiver" | "admin" | "division";
 
 interface Permission {
 	key: string;
@@ -19,6 +19,7 @@ interface User {
 	email: string;
 	role: RoleKey;
 	avatar: string;
+	division?: string;
 }
 
 // key = permissionKey, value = true (granted) | false (revoked) | undefined (inherits role default)
@@ -90,6 +91,20 @@ const PERMISSIONS_BY_ROLE: Record<RoleKey, Permission[]> = {
 				"Review and approve or reject documents submitted by receivers.",
 		},
 	],
+	division: [
+		{
+			key: "division.routed_to",
+			label: "Routed To",
+			description:
+				"Assign or change which division/user an incoming document is routed to.",
+		},
+		{
+			key: "division.edit_status",
+			label: "Edit Status & Remarks",
+			description:
+				"Change the processing status and edit remarks on incoming documents. Status rollbacks (e.g. Complete → On-Going) require a remarks note.",
+		},
+	],
 };
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -137,6 +152,30 @@ const MOCK_USERS: User[] = [
 		role: "admin",
 		avatar: "RG",
 	},
+	{
+		id: 7,
+		name: "Engr. Paolo Tan",
+		email: "p.tan@peo.gov.ph",
+		role: "division",
+		avatar: "PT",
+		division: "Equipment Division",
+	},
+	{
+		id: 8,
+		name: "Engr. Sofia Reyes",
+		email: "s.reyes@peo.gov.ph",
+		role: "division",
+		avatar: "SR",
+		division: "Maintenance Division",
+	},
+	{
+		id: 9,
+		name: "Engr. Benjo Cruz",
+		email: "b.cruz@peo.gov.ph",
+		role: "division",
+		avatar: "BC",
+		division: "Materials Division",
+	},
 ];
 
 // All role-level defaults are ON initially
@@ -147,6 +186,9 @@ function buildDefaultRoleToggles(): Record<RoleKey, Record<string, boolean>> {
 		),
 		admin: Object.fromEntries(
 			PERMISSIONS_BY_ROLE.admin.map((p) => [p.key, true]),
+		),
+		division: Object.fromEntries(
+			PERMISSIONS_BY_ROLE.division.map((p) => [p.key, true]),
 		),
 	};
 }
@@ -238,7 +280,7 @@ function RoleDefaultsCard({
 						Role Defaults
 					</h3>
 					<p className="text-theme-xs text-gray-400 dark:text-gray-500 mt-0.5">
-						Applies to all {role === "receiver" ? "Receivers" : "Admins"} unless
+						Applies to all {role === "receiver" ? "Receivers" : role === "admin" ? "Admins" : "Divisions"} unless
 						overridden per user.
 					</p>
 				</div>
@@ -319,12 +361,25 @@ function UserOverrideRow({
 
 				{/* Name + email */}
 				<div className="flex-1 min-w-0">
-					<p className="text-theme-sm font-medium text-gray-800 dark:text-white/90 truncate">
-						{user.name}
-					</p>
-					<p className="text-theme-xs text-gray-400 dark:text-gray-500 truncate">
-						{user.email}
-					</p>
+					{user.role === "division" ? (
+						<>
+							<p className="text-theme-sm font-medium text-gray-800 dark:text-white/90 truncate">
+								{user.division}
+							</p>
+							<p className="text-theme-xs text-gray-400 dark:text-gray-500 truncate">
+								{user.name}
+							</p>
+						</>
+					) : (
+						<>
+							<p className="text-theme-sm font-medium text-gray-800 dark:text-white/90 truncate">
+								{user.name}
+							</p>
+							<p className="text-theme-xs text-gray-400 dark:text-gray-500 truncate">
+								{user.email}
+							</p>
+						</>
+					)}
 				</div>
 
 				{/* Override badge */}
@@ -588,6 +643,7 @@ export default function AccessControlPage() {
 	const ROLE_LABELS: Record<RoleKey, string> = {
 		receiver: "Receiver",
 		admin: "Admin",
+		division: "Division",
 	};
 
 	return (

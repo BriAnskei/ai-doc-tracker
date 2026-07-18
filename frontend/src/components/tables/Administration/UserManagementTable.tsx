@@ -10,7 +10,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UserRole = "Super Admin" | "Admin" | "Receiver";
+type UserRole = "Super Admin" | "Admin" | "Receiver" | "Division";
 type AccountStatus = "Active" | "Disabled";
 
 interface SystemUser {
@@ -89,15 +89,25 @@ const mockUsers: SystemUser[] = [
 		contact: "+63 923 789 0123",
 		status: "Active",
 	},
+	{
+		id: 8,
+		name: "Engr. Paolo Tan",
+		title: "Equipment Division Head",
+		role: "Division",
+		email: "p.tan@peo.gov.ph",
+		contact: "+63 924 890 1234",
+		status: "Active",
+	},
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const ALL_ROLES: UserRole[] = ["Super Admin", "Admin", "Receiver"];
+const ALL_ROLES: UserRole[] = ["Super Admin", "Admin", "Receiver", "Division"];
 
 function getRoleBadgeColor(role: UserRole) {
 	if (role === "Super Admin") return "info";
 	if (role === "Admin") return "warning";
+	if (role === "Division") return "success";
 	return "light" as const;
 }
 
@@ -270,6 +280,8 @@ function UserFormModal({
 								"Provincial Engineers and Division Heads."}
 							{form.role === "Receiver" &&
 								"Updates document receipt and status."}
+							{form.role === "Division" &&
+								"Division units that submit and track documents."}
 						</p>
 					</div>
 

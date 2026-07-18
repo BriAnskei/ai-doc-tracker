@@ -10,7 +10,10 @@ export type NotificationType =
 	| "STATUS_CHANGED"
 	| "DOCUMENT_UPDATE"
 	| "RECEIVED"
-	| "ON_QUEUE";
+	| "ON_QUEUE"
+	| "DOCUMENT_ASSIGNED"
+	| "DOC_STALE_ALMOST"
+	| "DOC_STALE_YEAR";
 
 export interface NotificationProps {
 	id: number;
@@ -42,6 +45,9 @@ export const typeLabel: Record<NotificationType, string> = {
 	DOCUMENT_UPDATE: "Document Update",
 	RECEIVED: "Received",
 	ON_QUEUE: "On-Queue",
+	DOCUMENT_ASSIGNED: "Assigned",
+	DOC_STALE_ALMOST: "No Changes (11 Mo)",
+	DOC_STALE_YEAR: "No Changes (1 Yr)",
 };
 
 export const typeStyles: Record<NotificationType, string> = {
@@ -61,6 +67,9 @@ export const typeStyles: Record<NotificationType, string> = {
 		"bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-gray-400",
 	RECEIVED: "bg-success/10 text-success dark:bg-success/20 dark:text-success",
 	ON_QUEUE: "bg-warning/10 text-warning dark:bg-warning/20 dark:text-warning",
+	DOCUMENT_ASSIGNED: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-secondary",
+	DOC_STALE_ALMOST: "bg-warning/10 text-warning dark:bg-warning/20 dark:text-warning",
+	DOC_STALE_YEAR: "bg-danger/10 text-danger dark:bg-danger/20 dark:text-danger",
 };
 
 export const NotificationItem: React.FC<NotificationProps> = ({

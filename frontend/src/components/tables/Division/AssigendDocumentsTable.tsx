@@ -1,16 +1,14 @@
-import { useState, useRef, useEffect } from "react";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
+import { useState } from "react";
+import RoutedDivisionsModal from "../../ui/modal/document/RoutedDivisionsModal";
 import StatusUpdateModal, {
   StatusType,
   StatusUpdatePayload,
-} from "../ui/modal/document/StatusUpdateModal";
-import IncomingAuditModal from "../ui/modal/document/IncomingAuditModal";
-import RoutedDivisionsModal from "../ui/modal/document/RoutedDivisionsModal";
-import QRCodeModal from "../receiver/QRCodeModal";
+} from "../../ui/modal/document/StatusUpdateModal";
+import { Table, TableHeader, TableRow, TableCell, TableBody } from "../../ui/table";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface IncomingDocument {
+export interface IncomingDocument {
   id: number;
   code: string;
   subject: string;
@@ -22,82 +20,20 @@ interface IncomingDocument {
   dateReceived: string;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
+type StatusFilter = StatusType | "All";
 
-const mockData: IncomingDocument[] = [
-  {
-    id: 1,
-    code: "INC-2024-001",
-    subject: "Budget Proposal FY2024",
-    from: "Finance Department",
-    to: "Executive Office",
-    routedDivisions: ["Finance Division", "Office of the Provincial Engineer"],
-    status: "Completed",
-    fileUrl: "/files/budget-proposal-2024.pdf",
-    dateReceived: "2024-01-10",
-  },
-  {
-    id: 2,
-    code: "INC-2024-002",
-    subject: "Infrastructure Maintenance Request",
-    from: "Facilities Management",
-    to: "Operations Division",
-    routedDivisions: ["Maintenance Division"],
-    status: "On-Going",
-    fileUrl: "/files/maintenance-request.pdf",
-    dateReceived: "2024-01-14",
-  },
-  {
-    id: 3,
-    code: "INC-2024-003",
-    subject: "Staff Regularization Endorsement",
-    from: "HR Department",
-    to: "Director's Office",
-    routedDivisions: ["Human Resources Division", "Legal Division"],
-    status: "Pending",
-    fileUrl: "/files/regularization-endorsement.pdf",
-    dateReceived: "2024-01-18",
-  },
-  {
-    id: 4,
-    code: "INC-2024-004",
-    subject: "Procurement of Office Supplies",
-    from: "Administrative Office",
-    to: "Procurement Division",
-    routedDivisions: ["Procurement Division"],
-    status: "Pending",
-    fileUrl: "/files/procurement-supplies.pdf",
-    dateReceived: "2024-01-22",
-  },
-  {
-    id: 5,
-    code: "INC-2024-005",
-    subject: "Annual Performance Review Results",
-    from: "HR Department",
-    to: "Department Heads",
-    routedDivisions: ["Human Resources Division"],
-    status: "Completed",
-    fileUrl: "/files/performance-review.pdf",
-    dateReceived: "2024-01-25",
-  },
-  {
-    id: 6,
-    code: "INC-2024-006",
-    subject: "Legal Compliance Audit Report",
-    from: "Legal Affairs",
-    to: "Compliance Office",
-    routedDivisions: ["Legal Division", "Administrative Division"],
-    status: "On-Going",
-    fileUrl: "/files/audit-report.pdf",
-    dateReceived: "2024-02-01",
-  },
-];
+interface DivisionIncomingDocumentsTableProps {
+  division: string;
+  records: IncomingDocument[];
+  onRecordsChange: (records: IncomingDocument[]) => void;
+  statusFilter: StatusFilter;
+  onStatusFilterChange: (status: StatusFilter) => void;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ALL_STATUSES: StatusType[] = ["Completed", "On-Going", "Pending"];
 
-/** Plain colored text — no badge, no interactivity */
 function StatusText({ status }: { status: StatusType }) {
   const colorClass =
     status === "Completed"
@@ -123,7 +59,7 @@ function RoutedDivisionsButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-      title="View routed divisions"
+      title="View / update routed divisions"
     >
       <svg
         className="h-4 w-4"
@@ -143,44 +79,20 @@ function RoutedDivisionsButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-// ─── Kebab Menu ───────────────────────────────────────────────────────────────
+// ─── Kebab Menu (division view: View + Update Status only) ──────────────────
 
 function KebabMenu({
   record,
+  onView,
   onUpdateStatus,
-  onShare,
 }: {
   record: IncomingDocument;
+  onView: (record: IncomingDocument) => void;
   onUpdateStatus: (record: IncomingDocument) => void;
-  onShare: (record: IncomingDocument) => void;
 }) {
-  const [auditModalOpen, setAuditModalOpen] = useState(false);
-  const [auditRecord, setAuditRecord] = useState<IncomingDocument | null>(null);
-
-  function openAuditModal(record: IncomingDocument) {
-    setAuditRecord(record);
-    setAuditModalOpen(true);
-  }
-
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const actions: {
-    label: string;
-    icon: React.ReactNode;
-    handler: () => void;
-    danger?: boolean;
-  }[] = [
+  const actions = [
     {
       label: "View",
       icon: (
@@ -199,7 +111,7 @@ function KebabMenu({
           />
         </svg>
       ),
-      handler: () => console.log("[View] Record:", record),
+      handler: () => onView(record),
     },
     {
       label: "Update Status",
@@ -220,112 +132,43 @@ function KebabMenu({
       ),
       handler: () => onUpdateStatus(record),
     },
-    {
-      label: "History",
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.8}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-      handler: () => openAuditModal(record),
-    },
-    {
-      label: "Share",
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.8}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M8.684 13.342a4 4 0 105.316 5.658m6.632-8.974a4 4 0 10-5.316 5.658m0 2.316L8.684 13.342m6.632 4.974a4 4 0 10-5.316 5.658m0 2.316L8.684 15.658m9.316-9.632a4 4 0 11-8 0 4 4 0 018 0zm0 12a4 4 0 11-8 0 4 4 0 018 0zM7 12a4 4 0 11-8 0 4 4 0 018 0z"
-          />
-        </svg>
-      ),
-      handler: () => onShare(record),
-    },
-    {
-      label: "Archive",
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.8}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
-          />
-        </svg>
-      ),
-      handler: () => console.log("[Archive] Record:", record),
-    },
   ];
 
   return (
-    <>
-      <div ref={ref} className="relative inline-block">
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
-          title="More actions"
+    <div className="relative inline-block">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
+        title="More actions"
+      >
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="5" r="1.5" />
+          <circle cx="12" cy="12" r="1.5" />
+          <circle cx="12" cy="19" r="1.5" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          onMouseLeave={() => setOpen(false)}
+          className="absolute right-0 z-50 mt-1 w-40 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900"
         >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="12" cy="19" r="1.5" />
-          </svg>
-        </button>
-
-        {open && (
-          <div className="absolute right-0 z-50 mt-1 w-44 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-white/[0.08] dark:bg-gray-900">
-            {actions.map((action, idx) => (
-              <button
-                key={action.label}
-                onClick={() => {
-                  action.handler();
-                  setOpen(false);
-                }}
-                className={`text-theme-xs flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors ${idx === 0 ? "rounded-t-lg" : ""} ${idx === actions.length - 1 ? "rounded-b-lg" : ""} ${
-                  action.danger
-                    ? "text-danger hover:bg-red-50 dark:hover:bg-red-500/10"
-                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.05]"
-                }`}
-              >
-                {action.icon}
-                {action.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {auditRecord && (
-        <IncomingAuditModal
-          isOpen={auditModalOpen}
-          onClose={() => setAuditModalOpen(false)}
-          documentCode={auditRecord.code}
-          documentSubject={auditRecord.subject}
-        />
+          {actions.map((action, idx) => (
+            <button
+              key={action.label}
+              onClick={() => {
+                action.handler();
+                setOpen(false);
+              }}
+              className={`text-theme-xs flex w-full items-center gap-2.5 px-3 py-2 text-left text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.05] ${idx === 0 ? "rounded-t-lg" : ""} ${idx === actions.length - 1 ? "rounded-b-lg" : ""}`}
+            >
+              {action.icon}
+              {action.label}
+            </button>
+          ))}
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -333,33 +176,30 @@ function KebabMenu({
 
 function MobileCard({
   record,
+  onView,
   onUpdateStatus,
   onViewFile,
   onViewRouted,
-  onShare,
 }: {
   record: IncomingDocument;
+  onView: (r: IncomingDocument) => void;
   onUpdateStatus: (record: IncomingDocument) => void;
   onViewFile: (r: IncomingDocument) => void;
   onViewRouted: (r: IncomingDocument) => void;
-  onShare: (record: IncomingDocument) => void;
 }) {
   return (
     <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-white/[0.08] dark:bg-white/[0.03]">
-      {/* Top row: code + kebab */}
       <div className="flex items-start justify-between gap-2">
         <span className="text-theme-xs text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 rounded px-2 py-0.5 font-mono font-semibold">
           {record.code}
         </span>
-        <KebabMenu record={record} onUpdateStatus={onUpdateStatus} onShare={onShare} />
+        <KebabMenu record={record} onView={onView} onUpdateStatus={onUpdateStatus} />
       </div>
 
-      {/* Subject */}
       <p className="text-theme-sm leading-snug font-semibold text-gray-800 dark:text-white/90">
         {record.subject}
       </p>
 
-      {/* Meta grid */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
           <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
@@ -391,7 +231,6 @@ function MobileCard({
         </div>
       </div>
 
-      {/* Bottom row: status + file button */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-1 dark:border-white/[0.05]">
         <StatusText status={record.status} />
         <button
@@ -421,34 +260,24 @@ function MobileCard({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function IncomingDocumentsTable() {
-  const [records, setRecords] = useState<IncomingDocument[]>(mockData);
+export default function DivisionIncomingDocumentsTable({
+  division,
+  records,
+  onRecordsChange,
+  statusFilter,
+  onStatusFilterChange,
+}: DivisionIncomingDocumentsTableProps) {
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<StatusType | "All">("All");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
 
-  // Status modal state
+  // Status update modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<IncomingDocument | null>(null);
 
   // Routed divisions modal state
   const [routedModalOpen, setRoutedModalOpen] = useState(false);
   const [routedRecord, setRoutedRecord] = useState<IncomingDocument | null>(null);
-
-  // Share / QR modal state
-  const [shareTarget, setShareTarget] = useState<IncomingDocument | null>(null);
-
-  function handleShare(record: IncomingDocument) {
-    setShareTarget(record);
-  }
-
-  const shareInfo = shareTarget
-    ? {
-        trackingId: shareTarget.code,
-        trackingUrl: `${window.location.origin}/document/track`,
-      }
-    : null;
 
   function openUpdateModal(record: IncomingDocument) {
     setSelectedRecord(record);
@@ -461,8 +290,8 @@ export default function IncomingDocumentsTable() {
       `[Status Update] Record ${selectedRecord.code}: ${selectedRecord.status} → ${payload.newStatus}`,
       payload.reason ? `Reason: ${payload.reason}` : "",
     );
-    setRecords((prev) =>
-      prev.map((r) => (r.id === selectedRecord.id ? { ...r, status: payload.newStatus } : r)),
+    onRecordsChange(
+      records.map((r) => (r.id === selectedRecord.id ? { ...r, status: payload.newStatus } : r)),
     );
   }
 
@@ -479,31 +308,35 @@ export default function IncomingDocumentsTable() {
       "→",
       divisions,
     );
-    setRecords((prev) =>
-      prev.map((r) => (r.id === routedRecord.id ? { ...r, routedDivisions: divisions } : r)),
+    onRecordsChange(
+      records.map((r) => (r.id === routedRecord.id ? { ...r, routedDivisions: divisions } : r)),
     );
+  }
+
+  function handleView(record: IncomingDocument) {
+    console.log("[View] Record:", record);
   }
 
   function handleViewFile(record: IncomingDocument) {
     console.log("[View File] Opening PDF for record:", record.code, record.fileUrl);
   }
 
+  // Records here are already scoped to this division by the parent page.
   const filtered = records.filter((r) => {
     const q = search.toLowerCase();
     const matchesSearch =
       !q || r.code.toLowerCase().includes(q) || r.subject.toLowerCase().includes(q);
-    const matchesStatus = filterStatus === "All" || r.status === filterStatus;
+    const matchesStatus = statusFilter === "All" || r.status === statusFilter;
     const date = new Date(r.dateReceived);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
     return matchesSearch && matchesStatus && matchesFrom && matchesTo;
   });
 
-  const hasFilters = search || filterStatus !== "All" || filterDateFrom || filterDateTo;
+  const hasFilters = search || statusFilter !== "All" || filterDateFrom || filterDateTo;
 
   return (
     <>
-      {/* ── Status Update Modal ── */}
       {selectedRecord && (
         <StatusUpdateModal
           isOpen={modalOpen}
@@ -515,7 +348,6 @@ export default function IncomingDocumentsTable() {
         />
       )}
 
-      {/* ── Routed Divisions Modal ── */}
       {routedRecord && (
         <RoutedDivisionsModal
           isOpen={routedModalOpen}
@@ -527,21 +359,9 @@ export default function IncomingDocumentsTable() {
         />
       )}
 
-      {/* ── Share QR Modal ── */}
-      {shareTarget && shareInfo && (
-        <QRCodeModal
-          open={!!shareTarget}
-          onClose={() => setShareTarget(null)}
-          trackingId={shareInfo.trackingId}
-          trackingUrl={shareInfo.trackingUrl}
-          fileName={shareTarget.code}
-        />
-      )}
-
       <div className="space-y-4">
         {/* ── Filters ── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-          {/* Search */}
           <div className="relative w-full sm:min-w-[200px] sm:flex-1">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
               <svg
@@ -568,10 +388,9 @@ export default function IncomingDocumentsTable() {
           </div>
 
           <div className="flex flex-wrap items-end gap-3">
-            {/* Status filter */}
             <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as StatusType | "All")}
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value as StatusFilter)}
               className="text-theme-sm focus:ring-secondary/40 focus:border-secondary min-w-[130px] flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-700 transition focus:ring-2 focus:outline-none dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200"
             >
               <option value="All">All Statuses</option>
@@ -582,7 +401,6 @@ export default function IncomingDocumentsTable() {
               ))}
             </select>
 
-            {/* Date From */}
             <div className="flex flex-col gap-1">
               <label className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
                 From
@@ -595,7 +413,6 @@ export default function IncomingDocumentsTable() {
               />
             </div>
 
-            {/* Date To */}
             <div className="flex flex-col gap-1">
               <label className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
                 To
@@ -608,12 +425,11 @@ export default function IncomingDocumentsTable() {
               />
             </div>
 
-            {/* Clear */}
             {hasFilters && (
               <button
                 onClick={() => {
                   setSearch("");
-                  setFilterStatus("All");
+                  onStatusFilterChange("All");
                   setFilterDateFrom("");
                   setFilterDateTo("");
                 }}
@@ -636,10 +452,10 @@ export default function IncomingDocumentsTable() {
               <MobileCard
                 key={record.id}
                 record={record}
+                onView={handleView}
                 onUpdateStatus={openUpdateModal}
                 onViewFile={handleViewFile}
                 onViewRouted={openRoutedModal}
-                onShare={handleShare}
               />
             ))
           )}
@@ -701,50 +517,42 @@ export default function IncomingDocumentsTable() {
                         key={record.id}
                         className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                       >
-                        {/* Code */}
                         <TableCell className="px-3 py-3 whitespace-nowrap">
                           <span className="text-theme-xs text-primary dark:text-secondary bg-primary/5 dark:bg-secondary/10 rounded px-2 py-0.5 font-mono font-semibold">
                             {record.code}
                           </span>
                         </TableCell>
 
-                        {/* Subject */}
                         <TableCell className="text-theme-sm px-3 py-3 font-medium text-gray-800 dark:text-white/90">
                           <span className="block max-w-[160px] truncate" title={record.subject}>
                             {record.subject}
                           </span>
                         </TableCell>
 
-                        {/* From */}
                         <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
                           <span className="block max-w-[130px] truncate" title={record.from}>
                             {record.from}
                           </span>
                         </TableCell>
 
-                        {/* To */}
                         <TableCell className="text-theme-sm hidden px-3 py-3 text-gray-500 @4xl:table-cell dark:text-gray-400">
                           <span className="block max-w-[130px] truncate" title={record.to}>
                             {record.to}
                           </span>
                         </TableCell>
 
-                        {/* Routed To — view icon opens the divisions modal */}
                         <TableCell className="hidden px-3 py-3 whitespace-nowrap @4xl:table-cell">
                           <RoutedDivisionsButton onClick={() => openRoutedModal(record)} />
                         </TableCell>
 
-                        {/* Date Received */}
                         <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
                           {formatDate(record.dateReceived)}
                         </TableCell>
 
-                        {/* Status — plain colored text, no interaction */}
                         <TableCell className="px-3 py-3 whitespace-nowrap">
                           <StatusText status={record.status} />
                         </TableCell>
 
-                        {/* File */}
                         <TableCell className="px-3 py-3 whitespace-nowrap">
                           <button
                             onClick={() => handleViewFile(record)}
@@ -768,9 +576,12 @@ export default function IncomingDocumentsTable() {
                           </button>
                         </TableCell>
 
-                        {/* Action */}
                         <TableCell className="px-3 py-3">
-                          <KebabMenu record={record} onUpdateStatus={openUpdateModal} onShare={handleShare} />
+                          <KebabMenu
+                            record={record}
+                            onView={handleView}
+                            onUpdateStatus={openUpdateModal}
+                          />
                         </TableCell>
                       </TableRow>
                     ))
@@ -780,7 +591,6 @@ export default function IncomingDocumentsTable() {
             </div>
           </div>
 
-          {/* Footer */}
           {filtered.length > 0 && (
             <div className="border-t border-gray-100 px-4 py-3 dark:border-white/[0.05]">
               <span className="text-theme-xs text-gray-400 dark:text-gray-500">
