@@ -770,7 +770,11 @@ export default function IncomingDocumentsTable() {
 
                         {/* Action */}
                         <TableCell className="px-3 py-3">
-                          <KebabMenu record={record} onUpdateStatus={openUpdateModal} onShare={handleShare} />
+                          <KebabMenu
+                            record={record}
+                            onUpdateStatus={openUpdateModal}
+                            onShare={handleShare}
+                          />
                         </TableCell>
                       </TableRow>
                     ))
