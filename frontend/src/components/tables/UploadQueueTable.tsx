@@ -7,6 +7,7 @@ import { Table, TableHeader, TableRow, TableCell, TableBody } from "../ui/table"
 interface ValidationDocument {
   id: number;
   uploaderName: string;
+  from: string;
   uploadedAt: string;
   fileUrl: string;
 }
@@ -17,36 +18,42 @@ const mockData: ValidationDocument[] = [
   {
     id: 1,
     uploaderName: "Maria Santos",
+    from: "Barangay Hall",
     uploadedAt: "2024-01-10T09:14:00",
     fileUrl: "/files/doc-001.pdf",
   },
   {
     id: 2,
     uploaderName: "Juan dela Cruz",
+    from: "Engineering Division",
     uploadedAt: "2024-01-14T14:30:00",
     fileUrl: "/files/doc-002.pdf",
   },
   {
     id: 3,
     uploaderName: "Ana Reyes",
+    from: "City Mayor's Office",
     uploadedAt: "2024-01-18T11:05:00",
     fileUrl: "/files/doc-003.pdf",
   },
   {
     id: 4,
     uploaderName: "Carlos Mendoza",
+    from: "Treasury Office",
     uploadedAt: "2024-01-22T08:47:00",
     fileUrl: "/files/doc-004.pdf",
   },
   {
     id: 5,
     uploaderName: "Liza Torres",
+    from: "Planning Office",
     uploadedAt: "2024-01-25T16:20:00",
     fileUrl: "/files/doc-005.pdf",
   },
   {
     id: 6,
     uploaderName: "Ramon Garcia",
+    from: "Health Office",
     uploadedAt: "2024-02-01T10:00:00",
     fileUrl: "/files/doc-006.pdf",
   },
@@ -179,6 +186,14 @@ export default function UploadQueueTable() {
                 </p>
                 <div>
                   <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                    From
+                  </p>
+                  <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
+                    {record.from}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
                     Uploaded At
                   </p>
                   <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
@@ -230,7 +245,7 @@ export default function UploadQueueTable() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
-                  {["Uploader's Name", "Uploaded At", "Action"].map((col) => (
+                  {["Uploader's Name", "From", "Uploaded At", "Action"].map((col) => (
                     <TableCell
                       key={col}
                       isHeader
@@ -245,7 +260,7 @@ export default function UploadQueueTable() {
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="text-theme-sm px-5 py-10 text-center text-gray-400">
+                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
                       No records match your filters.
                     </td>
                   </tr>
@@ -257,6 +272,10 @@ export default function UploadQueueTable() {
                     >
                       <TableCell className="text-theme-sm px-3 py-3 font-medium whitespace-nowrap text-gray-800 dark:text-white/90">
                         {record.uploaderName}
+                      </TableCell>
+
+                      <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                        {record.from}
                       </TableCell>
 
                       <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">

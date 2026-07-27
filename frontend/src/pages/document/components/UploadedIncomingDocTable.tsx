@@ -11,6 +11,7 @@ type UploadStatus = "on-queue" | "received" | "archived";
 interface UploadedDocument {
   id: number;
   fileName: string;
+  from: string;
   uploadedAt: string;
   status: UploadStatus;
 }
@@ -21,48 +22,56 @@ const mockData: UploadedDocument[] = [
   {
     id: 1,
     fileName: "barangay-clearance-001.pdf",
+    from: "Barangay Hall",
     uploadedAt: "2024-01-10T09:14:00",
     status: "received",
   },
   {
     id: 2,
     fileName: "engineering-permit-rev2.pdf",
+    from: "Engineering Division",
     uploadedAt: "2024-01-14T14:30:00",
     status: "received",
   },
   {
     id: 3,
     fileName: "site-inspection-report.pdf",
+    from: "Planning Office",
     uploadedAt: "2024-01-18T11:05:00",
     status: "on-queue",
   },
   {
     id: 4,
     fileName: "building-plan-floor1.docx",
+    from: "Building Official",
     uploadedAt: "2024-01-22T08:47:00",
     status: "received",
   },
   {
     id: 5,
     fileName: "environmental-clearance.pdf",
+    from: "Environment Office",
     uploadedAt: "2024-01-25T16:20:00",
     status: "on-queue",
   },
   {
     id: 6,
     fileName: "occupancy-permit-req.pdf",
+    from: "Zoning Office",
     uploadedAt: "2024-02-01T10:00:00",
     status: "received",
   },
   {
     id: 7,
     fileName: "structural-analysis-v3.pdf",
+    from: "Engineering Division",
     uploadedAt: "2024-02-05T13:22:00",
     status: "received",
   },
   {
     id: 8,
     fileName: "electrical-plan-final.docx",
+    from: "Electrical Office",
     uploadedAt: "2024-02-10T09:50:00",
     status: "on-queue",
   },
@@ -458,6 +467,15 @@ export default function UploadedIncomingDocTable() {
 
                 <div>
                   <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                    From
+                  </p>
+                  <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
+                    {record.from}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
                     Uploaded At
                   </p>
                   <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
@@ -495,7 +513,7 @@ export default function UploadedIncomingDocTable() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
-                  {["File Name", "Uploaded At", "Status", "Action"].map((col) => (
+                  {["File Name", "From", "Uploaded At", "Status", "Action"].map((col) => (
                     <TableCell
                       key={col}
                       isHeader
@@ -510,7 +528,7 @@ export default function UploadedIncomingDocTable() {
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
+                    <td colSpan={5} className="text-theme-sm px-5 py-10 text-center text-gray-400">
                       No records match your filters.
                     </td>
                   </tr>
@@ -538,6 +556,11 @@ export default function UploadedIncomingDocTable() {
                           </svg>
                           {record.fileName}
                         </div>
+                      </TableCell>
+
+                      {/* From */}
+                      <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                        {record.from}
                       </TableCell>
 
                       {/* Date */}

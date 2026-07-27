@@ -22,6 +22,7 @@ import AccessControlPage from "../pages/Administration/AcessControlPage";
 import SystemLogsPage from "../pages/Logs/SystemLogsPage";
 import ReceiverDashboard from "../pages/Dashboard/ReceiverDashboard";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
+import StaleDocumentsPage from "../pages/Dashboard/StaleDocumentsPage";
 import SuperAdminDashboard from "../pages/Dashboard/SuperAdminDashboard";
 import PublicTrackingPage from "../pages/Public/PublicTrackingPage";
 
@@ -131,6 +132,14 @@ const ADMIN_ROUTES: RouteType[] = [
     element: (
       <RoleRoute allowedRoles={[2]}>
         <AdminDashboard />
+      </RoleRoute>
+    ),
+  },
+  {
+    path: "/admin/stale-documents",
+    element: (
+      <RoleRoute allowedRoles={[2]}>
+        <StaleDocumentsPage />
       </RoleRoute>
     ),
   },

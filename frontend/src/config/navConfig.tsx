@@ -87,33 +87,38 @@ export const NAV_ITEMS: NavItem[] = [
     subItems: [
       // Super Admin, Admin
       {
-        name: "Upload Queue",
-        path: "/upload-queue",
-        roles: [1, 2],
-      },
-      {
-        name: "Upload Document",
+        name: "New Doc",
         path: "/upload-direct",
         roles: [1, 2],
       },
       {
-        name: "Incoming Documents",
+        name: "Pending",
+        path: "/upload-queue",
+        roles: [1, 2],
+      },
+      {
+        name: "Incoming",
         path: "/incoming",
         roles: [1, 2],
       },
       {
-        name: "Outgoing Documents",
+        name: "Outgoing",
         path: "/outgoing",
         roles: [1, 2],
       },
+      {
+        name: "Stale Documients",
+        path: "/admin/stale-documents",
+        roles: [2],
+      },
 
       {
-        name: "Submit Document",
+        name: "Submit Doc",
         path: "/upload",
         roles: [3],
       },
       {
-        name: "Submitted Documents",
+        name: "My Submissions",
         path: "/uploads",
         roles: [3],
       },

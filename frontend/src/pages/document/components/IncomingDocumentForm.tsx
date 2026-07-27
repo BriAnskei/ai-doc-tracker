@@ -5,11 +5,6 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import QRCodeModal from "../../../components/receiver/QRCodeModal";
 
-// ── Mock session data (swap with real auth context later) ──
-const MOCK_RECEIVER = {
-	name: "Maria Santos",
-};
-
 // ── Helpers ──────────────────────────────────────────────
 
 function formatDate(date: Date) {
