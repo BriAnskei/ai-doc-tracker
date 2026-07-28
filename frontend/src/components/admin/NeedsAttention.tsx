@@ -20,7 +20,7 @@ const adminItems: AttentionItem[] = [
 ];
 
 const receiverItems: AttentionItem[] = [
-  { label: "Rejected Documents", value: 3, to: "/uploads", valueClass: "text-danger", dotClass: "bg-danger" },
+  { label: "Rejected Documents", value: 3, to: "/rejected-documents", valueClass: "text-danger", dotClass: "bg-danger" },
 ];
 
 export default function NeedsAttentionStrip() {

@@ -17,6 +17,7 @@ import InvalidDocumentsPage from "../pages/document/InvalidDocumentsPage";
 import IncomingDocumentUploadPage from "../pages/document/IncomingDocumentUploadPage";
 import UploadedIncomingDoc from "../pages/document/UploadedIncomingDocPage";
 import UploadedIncomingDocPage from "../pages/document/UploadedIncomingDocPage";
+import InvalidDocumentPage from "../pages/document/InvalidDocumentPage";
 import UserManagementTable from "../components/tables/Administration/UserManagementTable";
 import UserManagementPage from "../pages/Administration/UserManagementPage";
 import AccessControlPage from "../pages/Administration/AcessControlPage";
@@ -167,6 +168,10 @@ const RECEIVING_OFFICER_ROUTES: RouteType[] = [
   {
     path: "/uploads",
     element: <UploadedIncomingDocPage />,
+  },
+  {
+    path: "/rejected-documents",
+    element: <InvalidDocumentPage />,
   },
 ];
 

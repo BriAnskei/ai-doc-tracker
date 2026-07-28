@@ -127,6 +127,11 @@ export const NAV_ITEMS: NavItem[] = [
         path: "/uploads",
         roles: [3],
       },
+      {
+        name: "Invalid Docs",
+        path: "/rejected-documents",
+        roles: [3],
+      },
     ],
   },
 

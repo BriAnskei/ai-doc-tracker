@@ -75,20 +75,6 @@ const mockData: UploadedDocument[] = [
     uploadedAt: "2024-02-10T09:50:00",
     status: "on-queue",
   },
-  {
-    id: 9,
-    fileName: "health-permit-application.pdf",
-    from: "Health Office",
-    uploadedAt: "2024-02-12T11:30:00",
-    status: "rejected",
-  },
-  {
-    id: 10,
-    fileName: "zoning-compliance-report.pdf",
-    from: "Zoning Office",
-    uploadedAt: "2024-02-14T14:00:00",
-    status: "rejected",
-  },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

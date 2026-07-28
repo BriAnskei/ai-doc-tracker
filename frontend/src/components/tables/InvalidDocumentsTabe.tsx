@@ -1,14 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Table, TableHeader, TableRow, TableCell, TableBody } from "../ui/table";
-import { useNotifications } from "../../context/NotificationsContext";
-import MissingFieldsModal from "../ui/modal/document/MissingFieldsModal";
 
 // ─── Types ─────────────────────────────────────────────────────────────
 
-export interface InvalidDocument {
+interface RejectedDocument {
   id: number;
-  uploaderName: string;
   fileName: string;
   from: string;
   uploadedAt: string;
@@ -18,10 +15,9 @@ export interface InvalidDocument {
 
 // ─── Mock Data ─────────────────────────────────────────────────────────
 
-const mockData: InvalidDocument[] = [
+const mockData: RejectedDocument[] = [
   {
     id: 1,
-    uploaderName: "Maria Santos",
     fileName: "memo-budget-allocation.pdf",
     from: "Barangay Hall",
     uploadedAt: "2024-01-10T09:14:00",
@@ -30,7 +26,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 2,
-    uploaderName: "Juan dela Cruz",
     fileName: "construction-proposal.pdf",
     from: "Engineering Division",
     uploadedAt: "2024-01-14T14:30:00",
@@ -39,7 +34,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 3,
-    uploaderName: "Ana Reyes",
     fileName: "inspection-report.pdf",
     from: "City Mayor's Office",
     uploadedAt: "2024-01-18T11:05:00",
@@ -48,7 +42,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 4,
-    uploaderName: "Carlos Mendoza",
     fileName: "fund-release-order.pdf",
     from: "Treasury Office",
     uploadedAt: "2024-01-22T08:47:00",
@@ -57,21 +50,11 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 5,
-    uploaderName: "Liza Torres",
     fileName: "permit-application.pdf",
     from: "Planning Office",
     uploadedAt: "2024-01-25T16:20:00",
     missingFields: ["Subject"],
     fileUrl: "/files/doc-005.pdf",
-  },
-  {
-    id: 6,
-    uploaderName: "Ramon Garcia",
-    fileName: "health-advisory.pdf",
-    from: "Health Office",
-    uploadedAt: "2024-02-01T10:00:00",
-    missingFields: ["From", "To", "Date Received"],
-    fileUrl: "/files/doc-006.pdf",
   },
 ];
 
@@ -102,10 +85,10 @@ function KebabIcon({ className }: { className?: string }) {
 
 function KebabActionMenu({
   onView,
-  onReject,
+  onDelete,
 }: {
   onView: () => void;
-  onReject: () => void;
+  onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,11 +129,11 @@ function KebabActionMenu({
           <button
             onClick={() => {
               setOpen(false);
-              onReject();
+              onDelete();
             }}
             className="text-theme-xs flex w-full items-center gap-2 border-t border-gray-100 px-3 py-2 text-danger transition-colors hover:bg-danger/5 dark:border-white/[0.05] dark:text-danger"
           >
-            Reject
+            Delete Draft
           </button>
         </div>
       )}
@@ -165,78 +148,33 @@ export default function InvalidDocumentsTable() {
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
 
-  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [pendingRejectId, setPendingRejectId] = useState<number | null>(null);
-  const [rejectedIds, setRejectedIds] = useState<number[]>([]);
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectReasonError, setRejectReasonError] = useState(false);
-
-  // Missing Fields modal state
-  const [showFieldsModal, setShowFieldsModal] = useState(false);
-  const [activeRecord, setActiveRecord] = useState<InvalidDocument | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [deletedIds, setDeletedIds] = useState<number[]>([]);
 
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
 
   const hasFilters = search || filterDateFrom || filterDateTo;
 
-  // Only show documents that haven't been rejected yet
-  const activeData = mockData.filter((r) => !rejectedIds.includes(r.id));
+  // Only show documents that haven't been deleted
+  const activeData = mockData.filter((r) => !deletedIds.includes(r.id));
 
-  function handleOpenFieldsModal(record: InvalidDocument) {
-    setActiveRecord(record);
-    setShowFieldsModal(true);
+  function handleDeleteConfirm() {
+    if (pendingDeleteId === null) return;
+    setDeletedIds((prev) => [...prev, pendingDeleteId]);
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
   }
 
-  function handleCloseFieldsModal() {
-    setShowFieldsModal(false);
-    setActiveRecord(null);
-  }
-
-  function handleRejectClick(id: number) {
-    setShowFieldsModal(false);
-    setActiveRecord(null);
-    setRejectReason("");
-    setRejectReasonError(false);
-    setPendingRejectId(id);
-    setShowRejectConfirm(true);
-  }
-
-  function handleProcess(id: number) {
-    // Same destination as the previous "Edit & Route" action
-    void id;
-    setShowFieldsModal(false);
-    setActiveRecord(null);
-    navigate("/upload-direct");
-  }
-
-  function handleRejectConfirm() {
-    if (pendingRejectId === null) return;
-
-    if (!rejectReason.trim()) {
-      setRejectReasonError(true);
-      return;
-    }
-
-    setRejectedIds((prev) => [...prev, pendingRejectId]);
-    setShowRejectConfirm(false);
-    setPendingRejectId(null);
-    setRejectReason("");
-    setRejectReasonError(false);
-  }
-
-  function handleRejectCancel() {
-    setShowRejectConfirm(false);
-    setPendingRejectId(null);
-    setRejectReason("");
-    setRejectReasonError(false);
+  function handleDeleteCancel() {
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
   }
 
   const filtered = activeData.filter((r) => {
     const q = search.toLowerCase();
     const matchesSearch =
       !q ||
-      r.uploaderName.toLowerCase().includes(q) ||
       r.fileName.toLowerCase().includes(q);
     const date = new Date(r.uploadedAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
@@ -276,7 +214,7 @@ export default function InvalidDocumentsTable() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by uploader or file name…"
+              placeholder="Search by file name…"
               className={`w-full pr-4 pl-9 ${inputCls}`}
             />
           </div>
@@ -325,7 +263,7 @@ export default function InvalidDocumentsTable() {
         <div className="space-y-3 md:hidden">
           {filtered.length === 0 ? (
             <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
-              No invalid documents match your filters.
+              No rejected documents match your filters.
             </div>
           ) : (
             filtered.map((record) => (
@@ -335,10 +273,10 @@ export default function InvalidDocumentsTable() {
               >
                 <div className="flex items-start justify-between">
                   <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                    {record.uploaderName}
+                    {record.fileName}
                   </p>
                   <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-semibold text-danger">
-                    {record.missingFields.length} missing
+                    {record.missingFields.length}
                   </span>
                 </div>
 
@@ -353,51 +291,19 @@ export default function InvalidDocumentsTable() {
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-3 dark:border-white/[0.05]">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleOpenFieldsModal(record)}
-                      className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                      Review
-                    </button>
-                    <button
-                      onClick={() => handleRejectClick(record.id)}
-                      className="text-theme-xs text-danger border-danger/30 hover:bg-danger inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Reject
-                    </button>
-                  </div>
+                <div className="flex justify-end border-t border-gray-100 pt-1 dark:border-white/[0.05]">
+                  <KebabActionMenu
+                    onView={() => navigate("/upload-direct")}
+                    onDelete={() => {
+                      setPendingDeleteId(record.id);
+                      setShowDeleteConfirm(true);
+                    }}
+                  />
                 </div>
               </div>
             ))
           )}
+
           {filtered.length > 0 && (
             <p className="text-theme-xs px-1 text-right text-gray-400 dark:text-gray-500">
               Showing{" "}
@@ -419,12 +325,7 @@ export default function InvalidDocumentsTable() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
-                  {[
-                    "Uploaders Name",
-                    "Missing Field",
-                    "Uploaded At",
-                    "Actions",
-                  ].map((col) => (
+                  {["Missing Field", "Uploaded At", "Actions"].map((col) => (
                     <TableCell
                       key={col}
                       isHeader
@@ -440,10 +341,10 @@ export default function InvalidDocumentsTable() {
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={3}
                       className="text-theme-sm px-5 py-10 text-center text-gray-400"
                     >
-                      No invalid documents match your filters.
+                      No rejected documents match your filters.
                     </td>
                   </tr>
                 ) : (
@@ -452,10 +353,6 @@ export default function InvalidDocumentsTable() {
                       key={record.id}
                       className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                     >
-                      <TableCell className="text-theme-sm px-3 py-3 font-medium whitespace-nowrap text-gray-800 dark:text-white/90">
-                        {record.uploaderName}
-                      </TableCell>
-
                       <TableCell className="text-theme-sm px-3 py-3 text-left font-semibold text-danger dark:text-danger">
                         {record.missingFields.length}
                       </TableCell>
@@ -466,8 +363,11 @@ export default function InvalidDocumentsTable() {
 
                       <TableCell className="px-3 py-3">
                         <KebabActionMenu
-                          onView={() => handleOpenFieldsModal(record)}
-                          onReject={() => handleRejectClick(record.id)}
+                          onView={() => navigate("/upload-direct")}
+                          onDelete={() => {
+                            setPendingDeleteId(record.id);
+                            setShowDeleteConfirm(true);
+                          }}
                         />
                       </TableCell>
                     </TableRow>
@@ -495,21 +395,12 @@ export default function InvalidDocumentsTable() {
         </div>
       </div>
 
-      {/* ── Missing Fields Modal ── */}
-      <MissingFieldsModal
-        document={activeRecord}
-        isOpen={showFieldsModal}
-        onClose={handleCloseFieldsModal}
-        onReject={handleRejectClick}
-        onProcess={handleProcess}
-      />
-
-      {/* ── Reject Confirm Modal ── */}
-      {showRejectConfirm && (
+      {/* ── Delete Draft Confirm Modal ── */}
+      {showDeleteConfirm && (
         <div
           className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 px-4"
           onClick={(e) =>
-            e.target === e.currentTarget && handleRejectCancel()
+            e.target === e.currentTarget && handleDeleteCancel()
           }
         >
           <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-gray-900">
@@ -525,56 +416,29 @@ export default function InvalidDocumentsTable() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               </div>
 
               <h2 className="text-theme-sm font-semibold text-gray-900 dark:text-white/90">
-                Reject document?
+                Delete draft?
               </h2>
               <p className="text-theme-xs mt-1.5 leading-relaxed text-gray-500 dark:text-gray-400">
-                This will send the document back to the receiver with a{" "}
-                <span className="font-medium text-danger">Rejected</span>{" "}
-                status. The receiver will be notified and can fix the missing
-                metadata and re-upload.
+                This will permanently remove the rejected document from your
+                submissions. You can re-upload it later if needed.
               </p>
-
-              <div className="mt-4">
-                <label className="text-theme-xs mb-1.5 block font-medium text-gray-600 dark:text-gray-300">
-                  Reason for rejection <span className="text-danger">*</span>
-                </label>
-                <textarea
-                  value={rejectReason}
-                  onChange={(e) => {
-                    setRejectReason(e.target.value);
-                    if (e.target.value.trim()) setRejectReasonError(false);
-                  }}
-                  rows={3}
-                  placeholder="e.g. Missing subject line and date received — please resubmit with complete details."
-                  className={`text-theme-sm w-full resize-none rounded-lg border px-3 py-2 text-gray-700 transition focus:outline-none focus:ring-2 dark:bg-white/[0.03] dark:text-gray-200 ${
-                    rejectReasonError
-                      ? "border-danger focus:border-danger focus:ring-danger/30"
-                      : "border-gray-200 focus:border-secondary focus:ring-secondary/40 dark:border-white/[0.08]"
-                  }`}
-                />
-                {rejectReasonError && (
-                  <p className="text-theme-xs mt-1 text-danger">
-                    A reason is required to reject this document.
-                  </p>
-                )}
-              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.05]">
               <button
-                onClick={handleRejectCancel}
+                onClick={handleDeleteCancel}
                 className="text-theme-sm rounded-lg border border-gray-200 px-3 py-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-400 dark:hover:bg-white/[0.04]"
               >
                 Cancel
               </button>
               <button
-                onClick={handleRejectConfirm}
+                onClick={handleDeleteConfirm}
                 className="text-theme-sm inline-flex items-center gap-1.5 rounded-lg bg-danger px-3 py-2 font-medium text-white transition-colors hover:bg-danger/90"
               >
                 <svg
@@ -587,10 +451,10 @@ export default function InvalidDocumentsTable() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                Reject
+                Delete Draft
               </button>
             </div>
           </div>
