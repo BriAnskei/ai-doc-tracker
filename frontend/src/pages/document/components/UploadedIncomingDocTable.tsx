@@ -6,7 +6,7 @@ import QRCodeModal from "../../../components/receiver/QRCodeModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type UploadStatus = "on-queue" | "received" | "archived";
+type UploadStatus = "on-queue" | "received" | "archived" | "rejected";
 
 interface UploadedDocument {
   id: number;
@@ -75,6 +75,20 @@ const mockData: UploadedDocument[] = [
     uploadedAt: "2024-02-10T09:50:00",
     status: "on-queue",
   },
+  {
+    id: 9,
+    fileName: "health-permit-application.pdf",
+    from: "Health Office",
+    uploadedAt: "2024-02-12T11:30:00",
+    status: "rejected",
+  },
+  {
+    id: 10,
+    fileName: "zoning-compliance-report.pdf",
+    from: "Zoning Office",
+    uploadedAt: "2024-02-14T14:00:00",
+    status: "rejected",
+  },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -104,6 +118,7 @@ const STATUS_CONFIG: Record<UploadStatus, StatusConfigEntry> = {
   "on-queue": { label: "On-Queue", className: "text-warning font-medium" },
   received: { label: "Received", className: "text-success font-medium" },
   archived: { label: "Archived", className: "text-gray-400 font-medium" },
+  rejected: { label: "Rejected", className: "text-danger font-medium" },
 };
 
 function StatusBadge({ status }: { status: UploadStatus }) {
@@ -408,6 +423,7 @@ export default function UploadedIncomingDocTable() {
                 <option value="">All statuses</option>
                 <option value="on-queue">On-Queue</option>
                 <option value="received">Received</option>
+                <option value="rejected">Rejected</option>
                 <option value="archived">Archived</option>
               </select>
             </div>

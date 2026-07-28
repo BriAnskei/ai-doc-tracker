@@ -42,7 +42,7 @@ export default function UploadActivityCard() {
 	const weekUploads = dailyData.reduce((a, b) => a + b, 0);
 
 	const options: ApexOptions = {
-		colors: ["#465FFF"],
+		colors: ["#1e3a8a"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			type: "bar",

@@ -86,20 +86,20 @@ const stats: OverviewStat[] = [
 	{
 		label: "Total Documents",
 		value: 3840,
-		color: "#465FFF",
+		color: "#1e3a8a",
 		icon: <TotalIcon className="size-5 text-primary dark:text-secondary" />,
 	},
 	{
 		label: "Incoming",
 		value: 2100,
-		color: "#22C55E",
+		color: "#10B981",
 		icon: <InboxIcon className="size-5 text-success" />,
 	},
 	{
 		label: "Outgoing",
 		value: 1200,
-		color: "#8B5CF6",
-		icon: <OutboxIcon className="size-5 text-violet-500" />,
+		color: "#3b82f6",
+		icon: <OutboxIcon className="size-5 text-secondary" />,
 	},
 	{
 		label: "Archived",
@@ -129,7 +129,7 @@ export default function SystemDocumentOverview() {
 
 	const options: ApexOptions = {
 		legend: { show: false },
-		colors: ["#465FFF", "#22C55E", "#8B5CF6"],
+		colors: ["#1e3a8a", "#10B981", "#3b82f6"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			height: 260,
@@ -243,9 +243,9 @@ export default function SystemDocumentOverview() {
 			{/* Legend */}
 			<div className="flex items-center gap-5 mb-3">
 				{[
-					{ label: "Total", color: "#465FFF" },
-					{ label: "Incoming", color: "#22C55E" },
-					{ label: "Outgoing", color: "#8B5CF6" },
+					{ label: "Total", color: "#1e3a8a" },
+					{ label: "Incoming", color: "#10B981" },
+					{ label: "Outgoing", color: "#3b82f6" },
 				].map((l) => (
 					<div key={l.label} className="flex items-center gap-1.5">
 						<span

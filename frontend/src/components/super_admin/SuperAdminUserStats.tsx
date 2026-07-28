@@ -165,8 +165,8 @@ export default function SuperAdminUserStats() {
 		{
 			label: "Total Divisions",
 			value: 5,
-			icon: <BuildingIcon className="size-6 text-violet-500" />,
-			iconBg: "bg-violet-50 dark:bg-violet-500/10",
+			icon: <BuildingIcon className="size-6 text-secondary" />,
+			iconBg: "bg-secondary/10 dark:bg-secondary/10",
 			badge: { color: "info", text: "stable" },
 			sub: "org units registered",
 		},

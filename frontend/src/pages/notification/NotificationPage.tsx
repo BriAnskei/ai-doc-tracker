@@ -8,6 +8,7 @@ import {
 	typeLabel,
 } from "../../components/notifications/NotificationItem";
 import { userUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/NotificationsContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,187 +46,27 @@ const ALLOWED_TYPES_BY_ROLE: Record<number, NotificationType[]> = {
 		"DOC_STALE_ALMOST",
 		"DOC_STALE_YEAR",
 	],
-	3: ["RECEIVED", "ON_QUEUE"],
+	3: ["RECEIVED", "ON_QUEUE", "DOCUMENT_REJECTED"],
 	4: ["DOCUMENT_ASSIGNED", "STATUS_CHANGED"],
 };
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const allNotifications: Notification[] = [
-	{
-		id: 1,
-		userName: "Terry Franci",
-		role: "super-admin",
-		description: "uploaded a new incoming document.",
-		time: "5 min ago",
-		date: "2024-02-01",
-		type: "INCOMING_DOC_UPLOAD",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 2,
-		userName: "Alena Franci",
-		role: "admin",
-		description: "uploaded a new outgoing document.",
-		time: "12 min ago",
-		date: "2024-02-01",
-		type: "OUTGOING_DOC_UPLOAD",
-		link: "/outgoing",
-		isRead: false,
-	},
-	{
-		id: 3,
-		userName: "Alena Franci",
-		role: "admin",
-		description: "approved your submitted document.",
-		time: "30 min ago",
-		date: "2024-02-01",
-		type: "DOCUMENT_APPROVED",
-		isRead: false,
-	},
-	{
-		id: 4,
-		userName: "Carlos Mendoza",
-		role: "admin",
-		description: "changed the status of INC-2024-004 to On-Going.",
-		time: "1 hr ago",
-		date: "2024-01-31",
-		type: "STATUS_CHANGED",
-		isRead: true,
-	},
-	{
-		id: 5,
-		userName: "Jocelyn Kenter",
-		role: "admin",
-		description: "rejected your submitted document.",
-		time: "2 hrs ago",
-		date: "2024-01-31",
-		type: "DOCUMENT_REJECTED",
-		isRead: false,
-	},
-	{
-		id: 6,
-		userName: "Maria Santos",
-		role: "super-admin",
-		description: "flagged INC-2024-006 for validation.",
-		time: "3 hrs ago",
-		date: "2024-01-31",
-		type: "DOCUMENT_VALIDATION",
-		isRead: true,
-	},
-	{
-		id: 7,
-		userName: "Ramon Garcia",
-		role: "admin",
-		description: "updated the details of document 2024-30-006.",
-		time: "Yesterday",
-		date: "2024-01-30",
-		type: "DOCUMENT_UPDATE",
-		isRead: false,
-	},
-	{
-		id: 8,
-		userName: "Ana Cruz",
-		role: "admin",
-		description: "approved the procurement of office supplies request.",
-		time: "2 days ago",
-		date: "2024-01-29",
-		type: "DOCUMENT_APPROVED",
-		isRead: true,
-	},
-	{
-		id: 9,
-		userName: "Carlos Mendoza",
-		role: "admin",
-		description: "placed a new document on the queue for your processing.",
-		time: "8 min ago",
-		date: "2024-02-01",
-		type: "ON_QUEUE",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 10,
-		userName: "Maria Santos",
-		role: "super-admin",
-		description: "marked document INC-2024-010 as received.",
-		time: "25 min ago",
-		date: "2024-02-01",
-		type: "RECEIVED",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 11,
-		userName: "Ramon Garcia",
-		role: "admin",
-		description: "received a new incoming document for processing.",
-		time: "1 hr ago",
-		date: "2024-02-01",
-		type: "RECEIVED",
-		link: "/incoming",
-		isRead: true,
-	},
-	{
-		id: 12,
-		userName: "Maria Santos",
-		role: "super-admin",
-		description: "assigned document INC-2024-012 to your division for processing.",
-		time: "4 min ago",
-		date: "2024-02-01",
-		type: "DOCUMENT_ASSIGNED",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 13,
-		userName: "Carlos Mendoza",
-		role: "admin",
-		description: "changed the status of INC-2024-012 to On-Going.",
-		time: "20 min ago",
-		date: "2024-02-01",
-		type: "STATUS_CHANGED",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 14,
-		userName: "System",
-		role: "admin",
-		description: "Document ABC-001 has not changed status for almost one year.",
-		time: "2 days ago",
-		date: "2024-01-29",
-		type: "DOC_STALE_ALMOST",
-		link: "/incoming",
-		isRead: false,
-	},
-	{
-		id: 15,
-		userName: "System",
-		role: "admin",
-		description: "Document XYZ-010 has remained in the same status for one year.",
-		time: "5 days ago",
-		date: "2024-01-26",
-		type: "DOC_STALE_YEAR",
-		link: "/incoming",
-		isRead: false,
-	},
-];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const NotificationPage: React.FC = () => {
 	const { role } = userUser();
+	const {
+		notifications,
+		markAsRead,
+		removeNotification,
+		markAllAsRead,
+		clearNotifications,
+	} = useNotifications();
 
-	// Filter mock data by role on mount
-	const roleNotifications = allNotifications.filter((n) => {
+	// Filter notifications by role
+	const roleNotifications = notifications.filter((n) => {
 		if (!role) return false;
 		return ALLOWED_TYPES_BY_ROLE[role]?.includes(n.type) ?? false;
 	});
-
-	const [notifications, setNotifications] =
-		useState<Notification[]>(roleNotifications);
 	const [filterType, setFilterType] = useState<NotificationType | "All">("All");
 	const [filterDateFrom, setFilterDateFrom] = useState("");
 	const [filterDateTo, setFilterDateTo] = useState("");
@@ -236,24 +77,22 @@ const NotificationPage: React.FC = () => {
 		: [];
 
 	function handleMarkAsRead(id: number) {
-		setNotifications((prev) =>
-			prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-		);
+		markAsRead(id);
 	}
 
 	function handleRemove(id: number) {
-		setNotifications((prev) => prev.filter((n) => n.id !== id));
+		removeNotification(id);
 	}
 
 	function handleMarkAllAsRead() {
-		setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+		markAllAsRead();
 	}
 
 	function handleRemoveAll() {
-		setNotifications([]);
+		clearNotifications();
 	}
 
-	const filtered = notifications.filter((n) => {
+	const filtered = roleNotifications.filter((n) => {
 		const matchesType = filterType === "All" || n.type === filterType;
 		const date = new Date(n.date);
 		const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
@@ -262,7 +101,7 @@ const NotificationPage: React.FC = () => {
 	});
 
 	const hasFilters = filterType !== "All" || filterDateFrom || filterDateTo;
-	const unreadCount = notifications.filter((n) => !n.isRead).length;
+	const unreadCount = roleNotifications.filter((n) => !n.isRead).length;
 
 	return (
 		<>
@@ -298,7 +137,7 @@ const NotificationPage: React.FC = () => {
 									Mark all as read
 								</button>
 							)}
-							{notifications.length > 0 && (
+							{roleNotifications.length > 0 && (
 								<button
 									onClick={handleRemoveAll}
 									className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-theme-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03] hover:bg-red-50 dark:hover:bg-danger/10 hover:text-danger hover:border-danger/30 transition-colors"
@@ -381,7 +220,7 @@ const NotificationPage: React.FC = () => {
 					<div className="space-y-2">
 						{filtered.length === 0 ? (
 							<div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.03] px-5 py-10 text-center text-gray-400 text-theme-sm">
-								{notifications.length === 0
+								{roleNotifications.length === 0
 									? "No notifications."
 									: "No notifications match your filters."}
 							</div>
@@ -406,7 +245,7 @@ const NotificationPage: React.FC = () => {
 							</span>{" "}
 							of{" "}
 							<span className="font-medium text-gray-600 dark:text-gray-300">
-								{notifications.length}
+								{roleNotifications.length}
 							</span>{" "}
 							notifications
 						</p>

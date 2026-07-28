@@ -34,10 +34,10 @@ function LegendItem({ color, label, count, percent }: LegendItemProps) {
 }
 
 export default function DocumentStatusChart() {
-	const total = 115;
+	const total = 112;
 	const data = [
-		{ label: "Received", count: 100, color: "#22C55E" },
-		{ label: "On-Queue", count: 15, color: "#F59E0B" },
+		{ label: "Received", count: 100, color: "#10B981" },
+		{ label: "On-Queue", count: 12, color: "#F59E0B" },
 	];
 	const series = data.map((d) => d.count);
 	const colors = data.map((d) => d.color);

@@ -1,4 +1,5 @@
 // components/receiver/RecentUploads.tsx
+import { useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -7,8 +8,9 @@ import {
 	TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import Pagination from "../common/Pagination";
 
-type DocStatus = "On-Queue" | "Received";
+type DocStatus = "On-Queue" | "Received" | "Rejected";
 
 interface UploadedDocument {
 	id: number;
@@ -61,6 +63,20 @@ const recentUploads: UploadedDocument[] = [
 		status: "Received",
 		dateUploaded: "2024-06-12",
 	},
+	{
+		id: 7,
+		code: "UP-2024-014",
+		subject: "Health Permit Application",
+		status: "Rejected",
+		dateUploaded: "2024-06-10",
+	},
+	{
+		id: 8,
+		code: "UP-2024-013",
+		subject: "Zoning Compliance Report",
+		status: "Rejected",
+		dateUploaded: "2024-06-08",
+	},
 ];
 
 function formatDate(iso: string) {
@@ -71,8 +87,10 @@ function formatDate(iso: string) {
 	});
 }
 
-function statusBadgeColor(status: DocStatus): "success" | "warning" {
-	return status === "Received" ? "success" : "warning";
+function statusBadgeColor(status: DocStatus): "success" | "warning" | "danger" {
+	if (status === "Received") return "success";
+	if (status === "Rejected") return "danger";
+	return "warning";
 }
 
 function DocumentIcon({ className }: { className?: string }) {
@@ -93,7 +111,14 @@ function DocumentIcon({ className }: { className?: string }) {
 	);
 }
 
+const UPLOADS_PER_PAGE = 5;
+
 export default function RecentUploads() {
+	const [currentPage, setCurrentPage] = useState(1);
+	const totalPages = Math.max(1, Math.ceil(recentUploads.length / UPLOADS_PER_PAGE));
+	const pageStart = (currentPage - 1) * UPLOADS_PER_PAGE;
+	const pagedUploads = recentUploads.slice(pageStart, pageStart + UPLOADS_PER_PAGE);
+
 	return (
 		<div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 			{/* Header */}
@@ -112,7 +137,7 @@ export default function RecentUploads() {
 			</div>
 
 			{/* Table */}
-			<div className="max-w-full overflow-x-auto">
+			<div className="overflow-hidden">
 				<Table>
 					<TableHeader className="border-gray-100 dark:border-gray-800 border-y">
 						<TableRow>
@@ -144,7 +169,7 @@ export default function RecentUploads() {
 					</TableHeader>
 
 					<TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-						{recentUploads.map((doc) => (
+						{pagedUploads.map((doc) => (
 							<TableRow
 								key={doc.id}
 								className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
@@ -187,6 +212,12 @@ export default function RecentUploads() {
 					</TableBody>
 				</Table>
 			</div>
+
+			<Pagination
+				currentPage={currentPage}
+				totalPages={totalPages}
+				onPageChange={setCurrentPage}
+			/>
 		</div>
 	);
 }

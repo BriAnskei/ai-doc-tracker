@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
+import Pagination from "../common/Pagination";
 
 type ActivityType = "upload" | "validate" | "status" | "login" | "permission";
 
@@ -165,11 +166,11 @@ const typeConfig: Record<
 		),
 	},
 	login: {
-		dot: "bg-blue-400",
-		bg: "bg-blue-50 dark:bg-blue-400/10",
+		dot: "bg-primary",
+		bg: "bg-primary/10 dark:bg-secondary/10",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-blue-400"
+				className="w-3.5 h-3.5 text-primary dark:text-secondary"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -184,11 +185,11 @@ const typeConfig: Record<
 		),
 	},
 	permission: {
-		dot: "bg-violet-500",
-		bg: "bg-violet-50 dark:bg-violet-500/10",
+		dot: "bg-secondary",
+		bg: "bg-secondary/10 dark:bg-secondary/10",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-violet-500"
+				className="w-3.5 h-3.5 text-secondary"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -209,7 +210,7 @@ const roleBadge: Record<ActivityEntry["role"], string> = {
 		"bg-primary/10 text-primary dark:bg-secondary/10 dark:text-secondary",
 	Admin: "bg-success/10 text-success",
 	"Super Admin":
-		"bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
+		"bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary/80",
 };
 
 function buildDescription(a: ActivityEntry): string {
@@ -217,16 +218,19 @@ function buildDescription(a: ActivityEntry): string {
 	return a.action;
 }
 
+const ITEMS_PER_PAGE = 4;
+
 export default function UserActivityFeed() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [filter, setFilter] = useState<ActivityType | "all">("all");
+	const [currentPage, setCurrentPage] = useState(1);
 
-	const todayItems = activities.filter(
-		(a) => a.date === "today" && (filter === "all" || a.type === filter),
+	const allFiltered = activities.filter(
+		(a) => filter === "all" || a.type === filter,
 	);
-	const yesterdayItems = activities.filter(
-		(a) => a.date === "yesterday" && (filter === "all" || a.type === filter),
-	);
+	const totalPages = Math.max(1, Math.ceil(allFiltered.length / ITEMS_PER_PAGE));
+	const pageStart = (currentPage - 1) * ITEMS_PER_PAGE;
+	const pagedItems = allFiltered.slice(pageStart, pageStart + ITEMS_PER_PAGE);
 
 	const filterOptions: { label: string; value: ActivityType | "all" }[] = [
 		{ label: "All Activity", value: "all" },
@@ -273,32 +277,6 @@ export default function UserActivityFeed() {
 		);
 	}
 
-	function Section({
-		label,
-		items,
-	}: {
-		label: string;
-		items: ActivityEntry[];
-	}) {
-		if (items.length === 0) return null;
-		return (
-			<div className="mb-1">
-				<div className="flex items-center gap-2 mb-1 px-1">
-					<span className="text-theme-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
-						{label}
-					</span>
-					<div className="flex-1 h-px bg-gray-100 dark:bg-white/[0.05]" />
-					<span className="text-theme-xs text-gray-400 dark:text-gray-500">
-						{items.length}
-					</span>
-				</div>
-				{items.map((e) => (
-					<ActivityItem key={e.id} entry={e} />
-				))}
-			</div>
-		);
-	}
-
 	return (
 		<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
 			{/* Header */}
@@ -338,7 +316,10 @@ export default function UserActivityFeed() {
 				{filterOptions.map((f) => (
 					<button
 						key={f.value}
-						onClick={() => setFilter(f.value)}
+						onClick={() => {
+							setCurrentPage(1);
+							setFilter(f.value);
+						}}
 						className={`px-3 py-1 rounded-full text-theme-xs font-medium transition-colors ${
 							filter === f.value
 								? "bg-primary text-white dark:bg-secondary"
@@ -351,15 +332,24 @@ export default function UserActivityFeed() {
 			</div>
 
 			{/* Feed */}
-			<div className="max-h-[420px] overflow-y-auto custom-scrollbar pr-1">
-				<Section label="Today" items={todayItems} />
-				<Section label="Yesterday" items={yesterdayItems} />
-				{todayItems.length === 0 && yesterdayItems.length === 0 && (
-					<p className="text-center text-theme-sm text-gray-400 dark:text-gray-500 py-8">
-						No activity matches this filter.
-					</p>
-				)}
-			</div>
+			{pagedItems.length === 0 ? (
+				<p className="text-center text-theme-sm text-gray-400 dark:text-gray-500 py-8">
+					No activity matches this filter.
+				</p>
+			) : (
+				<>
+					<div className="space-y-0">
+						{pagedItems.map((e) => (
+							<ActivityItem key={e.id} entry={e} />
+						))}
+					</div>
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={setCurrentPage}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

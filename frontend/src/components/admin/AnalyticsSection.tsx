@@ -7,9 +7,9 @@ import { ArrowRightIcon } from "../../icons";
 
 // ── Mock data (shared across tabs) ────────────────────────────────────────────
 const statusData = [
-  { label: "Completed", count: 830, color: "#22C55E" },
-  { label: "On-Going", count: 300, color: "#F59E0B" },
-  { label: "Pending", count: 120, color: "#EF4444" },
+  { label: "Completed", count: 830, color: "#10B981" }, // --color-success
+  { label: "On-Going", count: 300, color: "#F59E0B" },  // --color-warning
+  { label: "Pending", count: 120, color: "#EF4444" },   // --color-danger
 ];
 const statusTotal = statusData.reduce((a, d) => a + d.count, 0);
 
@@ -24,11 +24,11 @@ interface Division {
   color: string;
 }
 const divisions: Division[] = [
-  { name: "Roads Division", count: 30, color: "#465FFF" },
-  { name: "Planning Division", count: 20, color: "#22C55E" },
-  { name: "Maintenance Division", count: 15, color: "#F59E0B" },
-  { name: "Bridge Division", count: 12, color: "#8B5CF6" },
-  { name: "Drainage Division", count: 8, color: "#06B6D4" },
+  { name: "Roads Division", count: 30, color: "#1E3A8A" },       // primary
+  { name: "Planning Division", count: 20, color: "#3B82F6" },    // secondary
+  { name: "Maintenance Division", count: 15, color: "#F59E0B" }, // accent/warning
+  { name: "Bridge Division", count: 12, color: "#10B981" },      // success
+  { name: "Drainage Division", count: 8, color: "#EF4444" },     // danger
 ];
 
 const queueStats = [

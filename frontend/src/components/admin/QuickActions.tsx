@@ -38,9 +38,9 @@ export default function QuickActions() {
           <button
             key={a.label}
             onClick={() => navigate(a.to)}
-            className="group flex flex-col items-start rounded-xl border border-gray-100 bg-gray-50 p-4 text-left transition hover:border-brand-500/30 hover:bg-brand-500/[0.03] dark:border-white/[0.05] dark:bg-white/[0.03]"
+            className="group flex flex-col items-start rounded-xl border border-gray-100 bg-gray-50 p-4 text-left transition hover:border-primary/30 hover:bg-primary/[0.03] dark:border-white/[0.05] dark:bg-white/[0.03]"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-500 shadow-theme-xs dark:bg-white/10">
+             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary shadow-theme-xs dark:bg-white/10">
               {a.icon}
             </span>
             <span className="text-theme-sm mt-3 font-medium text-gray-800 dark:text-white/90">

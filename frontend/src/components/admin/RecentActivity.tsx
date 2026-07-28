@@ -17,8 +17,8 @@ const activity: ActivityItem[] = [
 ];
 
 const toneStyles = {
-  upload: { dot: "bg-blue-500", icon: "M12 16V4m0 0L7 9m5-5l5 5M5 20h14", ring: "bg-blue-500/10" },
-  route: { dot: "bg-violet-500", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", ring: "bg-violet-500/10" },
+  upload: { dot: "bg-secondary", icon: "M12 16V4m0 0L7 9m5-5l5 5M5 20h14", ring: "bg-secondary/10" },
+  route: { dot: "bg-primary", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", ring: "bg-primary/10" },
   complete: { dot: "bg-success", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", ring: "bg-success/10" },
 };
 
@@ -36,7 +36,7 @@ export default function RecentActivity() {
         </div>
         <button
           onClick={() => navigate("/upload-queue")}
-          className="text-theme-sm font-medium text-brand-500 hover:underline dark:text-brand-400"
+          className="text-theme-sm font-medium text-primary hover:underline dark:text-secondary"
         >
           View all
         </button>

@@ -1,5 +1,6 @@
 // components/superadmin/SystemLogsPreview.tsx
 import { useState } from "react";
+import Pagination from "../common/Pagination";
 
 type LogLevel = "info" | "warning" | "error" | "success";
 type LogCategory = "login" | "document" | "permission" | "system";
@@ -207,17 +208,24 @@ const categoryConfig: Record<
 	},
 };
 
+const LOGS_PER_PAGE = 5;
+
 export default function SystemLogsPreview() {
 	const [activeCategory, setActiveCategory] = useState<LogCategory | "all">(
 		"all",
 	);
 	const [activeLevel, setActiveLevel] = useState<LogLevel | "all">("all");
+	const [currentPage, setCurrentPage] = useState(1);
 
 	const filtered = logs.filter(
 		(l) =>
 			(activeCategory === "all" || l.category === activeCategory) &&
 			(activeLevel === "all" || l.level === activeLevel),
 	);
+
+	const totalPages = Math.max(1, Math.ceil(filtered.length / LOGS_PER_PAGE));
+	const pageStart = (currentPage - 1) * LOGS_PER_PAGE;
+	const pagedLogs = filtered.slice(pageStart, pageStart + LOGS_PER_PAGE);
 
 	const categories: (LogCategory | "all")[] = [
 		"all",
@@ -270,7 +278,7 @@ export default function SystemLogsPreview() {
 				{categories.map((c) => (
 					<button
 						key={c}
-						onClick={() => setActiveCategory(c)}
+						onClick={() => { setCurrentPage(1); setActiveCategory(c); }}
 						className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-theme-xs font-medium transition-colors capitalize ${
 							activeCategory === c
 								? "bg-primary text-white dark:bg-secondary"
@@ -288,7 +296,7 @@ export default function SystemLogsPreview() {
 				{levels.map((l) => (
 					<button
 						key={l}
-						onClick={() => setActiveLevel(l)}
+						onClick={() => { setCurrentPage(1); setActiveLevel(l); }}
 						className={`px-3 py-1 rounded-full text-theme-xs font-medium transition-colors capitalize ${
 							activeLevel === l
 								? l === "all"
@@ -303,95 +311,102 @@ export default function SystemLogsPreview() {
 			</div>
 
 			{/* Log table */}
-			<div className="max-h-[360px] overflow-y-auto custom-scrollbar rounded-xl border border-gray-100 dark:border-white/[0.06]">
-				{filtered.length === 0 ? (
-					<p className="text-center text-theme-sm text-gray-400 dark:text-gray-500 py-10">
-						No logs match your filters.
-					</p>
-				) : (
-					<table className="w-full text-left">
-						<thead>
-							<tr className="border-b border-gray-100 dark:border-white/[0.06] bg-gray-50/80 dark:bg-white/[0.02]">
-								{[
-									"Level",
-									"Category",
-									"Message",
-									"Actor / IP",
-									"Timestamp",
-								].map((h) => (
-									<th
-										key={h}
-										className="px-3 py-2.5 text-theme-xs font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap"
-									>
-										{h}
-									</th>
-								))}
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-							{filtered.map((log) => {
-								const lc = levelConfig[log.level];
-								const cc = categoryConfig[log.category];
-								return (
-									<tr
-										key={log.id}
-										className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
-									>
-										{/* Level */}
-										<td className="px-3 py-2.5 whitespace-nowrap">
-											<span
-												className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-theme-xs font-medium ${lc.badge}`}
-											>
-												<span
-													className={`w-1.5 h-1.5 rounded-full ${lc.dot}`}
-												/>
-												{lc.label}
-											</span>
-										</td>
-										{/* Category */}
-										<td className="px-3 py-2.5 whitespace-nowrap">
-											<span className="inline-flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
-												{cc.icon}
-												{cc.label}
-											</span>
-										</td>
-										{/* Message */}
-										<td
-											className="px-3 py-2.5 text-theme-sm text-gray-700 dark:text-gray-300 max-w-[200px] truncate"
-											title={log.message}
+			{pagedLogs.length === 0 ? (
+				<p className="text-center text-theme-sm text-gray-400 dark:text-gray-500 py-10">
+					No logs match your filters.
+				</p>
+			) : (
+				<>
+					<div className="rounded-xl border border-gray-100 dark:border-white/[0.06] overflow-hidden">
+						<table className="w-full text-left">
+							<thead>
+								<tr className="border-b border-gray-100 dark:border-white/[0.06] bg-gray-50/80 dark:bg-white/[0.02]">
+									{[
+										"Level",
+										"Category",
+										"Message",
+										"Actor / IP",
+										"Timestamp",
+									].map((h) => (
+										<th
+											key={h}
+											className="px-3 py-2.5 text-theme-xs font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap"
 										>
-											{log.message}
-										</td>
-										{/* Actor / IP */}
-										<td className="px-3 py-2.5 whitespace-nowrap">
-											{log.actor ? (
-												<div>
-													<p className="text-theme-xs font-medium text-gray-700 dark:text-gray-300">
-														{log.actor}
-													</p>
-													{log.ip && (
-														<p className="text-theme-xs text-gray-400 dark:text-gray-500 font-mono">
-															{log.ip}
-														</p>
-													)}
-												</div>
-											) : (
-												<span className="text-theme-xs text-gray-400 dark:text-gray-500">
-													—
+											{h}
+										</th>
+									))}
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+								{pagedLogs.map((log) => {
+									const lc = levelConfig[log.level];
+									const cc = categoryConfig[log.category];
+									return (
+										<tr
+											key={log.id}
+											className="hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors"
+										>
+											{/* Level */}
+											<td className="px-3 py-2.5 whitespace-nowrap">
+												<span
+													className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-theme-xs font-medium ${lc.badge}`}
+												>
+													<span
+														className={`w-1.5 h-1.5 rounded-full ${lc.dot}`}
+													/>
+													{lc.label}
 												</span>
-											)}
-										</td>
-										{/* Timestamp */}
-										<td className="px-3 py-2.5 text-theme-xs text-gray-400 dark:text-gray-500 whitespace-nowrap font-mono">
-											{log.timestamp}
-										</td>
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
-				)}
-			</div>
+											</td>
+											{/* Category */}
+											<td className="px-3 py-2.5 whitespace-nowrap">
+												<span className="inline-flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
+													{cc.icon}
+													{cc.label}
+												</span>
+											</td>
+											{/* Message */}
+											<td
+												className="px-3 py-2.5 text-theme-sm text-gray-700 dark:text-gray-300 max-w-[200px] truncate"
+												title={log.message}
+											>
+												{log.message}
+											</td>
+											{/* Actor / IP */}
+											<td className="px-3 py-2.5 whitespace-nowrap">
+												{log.actor ? (
+													<div>
+														<p className="text-theme-xs font-medium text-gray-700 dark:text-gray-300">
+															{log.actor}
+														</p>
+														{log.ip && (
+															<p className="text-theme-xs text-gray-400 dark:text-gray-500 font-mono">
+																{log.ip}
+															</p>
+														)}
+													</div>
+												) : (
+													<span className="text-theme-xs text-gray-400 dark:text-gray-500">
+														—
+													</span>
+												)}
+											</td>
+											{/* Timestamp */}
+											<td className="px-3 py-2.5 text-theme-xs text-gray-400 dark:text-gray-500 whitespace-nowrap font-mono">
+												{log.timestamp}
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
+					</div>
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={setCurrentPage}
+					/>
+				</>
+			)}
 
 			<button className="mt-4 w-full py-2 text-theme-sm font-medium text-primary dark:text-secondary hover:underline text-center transition-colors">
 				View full audit log →

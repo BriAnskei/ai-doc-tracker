@@ -13,6 +13,7 @@ import { DashboardRedirect, UploadRedirect } from "./Redirect";
 import Unauthorized from "../pages/OtherPage/Unauthorized";
 import OutgoingDocPage from "../pages/document/OutgoingDocPage";
 import ValudationQueue from "../pages/document/UploadQueue";
+import InvalidDocumentsPage from "../pages/document/InvalidDocumentsPage";
 import IncomingDocumentUploadPage from "../pages/document/IncomingDocumentUploadPage";
 import UploadedIncomingDoc from "../pages/document/UploadedIncomingDocPage";
 import UploadedIncomingDocPage from "../pages/document/UploadedIncomingDocPage";
@@ -78,6 +79,15 @@ const ADMINISTRATION_ROUTES: RouteType[] = [
     element: (
       <RoleRoute allowedRoles={[1, 2]}>
         <ValudationQueue />
+      </RoleRoute>
+    ),
+  },
+
+  {
+    path: "/upload-invalid",
+    element: (
+      <RoleRoute allowedRoles={[1, 2]}>
+        <InvalidDocumentsPage />
       </RoleRoute>
     ),
   },

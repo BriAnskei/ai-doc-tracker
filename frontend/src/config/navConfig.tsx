@@ -97,6 +97,11 @@ export const NAV_ITEMS: NavItem[] = [
         roles: [1, 2],
       },
       {
+        name: "Invalid Docs",
+        path: "/upload-invalid",
+        roles: [1, 2],
+      },
+      {
         name: "Incoming",
         path: "/incoming",
         roles: [1, 2],
@@ -107,7 +112,7 @@ export const NAV_ITEMS: NavItem[] = [
         roles: [1, 2],
       },
       {
-        name: "Stale Documients",
+        name: "Stale Docs",
         path: "/admin/stale-documents",
         roles: [2],
       },

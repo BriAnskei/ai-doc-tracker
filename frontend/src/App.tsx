@@ -1,11 +1,12 @@
 import { RouterProvider } from "react-router";
 import { router } from "./routes";
+import { NotificationsProvider } from "./context/NotificationsContext";
 
 export default function App() {
 	return (
-		<>
+		<NotificationsProvider>
 			<RouterProvider router={router} />
-		</>
+		</NotificationsProvider>
 	);
 }
 
