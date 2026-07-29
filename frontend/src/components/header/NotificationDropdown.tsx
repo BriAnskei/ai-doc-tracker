@@ -1,3 +1,4 @@
+// components/header/NotificationDropdown.tsx
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
@@ -169,11 +170,8 @@ export default function NotificationDropdown() {
 							<li key={n.id}>
 								<DropdownItem
 									onItemClick={closeDropdown}
-									className={`flex gap-3 rounded-xl border px-3 py-2.5 transition-colors
-                    ${
-											n.isRead
-												? "border-gray-100 hover:bg-gray-50 dark:border-white/[0.05] dark:hover:bg-white/[0.03]"
-												: "border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.05] dark:border-secondary/20 dark:bg-secondary/[0.04] dark:hover:bg-secondary/[0.06]"
+									className={`flex gap-3 px-3 py-2.5 transition-colors ${
+										!n.isRead ? "bg-primary/[0.03] dark:bg-secondary/[0.04]" : ""
 										}`}
 								>
 									{/* Unread dot */}
@@ -197,7 +195,7 @@ export default function NotificationDropdown() {
 										</span>
 										<span className="flex items-center gap-2 flex-wrap">
 											<span
-												className={`inline-flex items-center px-2 py-0.5 rounded text-theme-xs font-medium ${typeStyles[n.type]}`}
+												className={`text-theme-xs font-medium ${typeStyles[n.type]}`}
 											>
 												{typeLabel[n.type]}
 											</span>
@@ -217,7 +215,7 @@ export default function NotificationDropdown() {
 													handleMarkAsRead(n.id);
 												}}
 												title="Mark as read"
-												className="p-1 rounded-lg text-gray-400 hover:text-primary dark:hover:text-secondary hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+												className="p-1 rounded-lg text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors"
 											>
 												<svg
 													className="w-3.5 h-3.5"
@@ -240,7 +238,7 @@ export default function NotificationDropdown() {
 												handleRemove(n.id);
 											}}
 											title="Remove"
-											className="p-1 rounded-lg text-gray-400 hover:text-danger hover:bg-danger/10 transition-colors"
+											className="p-1 rounded-lg text-gray-400 hover:text-danger transition-colors"
 										>
 											<svg
 												className="w-3.5 h-3.5"
@@ -267,7 +265,7 @@ export default function NotificationDropdown() {
 				<Link
 					to="/notification"
 					onClick={closeDropdown}
-					className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+					className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]"
 				>
 					View All Notifications
 				</Link>

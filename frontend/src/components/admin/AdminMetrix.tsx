@@ -1,51 +1,32 @@
 // components/admin/AdminMetrics.tsx
-import { ArrowUpIcon, ArrowDownIcon } from "../../icons";
-import Badge from "../ui/badge/Badge";
 
 interface MetricCardProps {
   label: string;
   value: number;
   icon: React.ReactNode;
   iconBg: string;
-  // Trend replaces meaningless percentages: a delta the user understands at a glance.
-  trend: {
-    text: string;
-    color: "success" | "error" | "warning" | "info";
-    up?: boolean;
-  };
-  // The single most important KPI gets extra emphasis.
-  emphasized?: boolean;
+  valueClass?: string;
 }
 
-function MetricCard({ label, value, icon, iconBg, trend, emphasized }: MetricCardProps) {
+function MetricCard({ label, value, icon, iconBg, valueClass }: MetricCardProps) {
   return (
-    <div
-      className={`rounded-2xl border bg-white p-5 dark:bg-white/[0.03] sm:p-6 ${
-        emphasized
-          ? "border-brand-200 dark:border-brand-500/30"
-          : "border-gray-200 dark:border-gray-800"
-      }`}
-    >
-      <div className={`flex items-center justify-center w-11 h-11 rounded-xl ${iconBg}`}>
-        {icon}
-      </div>
-      <div className="mt-4">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-        <h4 className="mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90">
-          {value.toLocaleString()}
-        </h4>
-      </div>
-      <div className="mt-3">
-        <Badge color={trend.color}>
-          {trend.up !== undefined ? (trend.up ? <ArrowUpIcon /> : <ArrowDownIcon />) : null}
-          {trend.text}
-        </Badge>
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      <div className="flex items-center gap-4">
+        <div className={`flex items-center justify-center w-11 h-11 rounded-xl ${iconBg}`}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
+          <h4 className={`mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90 ${valueClass ?? ""}`}>
+            {value.toLocaleString()}
+          </h4>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
+// ── Icons ─────────────────────────────────────────────────────────────
 
 function FolderIcon({ className }: { className?: string }) {
   return (
@@ -95,7 +76,7 @@ function CheckCircleIcon({ className }: { className?: string }) {
   );
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────
 // Only four KPIs — the rest of the breakdown lives inside the Analytics chart.
 export default function AdminMetrics() {
   const metrics: MetricCardProps[] = [
@@ -104,29 +85,24 @@ export default function AdminMetrics() {
       value: 1250,
       icon: <FolderIcon className="size-6 text-primary dark:text-secondary" />,
       iconBg: "bg-primary/10 dark:bg-secondary/10",
-      trend: { text: "+42 today", color: "success", up: true },
-      emphasized: true,
     },
     {
-      label: "Pending",
+      label: "Pending Documents",
       value: 120,
       icon: <ClockIcon className="size-6 text-warning" />,
       iconBg: "bg-warning/10",
-      trend: { text: "9 vs yesterday", color: "warning" },
     },
     {
       label: "On-Going",
       value: 300,
       icon: <RefreshIcon className="size-6 text-orange-500" />,
       iconBg: "bg-orange-50 dark:bg-orange-500/10",
-      trend: { text: "+12 this week", color: "info", up: true },
     },
     {
       label: "Completed",
       value: 830,
       icon: <CheckCircleIcon className="size-6 text-success" />,
       iconBg: "bg-success/10",
-      trend: { text: "+66 today", color: "success", up: true },
     },
   ];
 

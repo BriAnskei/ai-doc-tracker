@@ -337,7 +337,7 @@ export default function InvalidDocumentsTable() {
                   <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
                     {record.uploaderName}
                   </p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-[10px] font-semibold text-danger">
+                  <span className="text-[10px] font-semibold text-danger">
                     {record.missingFields.length} missing
                   </span>
                 </div>

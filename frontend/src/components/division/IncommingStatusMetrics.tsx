@@ -1,6 +1,6 @@
 import { StatusType } from "../ui/modal/document/StatusUpdateModal";
 
-// ── Icons ────────────────────────────────────────────────────────────────────
+// ── Icons ────────────────────────────────────────────────────────────
 
 function DocumentIcon({ className }: { className?: string }) {
   return (
@@ -74,7 +74,7 @@ function AlertIcon({ className }: { className?: string }) {
   );
 }
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────
 
 type StatusFilter = StatusType | "All";
 
@@ -96,7 +96,7 @@ interface MetricDef {
   ringClass: string;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────
 
 export default function IncomingStatusMetrics({
   total,
@@ -142,7 +142,6 @@ export default function IncomingStatusMetrics({
   ];
 
   function handleClick(key: StatusFilter) {
-    // Toggle: clicking the already-active card resets to "All"
     onSelect(activeStatus === key ? "All" : key);
   }
 
@@ -162,14 +161,16 @@ export default function IncomingStatusMetrics({
                 : "hover:border-gray-300 dark:hover:border-gray-700"
             }`}
           >
-            <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${m.iconBg}`}>
-              {m.icon}
-            </div>
-            <div className="mt-5">
-              <span className="text-sm text-gray-500 dark:text-gray-400">{m.label}</span>
-              <h4 className="text-title-sm mt-2 font-bold text-gray-800 dark:text-white/90">
-                {m.value.toLocaleString()}
-              </h4>
+            <div className="flex items-center gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${m.iconBg}`}>
+                {m.icon}
+              </div>
+              <div className="flex-1">
+                <span className="text-sm text-gray-500 dark:text-gray-400">{m.label}</span>
+                <h4 className="text-title-sm mt-2 font-bold text-gray-800 dark:text-white/90">
+                  {m.value.toLocaleString()}
+                </h4>
+              </div>
             </div>
           </button>
         );

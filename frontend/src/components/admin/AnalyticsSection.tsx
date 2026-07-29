@@ -14,8 +14,8 @@ const statusData = [
 const statusTotal = statusData.reduce((a, d) => a + d.count, 0);
 
 const flow = [
-  { label: "Incoming", value: 800, trend: "+42 today", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-  { label: "Outgoing", value: 450, trend: "+18 today", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
+  { label: "Incoming", value: 800, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+  { label: "Outgoing", value: 450, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
 ];
 
 interface Division {
@@ -190,7 +190,6 @@ function OverviewTab() {
               </p>
               <p className={`mt-0.5 text-2xl font-bold ${f.color}`}>{f.value}</p>
             </div>
-            <span className="text-theme-xs text-gray-400 dark:text-gray-500">{f.trend}</span>
           </div>
         ))}
       </div>
@@ -259,7 +258,6 @@ function UploadsTab({ onViewQueue }: { onViewQueue: () => void }) {
                 {s.label}
               </p>
               <p className={`mt-0.5 text-2xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-theme-xs mt-0.5 text-gray-500 dark:text-gray-400">{s.sub}</p>
             </div>
           </div>
         ))}

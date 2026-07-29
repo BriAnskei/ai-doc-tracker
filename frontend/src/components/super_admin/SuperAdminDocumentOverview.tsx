@@ -223,12 +223,12 @@ export default function SystemDocumentOverview() {
 				{stats.map((s) => (
 					<div
 						key={s.label}
-						className="flex items-center gap-2.5 p-3 rounded-xl border border-gray-100 dark:border-white/[0.06] bg-gray-50/60 dark:bg-white/[0.02]"
+						className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]"
 					>
-						<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-white/[0.05] border border-gray-100 dark:border-white/[0.06] flex-shrink-0">
+						<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-white/[0.05] flex-shrink-0">
 							{s.icon}
 						</div>
-						<div className="min-w-0">
+						<div className="flex-1 min-w-0">
 							<p className="text-lg font-bold text-gray-800 dark:text-white/90 leading-none">
 								{s.value.toLocaleString()}
 							</p>

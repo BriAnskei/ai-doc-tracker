@@ -3,6 +3,17 @@ layer(base);
 
 @import "tailwindcss";
 
+:root {
+  --color-primary: #1e3a8a;
+  --color-secondary: #3b82f6;
+  --color-accent: #f59e0b;
+  --color-background: #f8fafc;
+  --color-text: #1f2937;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -201,7 +212,9 @@ layer(base);
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative font-normal font-outfit z-1;
+    background-color: var(--color-background);
+    color: var(--color-text);
   }
 }
 

@@ -1,6 +1,5 @@
 // components/admin/StaleDocumentCard.tsx
 import { useMemo } from "react";
-import Badge from "../ui/badge/Badge";
 import { getStaleRows } from "./staleDocumentsData";
 
 function formatDate(dateString: string): string {
@@ -9,6 +8,12 @@ function formatDate(dateString: string): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function TierText({ tier }: { tier: string }) {
+  const colorClass =
+    tier === "Overdue" ? "text-danger" : "text-warning";
+  return <span className={`text-theme-sm font-semibold ${colorClass}`}>{tier}</span>;
 }
 
 // Full stale-documents table — shown on its own report page, not the dashboard.
@@ -57,7 +62,7 @@ export default function StaleDocumentsCard() {
                 {doc.days}
               </td>
               <td className="px-3 py-3 text-right">
-                <Badge color={doc.tier === "Overdue" ? "error" : "warning"}>{doc.tier}</Badge>
+                <TierText tier={doc.tier} />
               </td>
             </tr>
           ))}

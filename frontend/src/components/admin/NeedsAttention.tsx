@@ -12,11 +12,9 @@ interface AttentionItem {
 }
 
 const adminItems: AttentionItem[] = [
-  { label: "Pending Validation", value: 120, to: "/upload-queue", valueClass: "text-warning", dotClass: "bg-warning" },
-  { label: "Invalid Documents", value: 6, to: "/upload-invalid", valueClass: "text-danger", dotClass: "bg-danger" },
-  { label: "Pending OCR Extraction", value: 20, to: "/upload-queue", valueClass: "text-secondary", dotClass: "bg-secondary" },
+  { label: "Pending Documents", value: 120, to: "/upload-queue", valueClass: "text-warning", dotClass: "bg-warning" },
   { label: "Stale Documents", value: 2, to: "/admin/stale-documents", valueClass: "text-danger", dotClass: "bg-danger" },
-  { label: "Failed Uploads", value: 1, to: "/upload-queue", valueClass: "text-accent", dotClass: "bg-accent" },
+  { label: "Invalid Documents", value: 6, to: "/upload-invalid", valueClass: "text-danger", dotClass: "bg-danger" },
 ];
 
 const receiverItems: AttentionItem[] = [
