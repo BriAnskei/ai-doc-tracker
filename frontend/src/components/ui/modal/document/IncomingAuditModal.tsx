@@ -216,42 +216,42 @@ const ACTION_CONFIG: Record<
 	created: {
 		label: "Created",
 		dotClass: "bg-blue-100 border-blue-400",
-		badgeClass: "bg-blue-50 text-blue-700",
+		badgeClass: "text-blue-700",
 	},
 	status_changed: {
 		label: "Status changed",
 		dotClass: "bg-pink-100 border-pink-400",
-		badgeClass: "bg-pink-50 text-pink-700",
+		badgeClass: "text-pink-700",
 	},
 	re_routed: {
 		label: "Re-routed",
 		dotClass: "bg-amber-100 border-amber-400",
-		badgeClass: "bg-amber-50 text-amber-700",
+		badgeClass: "text-amber-700",
 	},
 	routed: {
 		label: "Routed",
 		dotClass: "bg-amber-100 border-amber-400",
-		badgeClass: "bg-amber-50 text-amber-700",
+		badgeClass: "text-amber-700",
 	},
 	file_viewed: {
 		label: "File viewed",
 		dotClass: "bg-gray-100 border-gray-400",
-		badgeClass: "bg-gray-100 text-gray-600",
+		badgeClass: "text-gray-600",
 	},
 	updated: {
 		label: "Updated",
 		dotClass: "bg-green-100 border-green-500",
-		badgeClass: "bg-green-50 text-green-700",
+		badgeClass: "text-green-700",
 	},
 	archived: {
 		label: "Archived",
 		dotClass: "bg-gray-100 border-gray-400",
-		badgeClass: "bg-gray-100 text-gray-600",
+		badgeClass: "text-gray-600",
 	},
 	deleted: {
 		label: "Deleted",
 		dotClass: "bg-red-100 border-red-400",
-		badgeClass: "bg-red-50 text-red-600",
+		badgeClass: "text-red-600",
 	},
 };
 

@@ -217,7 +217,7 @@ const AppSidebar: React.FC = () => {
 
 	return (
 		<aside
-			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-text h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-text h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
         ${
 					isExpanded || isMobileOpen
 						? "w-[220px]"
@@ -246,8 +246,8 @@ const AppSidebar: React.FC = () => {
 				<nav className="mb-6">
 					<div className="flex flex-col gap-4">
 						<div>
-							<h2
-								className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+						<h2
+								className={`mb-4 text-xs uppercase flex leading-[20px] text-primary/60 ${
 									!isExpanded && !isHovered
 										? "lg:justify-center"
 										: "justify-start"
@@ -264,7 +264,7 @@ const AppSidebar: React.FC = () => {
 						{Boolean(othersItems.length) && (
 							<div className="">
 								<h2
-									className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+									className={`mb-4 text-xs uppercase flex leading-[20px] text-primary/60 ${
 										!isExpanded && !isHovered
 											? "lg:justify-center"
 											: "justify-start"

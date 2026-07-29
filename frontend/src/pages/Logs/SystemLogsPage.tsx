@@ -579,12 +579,9 @@ function actionMeta(action: ActionType): {
 
 function roleBadge(role: RoleKey) {
 	const map: Record<RoleKey, string> = {
-		"Super Admin":
-			"text-primary bg-primary/8 dark:bg-primary/20 dark:text-blue-300 border border-primary/15",
-		Admin:
-			"text-violet-700 bg-violet-50 dark:bg-violet-500/10 dark:text-violet-300 border border-violet-200 dark:border-violet-500/20",
-		Receiver:
-			"text-gray-600 bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 border border-gray-200 dark:border-white/[0.08]",
+		"Super Admin": "text-primary dark:text-blue-300",
+		Admin: "text-violet-700 dark:text-violet-300",
+		Receiver: "text-gray-600 dark:text-gray-300",
 	};
 	return map[role];
 }
@@ -760,7 +757,7 @@ function MobileLogCard({ log }: { log: SystemLog }) {
 					</span>
 				</div>
 				<span
-					className={`flex-shrink-0 text-theme-xs font-semibold px-2 py-0.5 rounded-md ${log.status === "Success" ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10" : "text-danger bg-red-50 dark:bg-red-500/10"}`}
+					className={`flex-shrink-0 text-theme-xs font-semibold ${log.status === "Success" ? "text-emerald-600" : "text-danger"}`}
 				>
 					{log.status}
 				</span>

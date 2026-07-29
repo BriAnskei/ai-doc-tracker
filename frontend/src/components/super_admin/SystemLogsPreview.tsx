@@ -110,22 +110,22 @@ const levelConfig: Record<
 > = {
 	success: {
 		dot: "bg-success",
-		badge: "bg-success/10 text-success",
+		badge: "text-success",
 		label: "Success",
 	},
 	info: {
 		dot: "bg-blue-400",
-		badge: "bg-blue-50 text-blue-500 dark:bg-blue-400/10 dark:text-blue-400",
+		badge: "text-blue-500 dark:text-blue-400",
 		label: "Info",
 	},
 	warning: {
 		dot: "bg-warning",
-		badge: "bg-warning/10 text-warning",
+		badge: "text-warning",
 		label: "Warning",
 	},
 	error: {
 		dot: "bg-danger",
-		badge: "bg-danger/10 text-danger",
+		badge: "text-danger",
 		label: "Error",
 	},
 };

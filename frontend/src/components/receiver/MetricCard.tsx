@@ -1,42 +1,29 @@
 // components/receiver/ReceiverMetrics.tsx
-import { ArrowUpIcon } from "../../icons";
-import Badge from "../ui/badge/Badge";
 
 interface MetricCardProps {
 	label: string;
 	value: number;
 	icon: React.ReactNode;
-	badge?: {
-		color: "success" | "warning" | "info";
-		text: string;
-		up?: boolean;
-	};
 	iconBg: string;
 }
 
-function MetricCard({ label, value, icon, badge, iconBg }: MetricCardProps) {
+function MetricCard({ label, value, icon, iconBg }: MetricCardProps) {
 	return (
 		<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-			<div
-				className={`flex items-center justify-center w-12 h-12 rounded-xl ${iconBg}`}
-			>
-				{icon}
-			</div>
-			<div className="flex items-end justify-between mt-5">
-				<div>
+			<div className="flex items-center gap-4">
+				<div
+					className={`flex items-center justify-center w-12 h-12 rounded-xl ${iconBg}`}
+				>
+					{icon}
+				</div>
+				<div className="flex-1">
 					<span className="text-sm text-gray-500 dark:text-gray-400">
 						{label}
 					</span>
-					<h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+					<h4 className="mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90">
 						{value.toLocaleString()}
 					</h4>
 				</div>
-				{badge && (
-					<Badge color={badge.color}>
-						{badge.up ? <ArrowUpIcon /> : null}
-						{badge.text}
-					</Badge>
-				)}
 			</div>
 		</div>
 	);
@@ -107,14 +94,12 @@ export default function ReceiverMetrics() {
 			value: 115,
 			icon: <UploadIcon className="size-6 text-primary dark:text-secondary" />,
 			iconBg: "bg-primary/10 dark:bg-secondary/10",
-			badge: { color: "success", text: "12.5%", up: true },
 		},
 		{
 			label: "On-Queue",
 			value: 15,
 			icon: <QueueIcon className="size-6 text-warning dark:text-warning" />,
 			iconBg: "bg-warning/10 dark:bg-warning/10",
-			badge: { color: "warning", text: "3 new" },
 		},
 		{
 			label: "Received",
@@ -123,7 +108,6 @@ export default function ReceiverMetrics() {
 				<CheckCircleIcon className="size-6 text-success dark:text-success" />
 			),
 			iconBg: "bg-success/10 dark:bg-success/10",
-			badge: { color: "success", text: "87%", up: true },
 		},
 	];
 

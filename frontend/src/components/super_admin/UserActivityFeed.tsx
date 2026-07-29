@@ -206,11 +206,9 @@ const typeConfig: Record<
 };
 
 const roleBadge: Record<ActivityEntry["role"], string> = {
-	Receiver:
-		"bg-primary/10 text-primary dark:bg-secondary/10 dark:text-secondary",
-	Admin: "bg-success/10 text-success",
-	"Super Admin":
-		"bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary/80",
+	Receiver: "text-primary dark:text-secondary",
+	Admin: "text-success",
+	"Super Admin": "text-secondary dark:text-secondary/80",
 };
 
 function buildDescription(a: ActivityEntry): string {

@@ -115,11 +115,11 @@ const STAGE_LABEL: Record<Stage, string> = {
 };
 
 const STAGE_BADGE_CLS: Record<Stage, string> = {
-  "on-queue": "bg-indigo-50 text-indigo-600 border-indigo-200",
-  received: "bg-gray-100 text-gray-600 border-gray-200",
-  pending: "bg-orange-50 text-orange-600 border-orange-200",
-  "on-going": "bg-secondary/10 text-secondary border-secondary/20",
-  completed: "bg-success/10 text-success border-success/20",
+  "on-queue": "text-indigo-600",
+  received: "text-gray-600",
+  pending: "text-orange-600",
+  "on-going": "text-secondary",
+  completed: "text-success",
 };
 
 // ── Icons ────────────────────────────────────────────────
@@ -234,7 +234,7 @@ function ChevronIcon({ open }: { open: boolean }) {
 function StatusBadge({ stage }: { stage: Stage }) {
   return (
     <span
-      className={`text-theme-xs inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-medium ${STAGE_BADGE_CLS[stage]}`}
+      className={`text-theme-xs inline-flex items-center gap-1.5 font-medium ${STAGE_BADGE_CLS[stage]}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {STAGE_LABEL[stage]}
