@@ -10,14 +10,14 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon, iconBg, valueClass }: MetricCardProps) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-      <div className="flex items-center gap-4">
-        <div className={`flex items-center justify-center w-11 h-11 rounded-xl ${iconBg}`}>
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5">
+      <div className="flex items-center gap-3">
+        <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${iconBg}`}>
           {icon}
         </div>
         <div className="flex-1">
-          <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-          <h4 className={`mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90 ${valueClass ?? ""}`}>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+          <h4 className={`mt-0.5 font-bold text-gray-800 text-title-sm dark:text-white/90 ${valueClass ?? ""}`}>
             {value.toLocaleString()}
           </h4>
         </div>
@@ -89,14 +89,14 @@ export default function AdminMetrics() {
     {
       label: "Pending Documents",
       value: 120,
-      icon: <ClockIcon className="size-6 text-warning" />,
-      iconBg: "bg-warning/10",
+      icon: <ClockIcon className="size-6 text-secondary" />,
+      iconBg: "bg-secondary/10 dark:bg-secondary/10",
     },
     {
       label: "On-Going",
       value: 300,
-      icon: <RefreshIcon className="size-6 text-warning" />,
-      iconBg: "bg-warning/10",
+      icon: <RefreshIcon className="size-6 text-primary" />,
+      iconBg: "bg-primary/10 dark:bg-primary/10",
     },
     {
       label: "Completed",

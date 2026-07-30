@@ -89,7 +89,7 @@ export default function AnalyticsSection() {
               onClick={() => setTab(t)}
               className={`rounded-md px-3 py-1.5 text-theme-sm font-medium transition ${
                 tab === t
-                  ? "bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-white"
+                  ? "bg-white text-secondary shadow-theme-xs dark:bg-white/10 dark:text-white"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >

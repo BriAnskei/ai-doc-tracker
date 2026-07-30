@@ -248,6 +248,26 @@ layer(base);
   @apply text-text/60 group-hover:text-text dark:text-gray-400 dark:group-hover:text-gray-300;
 }
 
+/* ── Sidebar-specific overrides for dark navy background ── */
+.sidebar-menu-item {
+  @apply text-white/60 hover:bg-white/5 hover:text-white/90;
+}
+.sidebar-menu-item-active {
+  @apply bg-secondary/20 text-white font-medium;
+}
+.sidebar-menu-item-icon {
+  @apply text-white/50 group-hover:text-white/80;
+}
+.sidebar-menu-item-icon-active {
+  @apply text-white/90;
+}
+.sidebar-menu-item-arrow-active {
+  @apply rotate-180 text-secondary;
+}
+.sidebar-menu-item-arrow-inactive {
+  @apply text-white/40 group-hover:text-white/70;
+}
+
 @utility menu-item-arrow {
   @apply relative;
 }
@@ -258,6 +278,41 @@ layer(base);
 
 @utility menu-item-arrow-inactive {
   @apply text-text/60 group-hover:text-text dark:text-gray-400 dark:group-hover:text-gray-300;
+}
+
+/* ── Sidebar overrides for dark navy background ── */
+.sidebar-nav .menu-item-active {
+  @apply bg-secondary/20 text-white/90 dark:bg-secondary/20 dark:text-white;
+}
+.sidebar-nav .menu-item-inactive {
+  @apply text-white/50 hover:bg-white/10 group-hover:text-white/80 dark:text-white/50 dark:hover:bg-white/10;
+}
+.sidebar-nav .menu-item-icon {
+  @apply text-white/50 group-hover:text-white/80;
+}
+.sidebar-nav .menu-item-icon-active {
+  @apply text-white/90 dark:text-white;
+}
+.sidebar-nav .menu-item-icon-inactive {
+  @apply text-white/40 group-hover:text-white/60 dark:text-white/40 dark:group-hover:text-white/60;
+}
+.sidebar-nav .menu-item-arrow-active {
+  @apply rotate-180 text-secondary;
+}
+.sidebar-nav .menu-item-arrow-inactive {
+  @apply text-white/40 group-hover:text-white/60 dark:text-white/40 dark:group-hover:text-white/60;
+}
+.sidebar-nav .menu-dropdown-item-active {
+  @apply bg-secondary/20 text-white/90 dark:bg-secondary/20 dark:text-white;
+}
+.sidebar-nav .menu-dropdown-item-inactive {
+  @apply text-white/50 hover:bg-white/10 dark:text-white/50 dark:hover:bg-white/10;
+}
+.sidebar-nav .menu-dropdown-badge-active {
+  @apply bg-secondary/20;
+}
+.sidebar-nav .menu-dropdown-badge-inactive {
+  @apply bg-secondary/10 group-hover:bg-secondary/20;
 }
 
 @utility menu-dropdown-item {

@@ -41,7 +41,7 @@ export default function StatisticsChart() {
 			position: "top",
 			horizontalAlign: "left",
 		},
-		colors: ["var(--color-brand-500)", "var(--color-brand-200)"],
+		colors: ["var(--color-primary)", "var(--color-secondary)"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			height: 310,

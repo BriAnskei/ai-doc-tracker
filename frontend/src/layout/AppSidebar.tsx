@@ -28,23 +28,6 @@ const AppSidebar: React.FC = () => {
 	const othersItems = useFilteredOthersNav();
 	const location = useLocation();
 
-	// const navItems: NavItem[] = [
-	//   {
-	//     icon: <GridIcon />,
-	//     name: "Dashboard",
-	//     path: "/",
-	//   },
-	//   {
-	//     name: "Documents",
-	//     icon: <ListIcon />,
-	//     subItems: [
-	//       { name: "Upload", path: "/incoming-upload", pro: false },
-	//       { name: "Incoming", path: "/incoming", pro: false },
-	//       { name: "Outgoing", path: "/outgoing", pro: false },
-	//     ],
-	//   },
-	// ];
-
 	const navItems = useFilteredNav();
 
 	const [openSubmenu, setOpenSubmenu] = useState<{
@@ -56,7 +39,6 @@ const AppSidebar: React.FC = () => {
 	);
 	const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-	// const isActive = (path: string) => location.pathname === path;
 	const isActive = useCallback(
 		(path: string) => location.pathname === path,
 		[location.pathname],
@@ -217,7 +199,7 @@ const AppSidebar: React.FC = () => {
 
 	return (
 		<aside
-			className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-text h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
+			className={`sidebar-nav fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-primary text-white/80 dark:bg-primary dark:border-gray-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-primary/20
         ${
 					isExpanded || isMobileOpen
 						? "w-[220px]"
@@ -231,23 +213,28 @@ const AppSidebar: React.FC = () => {
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			<div
-				className={`py-8 flex ${
+				className={`py-4 flex items-center gap-2 ${
 					!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
 				}`}
 			>
-				<Link to="/">
+				<Link to="/" className="flex items-center gap-2">
 					<CompanyLogo
-						size={isExpanded || isHovered || isMobileOpen ? 150 : 32}
-						className="mx-auto"
+						size={isExpanded || isHovered || isMobileOpen ? 36 : 32}
+						className="flex-shrink-0"
 					/>
+					{(isExpanded || isHovered || isMobileOpen) && (
+						<span className="text-white font-semibold text-sm whitespace-nowrap">
+							Provincial Docs
+						</span>
+					)}
 				</Link>
 			</div>
 			<div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
 				<nav className="mb-6">
 					<div className="flex flex-col gap-4">
 						<div>
-						<h2
-								className={`mb-4 text-xs uppercase flex leading-[20px] text-primary/60 ${
+							<h2
+								className={`mb-4 text-xs uppercase flex leading-[20px] text-white/40 ${
 									!isExpanded && !isHovered
 										? "lg:justify-center"
 										: "justify-start"
@@ -264,7 +251,7 @@ const AppSidebar: React.FC = () => {
 						{Boolean(othersItems.length) && (
 							<div className="">
 								<h2
-									className={`mb-4 text-xs uppercase flex leading-[20px] text-primary/60 ${
+									className={`mb-4 text-xs uppercase flex leading-[20px] text-white/40 ${
 										!isExpanded && !isHovered
 											? "lg:justify-center"
 											: "justify-start"

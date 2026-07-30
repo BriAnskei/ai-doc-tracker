@@ -3,7 +3,7 @@ import { ApexOptions } from "apexcharts";
 
 export default function BarChartOne() {
 	const options: ApexOptions = {
-		colors: ["var(--color-brand-500)"],
+		colors: ["var(--color-secondary)"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			type: "bar",
@@ -16,7 +16,7 @@ export default function BarChartOne() {
 			bar: {
 				horizontal: false,
 				columnWidth: "39%",
-				borderRadius: 5,
+				borderRadius: 6,
 				borderRadiusApplication: "end",
 			},
 		},
