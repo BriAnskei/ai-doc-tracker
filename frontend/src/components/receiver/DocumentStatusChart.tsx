@@ -36,8 +36,8 @@ function LegendItem({ color, label, count, percent }: LegendItemProps) {
 export default function DocumentStatusChart() {
 	const total = 112;
 	const data = [
-		{ label: "Received", count: 100, color: "#10B981" },
-		{ label: "On-Queue", count: 12, color: "#F59E0B" },
+		{ label: "Received", count: 100, color: "var(--color-success)" },
+		{ label: "On-Queue", count: 12, color: "var(--color-warning)" },
 	];
 	const series = data.map((d) => d.count);
 	const colors = data.map((d) => d.color);
@@ -66,14 +66,14 @@ export default function DocumentStatusChart() {
 							label: "Total",
 							fontSize: "13px",
 							fontWeight: 500,
-							color: "#9CA3AF",
+							color: "var(--color-gray-400)",
 							formatter: () => `${total}`,
 						},
 						value: {
 							show: true,
 							fontSize: "24px",
 							fontWeight: 700,
-							color: "#111827",
+							color: "var(--color-text)",
 							offsetY: 4,
 						},
 					},

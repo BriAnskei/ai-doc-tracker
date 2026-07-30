@@ -41,7 +41,7 @@ export default function StatisticsChart() {
 			position: "top",
 			horizontalAlign: "left",
 		},
-		colors: ["#465FFF", "#9CB9FF"], // Define line colors
+		colors: ["var(--color-brand-500)", "var(--color-brand-200)"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			height: 310,
@@ -64,7 +64,7 @@ export default function StatisticsChart() {
 		},
 		markers: {
 			size: 0, // Size of the marker points
-			strokeColors: "#fff", // Marker border color
+			strokeColors: "var(--color-white)",
 			strokeWidth: 2,
 			hover: {
 				size: 6, // Marker size on hover
@@ -121,7 +121,7 @@ export default function StatisticsChart() {
 			labels: {
 				style: {
 					fontSize: "12px", // Adjust font size for y-axis labels
-					colors: ["#6B7280"], // Color of the labels
+					colors: ["var(--color-gray-500)"],
 				},
 			},
 			title: {

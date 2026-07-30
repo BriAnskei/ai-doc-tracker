@@ -255,7 +255,7 @@ export default function IncomingDocumentForm() {
 						{isSubmitting && (
 							<div className="mt-1.5 h-0.5 w-full rounded-full bg-gray-200 dark:bg-white/[0.08] overflow-hidden">
 								<div
-									className="h-full bg-secondary rounded-full transition-all duration-300"
+									className="h-full bg-primary rounded-full transition-all duration-300"
 									style={{ width: `${Math.min(progress, 100)}%` }}
 								/>
 							</div>

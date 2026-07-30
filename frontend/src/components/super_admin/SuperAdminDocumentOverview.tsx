@@ -86,25 +86,25 @@ const stats: OverviewStat[] = [
 	{
 		label: "Total Documents",
 		value: 3840,
-		color: "#1e3a8a",
+		color: "var(--color-primary)",
 		icon: <TotalIcon className="size-5 text-primary dark:text-secondary" />,
 	},
 	{
 		label: "Incoming",
 		value: 2100,
-		color: "#10B981",
+		color: "var(--color-success)",
 		icon: <InboxIcon className="size-5 text-success" />,
 	},
 	{
 		label: "Outgoing",
 		value: 1200,
-		color: "#3b82f6",
+		color: "var(--color-secondary)",
 		icon: <OutboxIcon className="size-5 text-secondary" />,
 	},
 	{
 		label: "Archived",
 		value: 540,
-		color: "#9CA3AF",
+		color: "var(--color-gray-400)",
 		icon: <ArchiveIcon className="size-5 text-gray-400" />,
 	},
 ];
@@ -129,7 +129,7 @@ export default function SystemDocumentOverview() {
 
 	const options: ApexOptions = {
 		legend: { show: false },
-		colors: ["#1e3a8a", "#10B981", "#3b82f6"],
+		colors: ["var(--color-primary)", "var(--color-success)", "var(--color-secondary)"],
 		chart: {
 			fontFamily: "Outfit, sans-serif",
 			height: 260,
@@ -146,7 +146,7 @@ export default function SystemDocumentOverview() {
 		grid: {
 			xaxis: { lines: { show: false } },
 			yaxis: { lines: { show: true } },
-			borderColor: "#F3F4F6",
+			borderColor: "var(--color-gray-100)",
 		},
 		xaxis: {
 			type: "category",
@@ -154,11 +154,11 @@ export default function SystemDocumentOverview() {
 			axisBorder: { show: false },
 			axisTicks: { show: false },
 			labels: {
-				style: { fontSize: "11px", colors: Array(12).fill("#9CA3AF") },
+				style: { fontSize: "11px", colors: Array(12).fill("var(--color-gray-400)") },
 			},
 		},
 		yaxis: {
-			labels: { style: { fontSize: "11px", colors: ["#9CA3AF"] } },
+			labels: { style: { fontSize: "11px", colors: ["var(--color-gray-400)"] } },
 		},
 		tooltip: { x: { show: true } },
 	};
@@ -243,9 +243,9 @@ export default function SystemDocumentOverview() {
 			{/* Legend */}
 			<div className="flex items-center gap-5 mb-3">
 				{[
-					{ label: "Total", color: "#1e3a8a" },
-					{ label: "Incoming", color: "#10B981" },
-					{ label: "Outgoing", color: "#3b82f6" },
+					{ label: "Total", color: "var(--color-primary)" },
+					{ label: "Incoming", color: "var(--color-success)" },
+					{ label: "Outgoing", color: "var(--color-secondary)" },
 				].map((l) => (
 					<div key={l.label} className="flex items-center gap-1.5">
 						<span

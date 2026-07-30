@@ -95,8 +95,8 @@ export default function AdminMetrics() {
     {
       label: "On-Going",
       value: 300,
-      icon: <RefreshIcon className="size-6 text-orange-500" />,
-      iconBg: "bg-orange-50 dark:bg-orange-500/10",
+      icon: <RefreshIcon className="size-6 text-warning" />,
+      iconBg: "bg-warning/10",
     },
     {
       label: "Completed",

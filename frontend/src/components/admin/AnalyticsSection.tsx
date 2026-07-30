@@ -7,15 +7,15 @@ import { ArrowRightIcon } from "../../icons";
 
 // ── Mock data (shared across tabs) ────────────────────────────────────────────
 const statusData = [
-  { label: "Completed", count: 830, color: "#10B981" }, // --color-success
-  { label: "On-Going", count: 300, color: "#F59E0B" },  // --color-warning
-  { label: "Pending", count: 120, color: "#EF4444" },   // --color-danger
+  { label: "Completed", count: 830, color: "var(--color-success)" },
+  { label: "On-Going", count: 300, color: "var(--color-warning)" },
+  { label: "Pending", count: 120, color: "var(--color-danger)" },
 ];
 const statusTotal = statusData.reduce((a, d) => a + d.count, 0);
 
 const flow = [
-  { label: "Incoming", value: 800, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-  { label: "Outgoing", value: 450, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
+  { label: "Incoming", value: 800, color: "text-primary", bg: "bg-primary/10 dark:bg-primary/10" },
+  { label: "Outgoing", value: 450, color: "text-secondary", bg: "bg-secondary/10 dark:bg-secondary/10" },
 ];
 
 interface Division {
@@ -24,11 +24,11 @@ interface Division {
   color: string;
 }
 const divisions: Division[] = [
-  { name: "Roads Division", count: 30, color: "#1E3A8A" },       // primary
-  { name: "Planning Division", count: 20, color: "#3B82F6" },    // secondary
-  { name: "Maintenance Division", count: 15, color: "#F59E0B" }, // accent/warning
-  { name: "Bridge Division", count: 12, color: "#10B981" },      // success
-  { name: "Drainage Division", count: 8, color: "#EF4444" },     // danger
+  { name: "Roads Division", count: 30, dotColor: "var(--color-primary)" },
+  { name: "Planning Division", count: 20, dotColor: "var(--color-secondary)" },
+  { name: "Maintenance Division", count: 15, dotColor: "var(--color-accent)" },
+  { name: "Bridge Division", count: 12, dotColor: "var(--color-success)" },
+  { name: "Drainage Division", count: 8, dotColor: "var(--color-danger)" },
 ];
 
 const queueStats = [
@@ -130,10 +130,10 @@ function OverviewTab() {
               label: "Total",
               fontSize: "13px",
               fontWeight: 500,
-              color: "#9CA3AF",
+              color: "var(--color-gray-400)",
               formatter: () => `${statusTotal.toLocaleString()}`,
             },
-            value: { show: true, fontSize: "24px", fontWeight: 700, color: "#111827", offsetY: 4 },
+            value: { show: true, fontSize: "24px", fontWeight: 700, color: "var(--color-text)", offsetY: 4 },
           },
         },
       },
@@ -220,13 +220,13 @@ function DivisionsTab() {
             <div key={div.name} className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="block h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: div.color }} />
+                  <span className="block h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: div.dotColor }} />
                   <span className="text-theme-sm font-medium text-gray-700 dark:text-gray-300">{div.name}</span>
                 </div>
                 <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{div.count}</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
-                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percent}%`, backgroundColor: div.color }} />
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percent}%`, backgroundColor: "var(--color-primary)" }} />
               </div>
             </div>
           );
