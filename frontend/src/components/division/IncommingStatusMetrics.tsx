@@ -111,32 +111,32 @@ export default function IncomingStatusMetrics({
       key: "All",
       label: "Total Assigned",
       value: total,
-      icon: <DocumentIcon className="text-primary dark:text-secondary size-6" />,
-      iconBg: "bg-primary/10 dark:bg-secondary/10",
-      ringClass: "ring-primary dark:ring-secondary",
+      icon: <DocumentIcon className="text-[#3b82f6] size-6" />,
+      iconBg: "bg-[#e0e7ff]",
+      ringClass: "ring-primary",
     },
     {
       key: "Completed",
       label: "Completed",
       value: completed,
-      icon: <CheckCircleIcon className="text-success size-6" />,
-      iconBg: "bg-success/10",
+      icon: <CheckCircleIcon className="text-[#10b981] size-6" />,
+      iconBg: "bg-[#d1fae5]",
       ringClass: "ring-success",
     },
     {
       key: "On-Going",
       label: "On-Going",
       value: onGoing,
-      icon: <ClockIcon className="text-warning size-6" />,
-      iconBg: "bg-warning/10",
-      ringClass: "ring-warning",
+      icon: <ClockIcon className="text-[#0284c7] size-6" />,
+      iconBg: "bg-[#e0f2fe]",
+      ringClass: "ring-primary",
     },
     {
       key: "Pending",
       label: "Pending",
       value: pending,
-      icon: <AlertIcon className="text-danger size-6" />,
-      iconBg: "bg-danger/10",
+      icon: <AlertIcon className="text-[#ef4444] size-6" />,
+      iconBg: "bg-[#fee2e2]",
       ringClass: "ring-danger",
     },
   ];
@@ -155,7 +155,7 @@ export default function IncomingStatusMetrics({
             type="button"
             aria-pressed={isActive}
             onClick={() => handleClick(m.key)}
-            className={`rounded-2xl border border-gray-200 bg-white p-5 text-left transition-all md:p-6 dark:border-gray-800 dark:bg-white/[0.03] ${
+            className={`rounded-2xl border border-[#fee8d6] bg-[#fffaf5] p-5 text-left transition-all md:p-6 dark:border-gray-800 dark:bg-white/[0.03] ${
               isActive
                 ? "bg-gray-50 shadow-sm dark:bg-white/[0.06]"
                 : "hover:border-gray-300 dark:hover:border-gray-700"

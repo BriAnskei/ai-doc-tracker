@@ -910,7 +910,7 @@ export default function SystemLogsPage() {
 					headerRight={
 						<button
 							onClick={() => exportToCSV(filtered)}
-							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05] text-theme-sm font-medium transition-colors"
+							className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#e2e8f0] text-[#475569] hover:bg-gray-50 text-theme-sm font-medium transition-colors"
 						>
 							<svg
 								className="w-4 h-4"
@@ -1032,7 +1032,7 @@ export default function SystemLogsPage() {
 						<div className="w-full overflow-x-auto">
 							<table className="w-full min-w-[700px] text-left border-collapse">
 								<thead>
-									<tr className="border-b border-gray-100 dark:border-white/[0.05]">
+									<tr className="border-b border-[#f1f5f9] bg-[#f1f5f9] dark:border-white/[0.05]">
 										{[
 											"Timestamp",
 											"User / Role",
@@ -1050,7 +1050,7 @@ export default function SystemLogsPage() {
 										))}
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+								<tbody className="divide-y divide-[#f1f5f9] dark:divide-white/[0.05]">
 									{paginated.length === 0 ? (
 										<tr>
 											<td

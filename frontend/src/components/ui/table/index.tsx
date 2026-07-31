@@ -33,17 +33,17 @@ interface TableCellProps {
 
 // Table Component
 const Table: React.FC<TableProps> = ({ children, className }) => {
-	return <table className={`min-w-full  ${className}`}>{children}</table>;
+	return <table className={`min-w-full ${className}`}>{children}</table>;
 };
 
 // TableHeader Component
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-	return <thead className={className}>{children}</thead>;
+	return <thead className={`bg-[#f1f5f9] ${className}`}>{children}</thead>;
 };
 
 // TableBody Component
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
-	return <tbody className={className}>{children}</tbody>;
+	return <tbody className={`divide-y divide-[#f1f5f9] ${className}`}>{children}</tbody>;
 };
 
 // TableRow Component

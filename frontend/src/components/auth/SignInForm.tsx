@@ -15,7 +15,7 @@ const ROLES = [
 ] as const;
 
 const selectClasses =
-  "h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22><path d=%22M5 7.5L10 12.5L15 7.5%22 stroke=%22%2398A2B3%22 stroke-width=%221.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] bg-no-repeat bg-[right_1rem_center] px-4 py-2.5 pr-10 text-sm text-text shadow-theme-xs focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-secondary";
+  "h-11 w-full appearance-none rounded-lg border border-[#e2e8f0] bg-transparent bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22 viewBox=%220 0 20 20%22 fill=%22none%22><path d=%22M5 7.5L10 12.5L15 7.5%22 stroke=%22%23475569%22 stroke-width=%221.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] bg-no-repeat bg-[right_1rem_center] px-4 py-2.5 pr-10 text-sm text-text shadow-theme-xs focus:border-[#2563eb] focus:outline-hidden focus:ring-3 focus:ring-[#2563eb]/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-secondary";
 
 export default function SignInForm() {
   const navigate = useNavigate();

@@ -10,14 +10,14 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon, iconBg, valueClass }: MetricCardProps) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5">
+    <div className="rounded-2xl border border-[#fee8d6] bg-[#fffaf5] p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5">
       <div className="flex items-center gap-3">
         <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${iconBg}`}>
           {icon}
         </div>
         <div className="flex-1">
-          <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
-          <h4 className={`mt-0.5 font-bold text-gray-800 text-title-sm dark:text-white/90 ${valueClass ?? ""}`}>
+          <span className="text-xs text-[#4b5563] dark:text-gray-400">{label}</span>
+          <h4 className={`mt-0.5 font-bold text-[#1f2937] text-title-sm dark:text-white/90 ${valueClass ?? ""}`}>
             {value.toLocaleString()}
           </h4>
         </div>
@@ -84,25 +84,25 @@ export default function AdminMetrics() {
       label: "Total Documents",
       value: 1250,
       icon: <FolderIcon className="size-6 text-primary dark:text-secondary" />,
-      iconBg: "bg-primary/10 dark:bg-secondary/10",
+      iconBg: "bg-[#e0e7ff]",
     },
     {
       label: "Pending Documents",
       value: 120,
-      icon: <ClockIcon className="size-6 text-secondary" />,
-      iconBg: "bg-secondary/10 dark:bg-secondary/10",
+      icon: <ClockIcon className="size-6 text-[#f59e0b]" />,
+      iconBg: "bg-[#fef3c7]",
     },
     {
       label: "On-Going",
       value: 300,
-      icon: <RefreshIcon className="size-6 text-primary" />,
-      iconBg: "bg-primary/10 dark:bg-primary/10",
+      icon: <RefreshIcon className="size-6 text-[#0284c7]" />,
+      iconBg: "bg-[#e0f2fe]",
     },
     {
       label: "Completed",
       value: 830,
-      icon: <CheckCircleIcon className="size-6 text-success" />,
-      iconBg: "bg-success/10",
+      icon: <CheckCircleIcon className="size-6 text-[#10b981]" />,
+      iconBg: "bg-[#d1fae5]",
     },
   ];
 

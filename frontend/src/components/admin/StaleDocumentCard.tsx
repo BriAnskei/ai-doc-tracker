@@ -23,8 +23,8 @@ export default function StaleDocumentsCard() {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left">
-        <thead>
-          <tr className="border-b border-gray-100 dark:border-white/[0.05]">
+        <thead className="bg-[#f1f5f9]">
+          <tr className="border-b border-[#f1f5f9] dark:border-white/[0.05]">
             <th className="text-theme-xs px-3 py-2 font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
               Tracking No.
             </th>
@@ -42,11 +42,11 @@ export default function StaleDocumentsCard() {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-[#f1f5f9]">
           {rows.map((doc) => (
             <tr
               key={doc.trackingNo}
-              className="border-b border-gray-50 last:border-0 dark:border-white/[0.03]"
+              className="dark:border-white/[0.03]"
             >
               <td className="text-theme-sm px-3 py-3 font-medium text-gray-800 dark:text-white/90">
                 {doc.trackingNo}

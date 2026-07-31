@@ -249,14 +249,14 @@ const Calendar: React.FC = () => {
 							<button
 								onClick={closeModal}
 								type="button"
-								className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+								className="flex w-full justify-center rounded-lg border border-[#e2e8f0] bg-white px-4 py-2.5 text-sm font-medium text-[#475569] hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
 							>
 								Close
 							</button>
 							<button
 								onClick={handleAddOrUpdateEvent}
 								type="button"
-								className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+								className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-[#2563eb] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1d4ed8] sm:w-auto"
 							>
 								{selectedEvent ? "Update Changes" : "Add Event"}
 							</button>

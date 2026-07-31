@@ -127,8 +127,8 @@ const AppSidebar: React.FC = () => {
 									className={`ml-auto w-4 h-4 transition-transform duration-200 ${
 										openSubmenu?.type === menuType &&
 										openSubmenu?.index === index
-											? "rotate-180 text-accent"
-											: ""
+											? "rotate-180 text-white"
+											: "text-white/40"
 									}`}
 								/>
 							)}
@@ -199,7 +199,7 @@ const AppSidebar: React.FC = () => {
 
 	return (
 		<aside
-			className={`sidebar-nav fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-primary text-white/80 dark:bg-primary dark:border-gray-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-primary/20
+			className={`sidebar-nav fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-sidebar text-white/80 dark:bg-sidebar dark:border-gray-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-white/10
         ${
 					isExpanded || isMobileOpen
 						? "w-[220px]"
@@ -224,7 +224,7 @@ const AppSidebar: React.FC = () => {
 					/>
 					{(isExpanded || isHovered || isMobileOpen) && (
 						<span className="text-white font-semibold text-sm whitespace-nowrap">
-							Provincial Docs
+						PEO DocTrack
 						</span>
 					)}
 				</Link>

@@ -14,8 +14,8 @@ const statusData = [
 const statusTotal = statusData.reduce((a, d) => a + d.count, 0);
 
 const flow = [
-  { label: "Incoming", value: 800, color: "text-primary", bg: "bg-primary/10 dark:bg-primary/10" },
-  { label: "Outgoing", value: 450, color: "text-secondary", bg: "bg-secondary/10 dark:bg-secondary/10" },
+  { label: "Incoming", value: 800, color: "text-[#3b82f6]", bg: "bg-[#e0e7ff]" },
+  { label: "Outgoing", value: 450, color: "text-[#0284c7]", bg: "bg-[#e0f2fe]" },
 ];
 
 interface Division {
@@ -32,8 +32,8 @@ const divisions: Division[] = [
 ];
 
 const queueStats = [
-  { label: "Pending Extraction", value: 20, sub: "awaiting processing", color: "text-warning", bg: "bg-warning/10" },
-  { label: "Routed Today", value: 50, sub: "sent to recipients", color: "text-success", bg: "bg-success/10" },
+  { label: "Pending Extraction", value: 20, sub: "awaiting processing", color: "text-[#f59e0b]", bg: "bg-[#fef3c7]" },
+  { label: "Routed Today", value: 50, sub: "sent to recipients", color: "text-[#10b981]", bg: "bg-[#d1fae5]" },
 ];
 
 function BuildingIcon({ className }: { className?: string }) {
@@ -174,6 +174,7 @@ function OverviewTab() {
             className="flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-white/[0.05] dark:bg-white/[0.03]"
           >
             <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${f.bg}`}>
+
               {f.label === "Incoming" ? (
                 <svg className={`size-5 ${f.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m0-8l-4 4m4-4l4 4M5 20h14" />
@@ -265,7 +266,7 @@ function UploadsTab({ onViewQueue }: { onViewQueue: () => void }) {
 
       <button
         onClick={onViewQueue}
-        className="text-theme-sm mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 py-2.5 font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.03]"
+        className="text-theme-sm mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#e2e8f0] py-2.5 font-medium text-[#475569] transition-colors hover:bg-gray-50 dark:border-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.03]"
       >
         View Queue <ArrowRightIcon className="size-4" />
       </button>

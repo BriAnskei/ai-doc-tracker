@@ -17,7 +17,7 @@ export default function IncomingDocPage() {
 					headerRight={
 						<button
 							onClick={() => setAuditLogOpen(true)}
-							className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-theme-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.03] hover:bg-gray-50 dark:hover:bg-white/[0.06] hover:text-primary dark:hover:text-secondary hover:border-primary/30 dark:hover:border-secondary/30 transition-colors"
+							className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-theme-xs font-medium text-[#475569] border border-[#e2e8f0] bg-white hover:bg-gray-50 transition-colors"
 							title="View audit log"
 						>
 							<svg

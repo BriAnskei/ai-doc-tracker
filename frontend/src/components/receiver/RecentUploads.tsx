@@ -131,7 +131,7 @@ export default function RecentUploads() {
 						Your latest submitted documents
 					</p>
 				</div>
-				<button className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 self-start sm:self-auto">
+				<button className="inline-flex items-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-4 py-2.5 text-theme-sm font-medium text-[#475569] shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 self-start sm:self-auto">
 					See all
 				</button>
 			</div>
@@ -139,7 +139,7 @@ export default function RecentUploads() {
 			{/* Table */}
 			<div className="overflow-hidden">
 				<Table>
-					<TableHeader className="border-gray-100 dark:border-gray-800 border-y">
+					<TableHeader className="border-y border-[#f1f5f9] dark:border-gray-800">
 						<TableRow>
 							<TableCell
 								isHeader
@@ -168,7 +168,7 @@ export default function RecentUploads() {
 						</TableRow>
 					</TableHeader>
 
-					<TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+					<TableBody className="dark:divide-gray-800">
 						{pagedUploads.map((doc) => (
 							<TableRow
 								key={doc.id}

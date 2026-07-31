@@ -477,7 +477,7 @@ export default function DivisionIncomingDocumentsTable({
           <div className="w-full overflow-x-auto">
             <div className="min-w-0">
               <Table>
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                <TableHeader className="dark:border-white/[0.05]">
                   <TableRow>
                     {[
                       { label: "Code", hide: "" },
@@ -501,7 +501,7 @@ export default function DivisionIncomingDocumentsTable({
                   </TableRow>
                 </TableHeader>
 
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                <TableBody className="dark:divide-white/[0.05]">
                   {filtered.length === 0 ? (
                     <tr>
                       <td

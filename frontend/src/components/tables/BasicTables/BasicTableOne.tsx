@@ -115,7 +115,7 @@ export default function BasicTableOne() {
 			<div className="max-w-full overflow-x-auto">
 				<Table>
 					{/* Table Header */}
-					<TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+					<TableHeader className="dark:border-white/[0.05]">
 						<TableRow>
 							<TableCell
 								isHeader
@@ -151,7 +151,7 @@ export default function BasicTableOne() {
 					</TableHeader>
 
 					{/* Table Body */}
-					<TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+					<TableBody className="dark:divide-white/[0.05]">
 						{tableData.map((order) => (
 							<TableRow key={order.id}>
 								<TableCell className="px-5 py-4 sm:px-6 text-start">

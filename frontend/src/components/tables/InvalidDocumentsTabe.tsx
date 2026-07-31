@@ -323,7 +323,7 @@ export default function InvalidDocumentsTable() {
         <div className="hidden rounded-xl border border-gray-200 bg-white md:block dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div className="w-full overflow-x-auto">
             <Table>
-              <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+              <TableHeader className="dark:border-white/[0.05]">
                 <TableRow>
                   {["Missing Field", "Uploaded At", "Actions"].map((col) => (
                     <TableCell
@@ -337,7 +337,7 @@ export default function InvalidDocumentsTable() {
                 </TableRow>
               </TableHeader>
 
-              <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              <TableBody className="dark:divide-white/[0.05]">
                 {filtered.length === 0 ? (
                   <tr>
                     <td

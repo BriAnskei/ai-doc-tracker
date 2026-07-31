@@ -197,7 +197,7 @@ export default function MissingFieldsModal({
 
           <button
             onClick={handleViewDocument}
-            className="text-theme-sm mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-3.5 py-2.5 font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.05]"
+            className="text-theme-sm mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] px-3.5 py-2.5 font-medium text-[#475569] transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.05]"
           >
             <ExternalLinkIcon className="h-4 w-4" />
             View Document

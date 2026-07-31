@@ -320,7 +320,7 @@ export default function SystemLogsPreview() {
 					<div className="rounded-xl border border-gray-100 dark:border-white/[0.06] overflow-hidden">
 						<table className="w-full text-left">
 							<thead>
-								<tr className="border-b border-gray-100 dark:border-white/[0.06] bg-gray-50/80 dark:bg-white/[0.02]">
+								<tr className="border-b border-[#f1f5f9] dark:border-white/[0.06] bg-[#f1f5f9] dark:bg-white/[0.02]">
 									{[
 										"Level",
 										"Category",
@@ -337,7 +337,7 @@ export default function SystemLogsPreview() {
 									))}
 								</tr>
 							</thead>
-							<tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+							<tbody className="divide-y divide-[#f1f5f9] dark:divide-white/[0.05]">
 								{pagedLogs.map((log) => {
 									const lc = levelConfig[log.level];
 									const cc = categoryConfig[log.category];

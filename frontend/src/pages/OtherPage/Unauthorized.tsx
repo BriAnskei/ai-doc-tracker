@@ -33,7 +33,7 @@ export default function Unauthorized() {
 
 					<Link
 						to="/"
-						className="inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-5 py-3.5 text-sm font-medium text-white shadow-theme-xs hover:bg-secondary hover:border-secondary"
+						className="inline-flex items-center justify-center rounded-lg border border-[#2563eb] bg-[#2563eb] px-5 py-3.5 text-sm font-medium text-white shadow-theme-xs hover:bg-[#1d4ed8] hover:border-[#1d4ed8]"
 					>
 						Back to Home Page
 					</Link>

@@ -9,7 +9,7 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon, iconBg }: MetricCardProps) {
 	return (
-		<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+		<div className="rounded-2xl border border-[#fee8d6] bg-[#fffaf5] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
 			<div className="flex items-center gap-4">
 				<div
 					className={`flex items-center justify-center w-12 h-12 rounded-xl ${iconBg}`}
@@ -17,10 +17,10 @@ function MetricCard({ label, value, icon, iconBg }: MetricCardProps) {
 					{icon}
 				</div>
 				<div className="flex-1">
-					<span className="text-sm text-gray-500 dark:text-gray-400">
+					<span className="text-sm text-[#4b5563] dark:text-gray-400">
 						{label}
 					</span>
-					<h4 className="mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90">
+					<h4 className="mt-1 font-bold text-[#1f2937] text-title-sm dark:text-white/90">
 						{value.toLocaleString()}
 					</h4>
 				</div>
@@ -92,22 +92,20 @@ export default function ReceiverMetrics() {
 		{
 			label: "Total Uploaded",
 			value: 115,
-			icon: <UploadIcon className="size-6 text-primary dark:text-secondary" />,
-			iconBg: "bg-primary/10 dark:bg-secondary/10",
+			icon: <UploadIcon className="size-6 text-[#3b82f6]" />,
+			iconBg: "bg-[#e0e7ff]",
 		},
 		{
 			label: "On-Queue",
 			value: 15,
-			icon: <QueueIcon className="size-6 text-warning dark:text-warning" />,
-			iconBg: "bg-warning/10 dark:bg-warning/10",
+			icon: <QueueIcon className="size-6 text-[#f59e0b]" />,
+			iconBg: "bg-[#fef3c7]",
 		},
 		{
 			label: "Received",
 			value: 100,
-			icon: (
-				<CheckCircleIcon className="size-6 text-success dark:text-success" />
-			),
-			iconBg: "bg-success/10 dark:bg-success/10",
+			icon: <CheckCircleIcon className="size-6 text-[#10b981]" />,
+			iconBg: "bg-[#d1fae5]",
 		},
 	];
 

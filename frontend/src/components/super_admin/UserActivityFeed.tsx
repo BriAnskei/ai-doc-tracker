@@ -109,11 +109,11 @@ const typeConfig: Record<
 	{ bg: string; icon: React.ReactNode; dot: string }
 > = {
 	upload: {
-		dot: "bg-primary",
-		bg: "bg-primary/10 dark:bg-secondary/10",
+		dot: "bg-[#3b82f6]",
+		bg: "bg-[#e0e7ff]",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-primary dark:text-secondary"
+				className="w-3.5 h-3.5 text-[#3b82f6]"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -128,11 +128,11 @@ const typeConfig: Record<
 		),
 	},
 	validate: {
-		dot: "bg-success",
-		bg: "bg-success/10",
+		dot: "bg-[#10b981]",
+		bg: "bg-[#d1fae5]",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-success"
+				className="w-3.5 h-3.5 text-[#10b981]"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -147,11 +147,11 @@ const typeConfig: Record<
 		),
 	},
 	status: {
-		dot: "bg-warning",
-		bg: "bg-warning/10",
+		dot: "bg-[#f59e0b]",
+		bg: "bg-[#fef3c7]",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-warning"
+				className="w-3.5 h-3.5 text-[#f59e0b]"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -166,11 +166,11 @@ const typeConfig: Record<
 		),
 	},
 	login: {
-		dot: "bg-primary",
-		bg: "bg-primary/10 dark:bg-secondary/10",
+		dot: "bg-[#3b82f6]",
+		bg: "bg-[#e0e7ff]",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-primary dark:text-secondary"
+				className="w-3.5 h-3.5 text-[#3b82f6]"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -185,11 +185,11 @@ const typeConfig: Record<
 		),
 	},
 	permission: {
-		dot: "bg-secondary",
-		bg: "bg-secondary/10 dark:bg-secondary/10",
+		dot: "bg-[#0284c7]",
+		bg: "bg-[#e0f2fe]",
 		icon: (
 			<svg
-				className="w-3.5 h-3.5 text-secondary"
+				className="w-3.5 h-3.5 text-[#0284c7]"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"

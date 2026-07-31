@@ -202,7 +202,7 @@ export default function RoutedDivisionsModal({
             <>
               <button
                 onClick={handleClose}
-                className="text-theme-xs rounded-lg border border-gray-200 px-3.5 py-2 font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.06]"
+                className="text-theme-xs rounded-lg border border-[#e2e8f0] px-3.5 py-2 font-medium text-[#475569] transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.06]"
               >
                 Close
               </button>
@@ -217,7 +217,7 @@ export default function RoutedDivisionsModal({
             <>
               <button
                 onClick={handleCancelEdit}
-                className="text-theme-xs rounded-lg border border-gray-200 px-3.5 py-2 font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.06]"
+                className="text-theme-xs rounded-lg border border-[#e2e8f0] px-3.5 py-2 font-medium text-[#475569] transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.06]"
               >
                 Cancel
               </button>

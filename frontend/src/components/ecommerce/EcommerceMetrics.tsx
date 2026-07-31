@@ -10,17 +10,17 @@ export default function EcommerceMetrics() {
 	return (
 		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
 			{/* <!-- Metric Item Start --> */}
-			<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-				<div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-					<GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
+			<div className="rounded-2xl border border-[#fee8d6] bg-[#fffaf5] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+				<div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#e0e7ff]">
+					<GroupIcon className="text-[#3b82f6] size-6" />
 				</div>
 
 				<div className="flex items-end justify-between mt-5">
 					<div>
-						<span className="text-sm text-gray-500 dark:text-gray-400">
+						<span className="text-sm text-[#4b5563] dark:text-gray-400">
 							Customers
 						</span>
-						<h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+						<h4 className="mt-2 font-bold text-[#1f2937] text-title-sm dark:text-white/90">
 							3,782
 						</h4>
 					</div>
@@ -33,16 +33,16 @@ export default function EcommerceMetrics() {
 			{/* <!-- Metric Item End --> */}
 
 			{/* <!-- Metric Item Start --> */}
-			<div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-				<div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-					<BoxIconLine className="text-gray-800 size-6 dark:text-white/90" />
+			<div className="rounded-2xl border border-[#fee8d6] bg-[#fffaf5] p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+				<div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#e0e7ff]">
+					<BoxIconLine className="text-[#3b82f6] size-6" />
 				</div>
 				<div className="flex items-end justify-between mt-5">
 					<div>
-						<span className="text-sm text-gray-500 dark:text-gray-400">
+						<span className="text-sm text-[#4b5563] dark:text-gray-400">
 							Orders
 						</span>
-						<h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+						<h4 className="mt-2 font-bold text-[#1f2937] text-title-sm dark:text-white/90">
 							5,359
 						</h4>
 					</div>

@@ -183,7 +183,7 @@ export default function IncomingExtractionPanel({
         <div className="shrink-0 border-t border-gray-100 pt-4 dark:border-gray-800">
           <button
             type="button"
-            className="bg-primary text-theme-sm hover:bg-primary/90 focus:ring-primary/30 w-full rounded-xl px-4 py-2.5 font-semibold text-white shadow-sm transition focus:ring-2 focus:outline-none active:scale-[0.98]"
+            className="bg-[#2563eb] text-theme-sm hover:bg-[#2563eb]/90 focus:ring-[#2563eb]/30 w-full rounded-xl px-4 py-2.5 font-semibold text-white shadow-sm transition focus:ring-2 focus:outline-none active:scale-[0.98]"
           >
             Save Document
           </button>

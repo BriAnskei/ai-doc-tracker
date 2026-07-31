@@ -23,7 +23,7 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-theme-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-primary hover:border-primary/30 dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400 dark:hover:text-secondary disabled:cursor-not-allowed disabled:opacity-40 dark:disabled:text-gray-600"
+          className="inline-flex items-center justify-center rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1.5 text-theme-xs font-medium text-[#475569] transition-colors hover:bg-gray-50 hover:text-[#2563eb] hover:border-[#2563eb]/30 dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400 dark:hover:text-[#2563eb] disabled:cursor-not-allowed disabled:opacity-40 dark:disabled:text-gray-600"
         >
           ← Prev
         </button>
@@ -33,8 +33,8 @@ export default function Pagination({
             onClick={() => onPageChange(page)}
             className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1.5 text-theme-xs font-medium transition-colors ${
               page === currentPage
-                ? "bg-primary text-white dark:bg-secondary"
-                : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-primary hover:border-primary/30 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-400 dark:hover:text-secondary"
+                ? "bg-[#2563eb] text-white dark:bg-[#2563eb]"
+                : "bg-white text-[#475569] border border-[#e2e8f0] hover:bg-gray-50 hover:text-[#2563eb] hover:border-[#2563eb]/30 dark:bg-white/[0.03] dark:border-white/[0.05] dark:text-gray-400 dark:hover:text-[#2563eb]"
             }`}
           >
             {page}
@@ -43,7 +43,7 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-theme-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-primary hover:border-primary/30 dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400 dark:hover:text-secondary disabled:cursor-not-allowed disabled:opacity-40 dark:disabled:text-gray-600"
+          className="inline-flex items-center justify-center rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1.5 text-theme-xs font-medium text-[#475569] transition-colors hover:bg-gray-50 hover:text-[#2563eb] hover:border-[#2563eb]/30 dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400 dark:hover:text-[#2563eb] disabled:cursor-not-allowed disabled:opacity-40 dark:disabled:text-gray-600"
         >
           Next →
         </button>
