@@ -8,7 +8,6 @@ import MissingFieldsModal from "../ui/modal/document/MissingFieldsModal";
 
 export interface InvalidDocument {
   id: number;
-  uploaderName: string;
   fileName: string;
   from: string;
   uploadedAt: string;
@@ -16,12 +15,11 @@ export interface InvalidDocument {
   fileUrl: string;
 }
 
-// ─── Mock Data ─────────────────────────────────────────────────────────
+// ─── Mock Data (fallback) ─────────────────────────────────────────────────────────
 
 const mockData: InvalidDocument[] = [
   {
     id: 1,
-    uploaderName: "Maria Santos",
     fileName: "memo-budget-allocation.pdf",
     from: "Barangay Hall",
     uploadedAt: "2024-01-10T09:14:00",
@@ -30,7 +28,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 2,
-    uploaderName: "Juan dela Cruz",
     fileName: "construction-proposal.pdf",
     from: "Engineering Division",
     uploadedAt: "2024-01-14T14:30:00",
@@ -39,7 +36,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 3,
-    uploaderName: "Ana Reyes",
     fileName: "inspection-report.pdf",
     from: "City Mayor's Office",
     uploadedAt: "2024-01-18T11:05:00",
@@ -48,7 +44,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 4,
-    uploaderName: "Carlos Mendoza",
     fileName: "fund-release-order.pdf",
     from: "Treasury Office",
     uploadedAt: "2024-01-22T08:47:00",
@@ -57,7 +52,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 5,
-    uploaderName: "Liza Torres",
     fileName: "permit-application.pdf",
     from: "Planning Office",
     uploadedAt: "2024-01-25T16:20:00",
@@ -66,7 +60,6 @@ const mockData: InvalidDocument[] = [
   },
   {
     id: 6,
-    uploaderName: "Ramon Garcia",
     fileName: "health-advisory.pdf",
     from: "Health Office",
     uploadedAt: "2024-02-01T10:00:00",
@@ -236,7 +229,6 @@ export default function InvalidDocumentsTable() {
     const q = search.toLowerCase();
     const matchesSearch =
       !q ||
-      r.uploaderName.toLowerCase().includes(q) ||
       r.fileName.toLowerCase().includes(q);
     const date = new Date(r.uploadedAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
@@ -276,7 +268,7 @@ export default function InvalidDocumentsTable() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by uploader or file name…"
+              placeholder="Search by file name…"
               className={`w-full pr-4 pl-9 ${inputCls}`}
             />
           </div>
@@ -335,7 +327,7 @@ export default function InvalidDocumentsTable() {
               >
                 <div className="flex items-start justify-between">
                   <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                    {record.uploaderName}
+                    {record.fileName}
                   </p>
                   <span className="text-[10px] font-semibold text-danger">
                     {record.missingFields.length} missing
@@ -420,7 +412,7 @@ export default function InvalidDocumentsTable() {
               <TableHeader className="dark:border-white/[0.05]">
                 <TableRow>
                   {[
-                    "Uploaders Name",
+                    "File Name",
                     "Missing Field",
                     "Uploaded At",
                     "Actions",
@@ -453,7 +445,7 @@ export default function InvalidDocumentsTable() {
                       className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                     >
                       <TableCell className="text-theme-sm px-3 py-3 font-medium whitespace-nowrap text-gray-800 dark:text-white/90">
-                        {record.uploaderName}
+                        {record.fileName}
                       </TableCell>
 
                       <TableCell className="text-theme-sm px-3 py-3 text-left font-semibold text-danger dark:text-danger">

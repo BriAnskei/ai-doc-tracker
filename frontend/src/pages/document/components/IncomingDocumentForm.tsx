@@ -1,9 +1,19 @@
-// ─── DocumentUploadForm.tsx ───────────────────────────────────────────────────
-// Requires: npm install qrcode.react
-// Add QRCodeModal.tsx alongside this file (or adjust the import path below).
+// ─── IncomingDocumentForm.tsx ──────────────────────────────────────────
+// Receiver upload form with client-side PDF text extraction and
+// backend AI field extraction.
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import * as pdfjsLib from "pdfjs-dist";
+import Tesseract from "tesseract.js";
+import axios from "axios";
 import QRCodeModal from "../../../components/receiver/QRCodeModal";
+import { userUser } from "../../../context/UserContext";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // ── Helpers ──────────────────────────────────────────────
 
@@ -21,23 +31,25 @@ function formatSize(bytes: number) {
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// Mock tracking ID/URL generator — replace trackingUrl's base once a real
-// client-facing status page exists.
-function generateTracking() {
-	const id = `DOC-${Math.random()
-		.toString(36)
-		.slice(2, 8)
-		.toUpperCase()}${Date.now().toString(36).slice(-2).toUpperCase()}`;
-	const url = `${window.location.origin}/document/track`;
-	return { id, url };
-}
-
 const ACCEPTED = ".pdf";
 const MAX_MB = 20;
+
+// ── Types ────────────────────────────────────────────────
+
+interface UploadResult {
+	success: boolean;
+	fileId: string;
+	queueId?: string;
+	invalidDocId?: string;
+	missingFields?: string[];
+	message: string;
+}
 
 // ── Component ─────────────────────────────────────────────
 
 export default function IncomingDocumentForm() {
+	const { userId } = userUser();
+
 	const [file, setFile] = useState<File | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +60,11 @@ export default function IncomingDocumentForm() {
 		null,
 	);
 	const [showQrModal, setShowQrModal] = useState(false);
+	const [extractionStatus, setExtractionStatus] = useState<
+		"idle" | "extracting" | "ai-processing" | "done" | "error"
+	>("idle");
+	const [extractionMessage, setExtractionMessage] = useState<string>("");
+	const [missingFields, setMissingFields] = useState<string[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const today = formatDate(new Date());
@@ -72,6 +89,9 @@ export default function IncomingDocumentForm() {
 		setFile(candidate);
 		setSubmitted(false);
 		setTracking(null);
+		setExtractionStatus("idle");
+		setExtractionMessage("");
+		setMissingFields([]);
 	}
 
 	function removeFile() {
@@ -80,6 +100,9 @@ export default function IncomingDocumentForm() {
 		setSubmitted(false);
 		setProgress(0);
 		setTracking(null);
+		setExtractionStatus("idle");
+		setExtractionMessage("");
+		setMissingFields([]);
 		if (inputRef.current) inputRef.current.value = "";
 	}
 
@@ -101,31 +124,139 @@ export default function IncomingDocumentForm() {
 		addFile(e.target.files);
 	}
 
+	// ── PDF text extraction ──
+
+	const extractPdfText = async (pdfFile: File): Promise<string> => {
+		try {
+			const arrBuffer = await pdfFile.arrayBuffer();
+			const pdf = await pdfjsLib.getDocument({ data: arrBuffer }).promise;
+			let text = "";
+			for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+				const page = await pdf.getPage(pageNum);
+				const content = await page.getTextContent();
+				const pageText = content.items.map((item: any) => item.str).join(" ");
+				text += `\n\n--- PAGE ${pageNum} ---\n${pageText}`;
+			}
+			return text;
+		} catch (error) {
+			console.error("PDF text extraction error:", error);
+			return "";
+		}
+	};
+
+	const extractOcr = async (pdfFile: File): Promise<string> => {
+		try {
+			const arrBuffer = await pdfFile.arrayBuffer();
+			const pdf = await pdfjsLib.getDocument({ data: arrBuffer }).promise;
+			let fullText = "";
+			for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+				const page = await pdf.getPage(pageNum);
+				const viewport = page.getViewport({ scale: 2 });
+				const canvas = document.createElement("canvas");
+				const context = canvas.getContext("2d");
+				if (!context) continue;
+				canvas.width = viewport.width;
+				canvas.height = viewport.height;
+				await page.render({ canvasContext: context, canvas, viewport }).promise;
+				const image = canvas.toDataURL("image/png");
+				const result = await Tesseract.recognize(image, "eng", {
+					logger: (m) => console.log(m),
+				});
+				fullText += `\n\n--- PAGE ${pageNum} ---\n` + result.data.text;
+			}
+			return fullText;
+		} catch (error) {
+			console.error("OCR extraction error:", error);
+			return "";
+		}
+	};
+
 	// ── Submit ──
 
-	function handleSubmit() {
+	async function handleSubmit() {
 		if (!file || isSubmitting) return;
+		if (!userId) {
+			setExtractionStatus("error");
+			setExtractionMessage("You must be signed in to upload a document.");
+			setIsSubmitting(false);
+			return;
+		}
 		setIsSubmitting(true);
 		setProgress(0);
+		setExtractionStatus("extracting");
+		setExtractionMessage("Extracting text from PDF…");
 
-		const interval = setInterval(() => {
-			setProgress((p) => {
-				const next = p + Math.random() * 18 + 8;
-				if (next >= 100) {
-					clearInterval(interval);
-					setTimeout(() => {
-						setIsSubmitting(false);
-						setSubmitted(true);
-						setProgress(0);
-						const newTracking = generateTracking();
-						setTracking(newTracking);
-						setShowQrModal(true);
-					}, 400);
-					return 100;
+		try {
+			// Step 1: Extract text from PDF
+			let text = await extractPdfText(file);
+
+			if (!text || text.trim().length <= 50) {
+				setExtractionMessage("Text too short — running OCR on scanned document…");
+				setProgress(30);
+				text = await extractOcr(file);
+			}
+
+			setExtractionStatus("ai-processing");
+			setExtractionMessage("Sending document for AI field extraction…");
+			setProgress(60);
+
+			// Step 2: Send file + extracted text to backend
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("documentText", text || "");
+			formData.append("uploaderId", userId || "");
+
+			const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+			const response = await axios.post<UploadResult>(
+				`${apiUrl}/upload/receiver`,
+				formData,
+				{
+					headers: { "Content-Type": "multipart/form-data" },
+					onUploadProgress: (event) => {
+						if (event.total) {
+							const pct = Math.round((event.loaded / event.total) * 40) + 60;
+							setProgress(Math.min(pct, 95));
+						}
+					},
+				},
+			);
+
+			setProgress(100);
+
+			// Step 3: Handle response
+			if (response.data.success) {
+				setSubmitted(true);
+				setExtractionStatus("done");
+				setExtractionMessage(response.data.message);
+
+				if (response.data.missingFields && response.data.missingFields.length > 0) {
+					setMissingFields(response.data.missingFields);
 				}
-				return next;
-			});
-		}, 120);
+
+				if (response.data.queueId) {
+					const newTracking = {
+						id: response.data.queueId,
+						url: `${window.location.origin}/document/track`,
+					};
+					setTracking(newTracking);
+					setShowQrModal(true);
+				}
+			} else {
+				setExtractionStatus("error");
+				setExtractionMessage(
+					response.data.message || "Upload failed",
+				);
+			}
+		} catch (error: any) {
+			console.error("Upload error:", error);
+			setExtractionStatus("error");
+			setExtractionMessage(
+				error?.response?.data?.message || "An error occurred during upload",
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
 	}
 
 	// ── Shared classes ──
@@ -289,6 +420,41 @@ export default function IncomingDocumentForm() {
 				</div>
 			)}
 
+			{/* ── Extraction status ── */}
+			{extractionStatus !== "idle" && (
+				<div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-theme-xs">
+					{extractionStatus === "extracting" && (
+						<span className="text-blue-600 dark:text-blue-400">
+							📄 {extractionMessage}
+						</span>
+					)}
+					{extractionStatus === "ai-processing" && (
+						<span className="text-purple-600 dark:text-purple-400">
+							🤖 {extractionMessage}
+						</span>
+					)}
+					{extractionStatus === "done" && (
+						<span className="text-success">✅ {extractionMessage}</span>
+					)}
+					{extractionStatus === "error" && (
+						<span className="text-danger">❌ {extractionMessage}</span>
+					)}
+				</div>
+			)}
+
+			{/* ── Missing fields alert ── */}
+			{missingFields.length > 0 && (
+				<div className="rounded-lg border border-danger/20 bg-danger/5 px-3 py-2 text-theme-xs text-danger">
+					⚠️ Missing fields detected:{" "}
+					{missingFields.map((f) => (
+						<span key={f} className="font-medium underline">
+							{f}
+						</span>
+					))}
+					. The document has been flagged for review.
+				</div>
+			)}
+
 			{/* ── Footer ── */}
 			<div className="flex items-center justify-between gap-3 border-t border-gray-100 dark:border-white/[0.05] pt-4 flex-wrap">
 				<p className="text-theme-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
@@ -305,7 +471,7 @@ export default function IncomingDocumentForm() {
 							d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
 						/>
 					</svg>
-					Files go to validation queue before entering the system.
+					Files are validated by AI before entering the system.
 				</p>
 
 				<div className="flex items-center gap-3">
@@ -325,7 +491,7 @@ export default function IncomingDocumentForm() {
 										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 									/>
 								</svg>
-								Submitted for validation
+								{missingFields.length > 0 ? "Flagged — Missing Fields" : "Queued for Processing"}
 							</span>
 							<button
 								onClick={() => setShowQrModal(true)}
@@ -354,7 +520,7 @@ export default function IncomingDocumentForm() {
 								d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
 							/>
 						</svg>
-						{isSubmitting ? "Submitting…" : "Submit for validation"}
+						{isSubmitting ? "Processing…" : "Submit for Validation"}
 					</button>
 				</div>
 			</div>
