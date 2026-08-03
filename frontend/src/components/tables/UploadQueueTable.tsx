@@ -1,65 +1,21 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
 import { Table, TableHeader, TableRow, TableCell, TableBody } from "../ui/table";
+import axios from "axios";
+import { userUser } from "../../context/UserContext";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────
 
-interface ValidationDocument {
-  id: number;
-  uploaderName: string;
-  from: string;
-  uploadedAt: string;
+interface QueueDocument {
+  id: string;
+  fileId: string;
+  fileName: string;
+  filePath: string;
   fileUrl: string;
+  status: string;
+  createdAt: string;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const mockData: ValidationDocument[] = [
-  {
-    id: 1,
-    uploaderName: "Maria Santos",
-    from: "Barangay Hall",
-    uploadedAt: "2024-01-10T09:14:00",
-    fileUrl: "/files/doc-001.pdf",
-  },
-  {
-    id: 2,
-    uploaderName: "Juan dela Cruz",
-    from: "Engineering Division",
-    uploadedAt: "2024-01-14T14:30:00",
-    fileUrl: "/files/doc-002.pdf",
-  },
-  {
-    id: 3,
-    uploaderName: "Ana Reyes",
-    from: "City Mayor's Office",
-    uploadedAt: "2024-01-18T11:05:00",
-    fileUrl: "/files/doc-003.pdf",
-  },
-  {
-    id: 4,
-    uploaderName: "Carlos Mendoza",
-    from: "Treasury Office",
-    uploadedAt: "2024-01-22T08:47:00",
-    fileUrl: "/files/doc-004.pdf",
-  },
-  {
-    id: 5,
-    uploaderName: "Liza Torres",
-    from: "Planning Office",
-    uploadedAt: "2024-01-25T16:20:00",
-    fileUrl: "/files/doc-005.pdf",
-  },
-  {
-    id: 6,
-    uploaderName: "Ramon Garcia",
-    from: "Health Office",
-    uploadedAt: "2024-02-01T10:00:00",
-    fileUrl: "/files/doc-006.pdf",
-  },
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("en-PH", {
@@ -72,21 +28,41 @@ function formatDateTime(iso: string) {
   });
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────
 
 export default function UploadQueueTable() {
+  const { userId } = userUser();
   const [search, setSearch] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
 
-  const navigate = useNavigate();
+  const [data, setData] = useState<QueueDocument[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const hasFilters = search || filterDateFrom || filterDateTo;
 
-  const filtered = mockData.filter((r) => {
+  // Fetch queued documents from API
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const response = await axios.get<{ data: QueueDocument[]; total: number }>(
+          `${apiUrl}/upload-queue`,
+        );
+        setData(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch upload queue:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [userId]);
+
+  const filtered = data.filter((r) => {
     const q = search.toLowerCase();
-    const matchesSearch = !q || r.uploaderName.toLowerCase().includes(q);
-    const date = new Date(r.uploadedAt);
+    const matchesSearch = !q || r.fileName.toLowerCase().includes(q);
+    const date = new Date(r.createdAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
     return matchesSearch && matchesFrom && matchesTo;
@@ -124,7 +100,7 @@ export default function UploadQueueTable() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by uploader name…"
+              placeholder="Search by file name…"
               className={`w-full pr-4 pl-9 ${inputCls}`}
             />
           </div>
@@ -171,9 +147,13 @@ export default function UploadQueueTable() {
 
         {/* ── Mobile Cards (< md) ── */}
         <div className="space-y-3 md:hidden">
-          {filtered.length === 0 ? (
+          {loading ? (
             <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
-              No records match your filters.
+              Loading…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
+              No queued documents match your filters.
             </div>
           ) : (
             filtered.map((record) => (
@@ -181,28 +161,31 @@ export default function UploadQueueTable() {
                 key={record.id}
                 className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-white/[0.08] dark:bg-white/[0.03]"
               >
-                <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                  {record.uploaderName}
-                </p>
-                <div>
-                  <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
-                    From
+                <div className="flex items-start justify-between">
+                  <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    {record.fileName}
                   </p>
-                  <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
-                    {record.from}
-                  </p>
+                  <span className="text-[10px] font-semibold text-success">
+                    {record.status}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
-                    Uploaded At
-                  </p>
-                  <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
-                    {formatDateTime(record.uploadedAt)}
-                  </p>
+
+                <div className="flex flex-col gap-1.5">
+                  <div>
+                    <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                      Uploaded At
+                    </p>
+                    <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
+                      {formatDateTime(record.createdAt)}
+                    </p>
+                  </div>
                 </div>
-                <div className="border-t border-gray-100 pt-1 dark:border-white/[0.05]">
-                  <button
-                    onClick={() => navigate("/upload-direct")}
+
+                <div className="border-t border-gray-100 pt-3 dark:border-white/[0.05]">
+                  <a
+                    href={record.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
                   >
                     <svg
@@ -215,15 +198,21 @@ export default function UploadQueueTable() {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M5 12h14M13 6l6 6-6 6"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
-                    Extract &amp; Route
-                  </button>
+                    View File
+                  </a>
                 </div>
               </div>
             ))
           )}
+
           {filtered.length > 0 && (
             <p className="text-theme-xs px-1 text-right text-gray-400 dark:text-gray-500">
               Showing{" "}
@@ -232,7 +221,7 @@ export default function UploadQueueTable() {
               </span>{" "}
               of{" "}
               <span className="font-medium text-gray-600 dark:text-gray-300">
-                {mockData.length}
+                {data.length}
               </span>{" "}
               records
             </p>
@@ -245,7 +234,12 @@ export default function UploadQueueTable() {
             <Table>
               <TableHeader className="dark:border-white/[0.05]">
                 <TableRow>
-                  {["Uploader's Name", "From", "Uploaded At", "Action"].map((col) => (
+                  {[
+                    "File Name",
+                    "Status",
+                    "Uploaded At",
+                    "Action",
+                  ].map((col) => (
                     <TableCell
                       key={col}
                       isHeader
@@ -258,10 +252,22 @@ export default function UploadQueueTable() {
               </TableHeader>
 
               <TableBody className="dark:divide-white/[0.05]">
-                {filtered.length === 0 ? (
+                {loading ? (
                   <tr>
-                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
-                      No records match your filters.
+                    <td
+                      colSpan={4}
+                      className="text-theme-sm px-5 py-10 text-center text-gray-400"
+                    >
+                      Loading…
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-theme-sm px-5 py-10 text-center text-gray-400"
+                    >
+                      No queued documents match your filters.
                     </td>
                   </tr>
                 ) : (
@@ -271,22 +277,23 @@ export default function UploadQueueTable() {
                       className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
                     >
                       <TableCell className="text-theme-sm px-3 py-3 font-medium whitespace-nowrap text-gray-800 dark:text-white/90">
-                        {record.uploaderName}
+                        {record.fileName}
+                      </TableCell>
+
+                      <TableCell className="text-theme-sm px-3 py-3 text-left font-semibold text-success dark:text-success">
+                        {record.status}
                       </TableCell>
 
                       <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                        {record.from}
-                      </TableCell>
-
-                      <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                        {formatDateTime(record.uploadedAt)}
+                        {formatDateTime(record.createdAt)}
                       </TableCell>
 
                       <TableCell className="px-3 py-3">
-                        <button
-                          onClick={() => navigate("/upload-direct")}
+                        <a
+                          href={record.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors duration-150 hover:text-white"
-                          title="Extract & Route document"
                         >
                           <svg
                             className="h-3.5 w-3.5 flex-shrink-0"
@@ -298,11 +305,16 @@ export default function UploadQueueTable() {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="M5 12h14M13 6l6 6-6 6"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                             />
                           </svg>
-                          Extract &amp; Route
-                        </button>
+                          View File
+                        </a>
                       </TableCell>
                     </TableRow>
                   ))
@@ -320,7 +332,7 @@ export default function UploadQueueTable() {
                 </span>{" "}
                 of{" "}
                 <span className="font-medium text-gray-600 dark:text-gray-300">
-                  {mockData.length}
+                  {data.length}
                 </span>{" "}
                 records
               </span>

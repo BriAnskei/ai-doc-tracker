@@ -3,72 +3,23 @@ import { useNavigate } from "react-router";
 import { Table, TableHeader, TableRow, TableCell, TableBody } from "../ui/table";
 import { useNotifications } from "../../context/NotificationsContext";
 import MissingFieldsModal from "../ui/modal/document/MissingFieldsModal";
+import axios from "axios";
 
 // ─── Types ─────────────────────────────────────────────────────────────
 
 export interface InvalidDocument {
-  id: number;
+  id: string;
   fileName: string;
   from: string;
   uploadedAt: string;
   missingFields: string[];
   fileUrl: string;
+  aiResponse: Record<string, string> | null;
+  remarks: string | null;
+  isMarkInvalid: boolean;
 }
 
-// ─── Mock Data (fallback) ─────────────────────────────────────────────────────────
-
-const mockData: InvalidDocument[] = [
-  {
-    id: 1,
-    fileName: "memo-budget-allocation.pdf",
-    from: "Barangay Hall",
-    uploadedAt: "2024-01-10T09:14:00",
-    missingFields: ["Subject", "Date Received"],
-    fileUrl: "/files/doc-001.pdf",
-  },
-  {
-    id: 2,
-    fileName: "construction-proposal.pdf",
-    from: "Engineering Division",
-    uploadedAt: "2024-01-14T14:30:00",
-    missingFields: ["To"],
-    fileUrl: "/files/doc-002.pdf",
-  },
-  {
-    id: 3,
-    fileName: "inspection-report.pdf",
-    from: "City Mayor's Office",
-    uploadedAt: "2024-01-18T11:05:00",
-    missingFields: ["Subject", "From", "Date Received"],
-    fileUrl: "/files/doc-003.pdf",
-  },
-  {
-    id: 4,
-    fileName: "fund-release-order.pdf",
-    from: "Treasury Office",
-    uploadedAt: "2024-01-22T08:47:00",
-    missingFields: ["To", "Date Received"],
-    fileUrl: "/files/doc-004.pdf",
-  },
-  {
-    id: 5,
-    fileName: "permit-application.pdf",
-    from: "Planning Office",
-    uploadedAt: "2024-01-25T16:20:00",
-    missingFields: ["Subject"],
-    fileUrl: "/files/doc-005.pdf",
-  },
-  {
-    id: 6,
-    fileName: "health-advisory.pdf",
-    from: "Health Office",
-    uploadedAt: "2024-02-01T10:00:00",
-    missingFields: ["From", "To", "Date Received"],
-    fileUrl: "/files/doc-006.pdf",
-  },
-];
-
-// ─── Helpers ────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("en-PH", {
@@ -81,7 +32,7 @@ function formatDateTime(iso: string) {
   });
 }
 
-// ── Kebab Action Menu ───────────────────────────────────────────────────
+// ── Kebab Action Menu ─────────────────────────────────────────────────
 
 function KebabIcon({ className }: { className?: string }) {
   return (
@@ -151,18 +102,21 @@ function KebabActionMenu({
   );
 }
 
-// ─── Main Component ─────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────
 
 export default function InvalidDocumentsTable() {
   const [search, setSearch] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
 
+  const [data, setData] = useState<InvalidDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [pendingRejectId, setPendingRejectId] = useState<number | null>(null);
-  const [rejectedIds, setRejectedIds] = useState<number[]>([]);
+  const [pendingRejectId, setPendingRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectReasonError, setRejectReasonError] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   // Missing Fields modal state
   const [showFieldsModal, setShowFieldsModal] = useState(false);
@@ -173,8 +127,23 @@ export default function InvalidDocumentsTable() {
 
   const hasFilters = search || filterDateFrom || filterDateTo;
 
-  // Only show documents that haven't been rejected yet
-  const activeData = mockData.filter((r) => !rejectedIds.includes(r.id));
+  // Fetch invalid documents from API
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const response = await axios.get<{ data: InvalidDocument[]; total: number }>(
+          `${apiUrl}/upload-invalid`,
+        );
+        setData(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch invalid documents:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   function handleOpenFieldsModal(record: InvalidDocument) {
     setActiveRecord(record);
@@ -186,7 +155,39 @@ export default function InvalidDocumentsTable() {
     setActiveRecord(null);
   }
 
-  function handleRejectClick(id: number) {
+  async function handleRejectConfirm() {
+    if (pendingRejectId === null) return;
+
+    if (!rejectReason.trim()) {
+      setRejectReasonError(true);
+      return;
+    }
+
+    setRejecting(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      await axios.patch(`${apiUrl}/invalid-documents/${pendingRejectId}/mark-invalid`);
+
+      // Remove the rejected item from local state
+      setData((prev) => prev.filter((r) => r.id !== pendingRejectId));
+      setShowRejectConfirm(false);
+      setPendingRejectId(null);
+      setRejectReason("");
+      setRejectReasonError(false);
+
+      addNotification?.({
+        title: "Document Marked Invalid",
+        description: `Document has been marked as invalid and will be returned to the receiver.`,
+        type: "warning",
+      });
+    } catch (error) {
+      console.error("Failed to mark document as invalid:", error);
+    } finally {
+      setRejecting(false);
+    }
+  }
+
+  function handleRejectClick(id: string) {
     setShowFieldsModal(false);
     setActiveRecord(null);
     setRejectReason("");
@@ -195,41 +196,16 @@ export default function InvalidDocumentsTable() {
     setShowRejectConfirm(true);
   }
 
-  function handleProcess(id: number) {
-    // Same destination as the previous "Edit & Route" action
+  function handleProcess(id: string) {
     void id;
     setShowFieldsModal(false);
     setActiveRecord(null);
     navigate("/upload-direct");
   }
 
-  function handleRejectConfirm() {
-    if (pendingRejectId === null) return;
-
-    if (!rejectReason.trim()) {
-      setRejectReasonError(true);
-      return;
-    }
-
-    setRejectedIds((prev) => [...prev, pendingRejectId]);
-    setShowRejectConfirm(false);
-    setPendingRejectId(null);
-    setRejectReason("");
-    setRejectReasonError(false);
-  }
-
-  function handleRejectCancel() {
-    setShowRejectConfirm(false);
-    setPendingRejectId(null);
-    setRejectReason("");
-    setRejectReasonError(false);
-  }
-
-  const filtered = activeData.filter((r) => {
+  const filtered = data.filter((r) => {
     const q = search.toLowerCase();
-    const matchesSearch =
-      !q ||
-      r.fileName.toLowerCase().includes(q);
+    const matchesSearch = !q || r.fileName.toLowerCase().includes(q);
     const date = new Date(r.uploadedAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
@@ -315,7 +291,11 @@ export default function InvalidDocumentsTable() {
 
         {/* ── Mobile Cards (< md) ── */}
         <div className="space-y-3 md:hidden">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
+              Loading…
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-theme-sm rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-gray-400 dark:border-white/[0.08] dark:bg-white/[0.03]">
               No invalid documents match your filters.
             </div>
@@ -398,7 +378,7 @@ export default function InvalidDocumentsTable() {
               </span>{" "}
               of{" "}
               <span className="font-medium text-gray-600 dark:text-gray-300">
-                {activeData.length}
+                {data.length}
               </span>{" "}
               records
             </p>
@@ -429,7 +409,16 @@ export default function InvalidDocumentsTable() {
               </TableHeader>
 
               <TableBody className="dark:divide-white/[0.05]">
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-theme-sm px-5 py-10 text-center text-gray-400"
+                    >
+                      Loading…
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td
                       colSpan={4}
@@ -478,7 +467,7 @@ export default function InvalidDocumentsTable() {
                 </span>{" "}
                 of{" "}
                 <span className="font-medium text-gray-600 dark:text-gray-300">
-                  {activeData.length}
+                  {data.length}
                 </span>{" "}
                 records
               </span>
@@ -501,7 +490,7 @@ export default function InvalidDocumentsTable() {
         <div
           className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 px-4"
           onClick={(e) =>
-            e.target === e.currentTarget && handleRejectCancel()
+            e.target === e.currentTarget && handleRejectConfirm()
           }
         >
           <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-gray-900">
@@ -526,9 +515,8 @@ export default function InvalidDocumentsTable() {
                 Reject document?
               </h2>
               <p className="text-theme-xs mt-1.5 leading-relaxed text-gray-500 dark:text-gray-400">
-                This will send the document back to the receiver with a{" "}
-                <span className="font-medium text-danger">Rejected</span>{" "}
-                status. The receiver will be notified and can fix the missing
+                This will mark the document as invalid and return it to the
+                receiver. The receiver will be notified and can fix the missing
                 metadata and re-upload.
               </p>
 
@@ -560,29 +548,22 @@ export default function InvalidDocumentsTable() {
 
             <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.05]">
               <button
-                onClick={handleRejectCancel}
+                onClick={() => {
+                  setShowRejectConfirm(false);
+                  setPendingRejectId(null);
+                  setRejectReason("");
+                  setRejectReasonError(false);
+                }}
                 className="text-theme-sm rounded-lg border border-gray-200 px-3 py-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-400 dark:hover:bg-white/[0.04]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRejectConfirm}
-                className="text-theme-sm inline-flex items-center gap-1.5 rounded-lg bg-danger px-3 py-2 font-medium text-white transition-colors hover:bg-danger/90"
+                disabled={rejecting}
+                className="text-theme-sm inline-flex items-center gap-1.5 rounded-lg bg-danger px-3 py-2 font-medium text-white transition-colors hover:bg-danger/90 disabled:opacity-50"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Reject
+                {rejecting ? "Rejecting…" : "Reject"}
               </button>
             </div>
           </div>

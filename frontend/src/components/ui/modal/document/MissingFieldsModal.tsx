@@ -85,8 +85,8 @@ interface MissingFieldsModalProps {
   document: InvalidDocument | null;
   isOpen: boolean;
   onClose: () => void;
-  onReject: (id: number) => void;
-  onProcess: (id: number) => void;
+  onReject: (id: string) => void;
+  onProcess: (id: string) => void;
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────

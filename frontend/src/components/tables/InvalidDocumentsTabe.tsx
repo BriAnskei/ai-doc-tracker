@@ -5,12 +5,13 @@ import { userUser } from "../../context/UserContext";
 
 // ─── Types ─────────────────────────────────────────────────────
 
-interface InvalidDocument {
+export interface InvalidDocument {
   id: string;
   fileName: string;
   fileUrl: string;
   missingFields: string[];
   createdAt: string;
+  isMarkInvalid: boolean;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -39,17 +40,14 @@ export default function InvalidDocumentsTable() {
 
   const hasFilters = search || filterDateFrom || filterDateTo;
 
-  // Fetch invalid documents from API, filtered by current user
+  // Fetch receiver invalid documents from API
   useEffect(() => {
     async function fetchData() {
       if (!userId) return;
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
         const response = await axios.get<{ data: InvalidDocument[]; total: number }>(
-          `${apiUrl}/invalid-documents`,
-          {
-            params: { uploaderId: userId },
-          },
+          `${apiUrl}/invalid-documents/receiver`,
         );
         setData(response.data.data);
       } catch (error) {
@@ -63,9 +61,7 @@ export default function InvalidDocumentsTable() {
 
   const filtered = data.filter((r) => {
     const q = search.toLowerCase();
-    const matchesSearch =
-      !q ||
-      r.fileName.toLowerCase().includes(q);
+    const matchesSearch = !q || r.fileName.toLowerCase().includes(q);
     const date = new Date(r.createdAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
@@ -185,20 +181,41 @@ export default function InvalidDocumentsTable() {
                   </div>
                   <div>
                     <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
-                      Uploaded At
-                    </p>
-                    <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
-                      {formatDateTime(record.createdAt)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
                       Missing Fields
                     </p>
                     <p className="text-theme-xs mt-0.5 text-danger">
                       {record.missingFields.join(", ")}
                     </p>
                   </div>
+                </div>
+
+                <div className="border-t border-gray-100 pt-3 dark:border-white/[0.05]">
+                  <a
+                    href={record.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                    View Document
+                  </a>
                 </div>
               </div>
             ))
@@ -229,6 +246,7 @@ export default function InvalidDocumentsTable() {
                     "File Name",
                     "Missing Fields",
                     "Uploaded At",
+                    "Action",
                   ].map((col) => (
                     <TableCell
                       key={col}
@@ -276,6 +294,35 @@ export default function InvalidDocumentsTable() {
 
                       <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
                         {formatDateTime(record.createdAt)}
+                      </TableCell>
+
+                      <TableCell className="px-3 py-3">
+                        <a
+                          href={record.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-theme-xs text-secondary border-secondary/30 hover:bg-secondary inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors duration-150 hover:text-white"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 flex-shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                          </svg>
+                          View
+                        </a>
                       </TableCell>
                     </TableRow>
                   ))
