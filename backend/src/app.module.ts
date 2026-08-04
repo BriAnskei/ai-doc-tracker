@@ -5,16 +5,16 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Role } from './entities/role.entity';
-import { IncomingDocumentFile } from './entities/incoming-document-file.entity';
-import { InvalidDocument } from './entities/invalid-document.entity';
-import { IncomingDocQueue } from './entities/incoming-doc-queue.entity';
-import { UploadController } from './controllers/upload.controller';
-import { InvalidDocumentsController } from './controllers/invalid-documents.controller';
 import { AiExtractorController } from './controllers/ai-extractor.controller';
 import { DocumentQueueController } from './controllers/document-queue.controller';
+import { Role } from './entities/role.entity';
 import { IncomingDocuments } from './entities/incoming-documents.entity';
+import { InvalidDocument } from './entities/invalid-document.entity';
+import { IncomingDocumentFile } from './entities/incoming-document-file.entity';
+import { IncomingDocQueue } from './entities/incoming-doc-queue.entity';
 import { getDatabaseConfig } from './config/database.config';
+import { UploadController } from './controllers/upload.controller';
+import { InvalidDocumentsController } from './controllers/invalid-documents.controller';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { getDatabaseConfig } from './config/database.config';
       IncomingDocuments,
     ]),
   ],
-  controllers: [AppController, UploadController, InvalidDocumentsController, DocumentQueueController],
+  controllers: [AppController, UploadController, InvalidDocumentsController, DocumentQueueController, AiExtractorController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -21,13 +22,34 @@ import { useOutgoingExtraction } from "./components/useOutgoingExtraction";
 
 // Types
 import { DocumentType } from "./components/types";
+import type { InvalidDocument } from "../../tables/InvalidDocumentsTable";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+interface LocationState {
+  invalidDocument?: InvalidDocument;
+  queueDocument?: QueueDocument;
+}
+
+interface QueueDocument {
+  id: string;
+  fileId: string;
+  fileName: string;
+  filePath: string;
+  fileUrl: string;
+  uploaderName: string;
+  createdAt: string;
+}
+
 export default function DocumentUploadPage() {
+  const location = useLocation();
+  const invalidDocument = (location.state as LocationState | null)?.invalidDocument;
+  const queueDocument = (location.state as LocationState | null)?.queueDocument;
+
   const [docType, setDocType] = useState<DocumentType>("incoming");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [hydrating, setHydrating] = useState(!!invalidDocument || !!queueDocument);
 
   const incoming = useIncomingExtraction();
   const outgoing = useOutgoingExtraction();
@@ -79,10 +101,142 @@ export default function DocumentUploadPage() {
   };
 
   // ---------------------------------------------------------------------------
+  // Hydrate from an invalid document (arrived via "Process Document" in the modal)
+  // Skips OCR/extraction entirely — we already have aiResponse from the first pass.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!invalidDocument) return;
+
+    let cancelled = false;
+
+    async function hydrateFromInvalidDocument(doc: InvalidDocument) {
+      setDocType("incoming"); // invalid docs only ever come from the incoming flow
+      setHydrating(true);
+
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const fileRes = await fetch(`${apiUrl}${doc.fileUrl}`);
+        if (!fileRes.ok) {
+          throw new Error(`Failed to fetch document file: ${fileRes.status}`);
+        }
+        const blob = await fileRes.blob();
+        const file = new File([blob], doc.fileName, { type: "application/pdf" });
+
+        if (cancelled) return;
+        setUploadedFile(file);
+
+        // Prefill whatever the AI already extracted successfully.
+        // missingFields are intentionally left blank for manual entry.
+        const ai = doc.aiResponse ?? {};
+        incoming.updateField("subject", ai.subject ?? "");
+        incoming.updateField("from", ai.from ?? "");
+        incoming.updateField("to", ai.to ?? "");
+        incoming.updateField("dateReceived", ai.date_received ?? "");
+
+        incoming.setStatus("success");
+      } catch (error) {
+        console.error("Failed to hydrate from invalid document:", error);
+        incoming.setStatus("error");
+      } finally {
+        if (!cancelled) setHydrating(false);
+      }
+    }
+
+    hydrateFromInvalidDocument(invalidDocument);
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invalidDocument]);
+
+  // ── Hydrate from a queue document (arrived via "Process Document" in the upload queue)
+  // Fetches the PDF, extracts text, runs AI extraction, and pre-fills the form.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!queueDocument) return;
+
+    let cancelled = false;
+
+    async function hydrateFromQueueDocument(doc: QueueDocument) {
+      setDocType("incoming"); // queue docs only ever come from the incoming flow
+      setHydrating(true);
+
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+        // Step 1: Fetch the PDF file
+        const fileRes = await fetch(`${apiUrl}${doc.fileUrl}`);
+        if (!fileRes.ok) {
+          throw new Error(`Failed to fetch document file: ${fileRes.status}`);
+        }
+        const blob = await fileRes.blob();
+        const file = new File([blob], doc.fileName, { type: "application/pdf" });
+
+        if (cancelled) return;
+        setUploadedFile(file);
+
+        // Step 2: Extract text from PDF
+        let text = await extractPdfText(file);
+
+        if (!text || text.trim().length <= 50) {
+          text = await extractOCR(file);
+        }
+
+        if (cancelled || !text) {
+          throw new Error("Failed to extract text from document");
+        }
+
+        // Step 3: Call AI extraction endpoint
+        const aiRes = await fetch(`${apiUrl}/ai/extract`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: text,
+            systemInstruction:
+              "You are a document extraction assistant. Extract structured metadata from document text. " +
+              "Return ONLY a valid JSON object with no markdown, no explanations, no extra text. " +
+              "Required fields: subject, from, to, date_received. " +
+              "date_received must be in YYYY-MM-DD format. " +
+              "If a field cannot be found in the document, return an empty string for that field.",
+          }),
+        });
+
+        const aiData = await aiRes.json();
+
+        if (cancelled) return;
+
+        if (aiData.success && aiData.res) {
+          incoming.setExtractionField(aiData.res);
+          incoming.setStatus("success");
+        } else {
+          throw new Error(aiData.error || "AI extraction failed");
+        }
+      } catch (error) {
+        console.error("Failed to hydrate from queue document:", error);
+        incoming.setStatus("error");
+      } finally {
+        if (!cancelled) setHydrating(false);
+      }
+    }
+
+    hydrateFromQueueDocument(queueDocument);
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queueDocument]);
+
+  // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
   const handleFileDrop = useCallback(
     async (file: File) => {
+      // Manual drop is for fresh uploads only — an invalid-document or queue-document
+      // session already has its file supplied via hydration above.
+      if (invalidDocument || queueDocument) return;
+
       setUploadedFile(file);
       if (docType === "incoming") incoming.extract(file);
       else outgoing.extract(file);
@@ -93,25 +247,26 @@ export default function DocumentUploadPage() {
       if (!text || text.length <= 50) {
         text = await extractOCR(file);
       }
-
     },
-    [docType, incoming, outgoing],
+    [docType, incoming, outgoing, invalidDocument, queueDocument],
   );
 
   const handleClearFile = useCallback(() => {
+    if (invalidDocument || queueDocument) return; // don't allow clearing the source doc mid-fix
     setUploadedFile(null);
     incoming.reset();
     outgoing.reset();
-  }, [incoming, outgoing]);
+  }, [incoming, outgoing, invalidDocument, queueDocument]);
 
   const handleTypeChange = useCallback(
     (type: DocumentType) => {
+      if (invalidDocument || queueDocument) return; // type is locked to "incoming" in this flow
       setDocType(type);
       setUploadedFile(null);
       incoming.reset();
       outgoing.reset();
     },
-    [incoming, outgoing],
+    [incoming, outgoing, invalidDocument, queueDocument],
   );
 
   return (
@@ -123,11 +278,27 @@ export default function DocumentUploadPage() {
       <PageBreadcrumb pageTitle="Document Upload" />
 
       <ComponentCard
-        title="Upload"
-        desc="Upload a PDF to automatically extract its metadata for routing and tracking."
+        title={
+          invalidDocument
+            ? "Complete Missing Details"
+            : queueDocument
+              ? "Process Document"
+              : "Upload"
+        }
+        desc={
+          invalidDocument
+            ? `Fill in the missing fields for "${invalidDocument.fileName}" before it can be routed.`
+            : queueDocument
+              ? `Review the AI-extracted metadata for "${queueDocument.fileName}" and make any corrections before routing.`
+              : "Upload a PDF to automatically extract its metadata for routing and tracking."
+        }
         className="mb-8"
       >
-        <DocumentTypeToggle value={docType} onChange={handleTypeChange} />
+        <DocumentTypeToggle
+          value={docType}
+          onChange={handleTypeChange}
+          disabled={!!invalidDocument || !!queueDocument}
+        />
         <div
           className={`mb-6 flex items-center gap-2.5 rounded-xl border px-4 py-3 ${
             docType === "incoming"
@@ -159,8 +330,16 @@ export default function DocumentUploadPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            {uploadedFile ? (
-              <PdfPreviewPanel file={uploadedFile} onClear={handleClearFile} />
+            {hydrating ? (
+              <div className="text-theme-sm flex h-full min-h-[200px] items-center justify-center text-gray-400">
+                Loading document…
+              </div>
+            ) : uploadedFile ? (
+              <PdfPreviewPanel
+                file={uploadedFile}
+                onClear={handleClearFile}
+                clearable={!invalidDocument && !queueDocument}
+              />
             ) : (
               <DropZone onFileDrop={handleFileDrop} />
             )}

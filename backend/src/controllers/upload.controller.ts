@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFile,
   UseInterceptors,
   Body,
@@ -23,6 +24,14 @@ interface AiExtractionResult {
   from: string;
   to: string;
   date_received: string;
+}
+
+interface QueueListItem {
+  id: string;
+  fileName: string;
+  from: string;
+  uploadedAt: Date;
+  status: 'on-queue' | 'received';
 }
 
 @Controller('upload')
@@ -130,6 +139,26 @@ export class UploadController {
       queueId: queueEntry.id,
       message: 'Document uploaded and queued for processing',
     };
+  }
+
+  @Get('queue')
+  @HttpCode(HttpStatus.OK)
+  async getQueuedDocuments(): Promise<QueueListItem[]> {
+    const entries = await this.queueRepository.find({
+      relations: { documentFile: true },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entries
+      .filter((entry) => !!entry.documentFile)
+      .map((entry) => ({
+        id: entry.id,
+        fileName: entry.documentFile.name,
+        // TODO: replace with a join to users.Full_name once a User entity/relation exists
+        from: entry.documentFile.uploaderId,
+        uploadedAt: entry.createdAt,
+        status: entry.status === 'on_queue' ? 'on-queue' : 'received',
+      }));
   }
 
   private async extractFieldsWithAi(text: string): Promise<AiExtractionResult> {

@@ -11,7 +11,8 @@ export interface InvalidDocument {
   id: string;
   fileName: string;
   from: string;
-  uploadedAt: string;
+  uploaderName: string;
+  createdAt: string;
   missingFields: string[];
   fileUrl: string;
   aiResponse: Record<string, string> | null;
@@ -46,10 +47,10 @@ function KebabIcon({ className }: { className?: string }) {
 
 function KebabActionMenu({
   onView,
-  onReject,
+  onMarkInvalid,
 }: {
   onView: () => void;
-  onReject: () => void;
+  onMarkInvalid: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,11 +91,11 @@ function KebabActionMenu({
           <button
             onClick={() => {
               setOpen(false);
-              onReject();
+              onMarkInvalid();
             }}
-            className="text-theme-xs flex w-full items-center gap-2 border-t border-gray-100 px-3 py-2 text-danger transition-colors hover:bg-danger/5 dark:border-white/[0.05] dark:text-danger"
+            className="text-theme-xs text-danger hover:bg-danger/5 dark:text-danger flex w-full items-center gap-2 border-t border-gray-100 px-3 py-2 transition-colors dark:border-white/[0.05]"
           >
-            Reject
+            Mark as Invalid
           </button>
         </div>
       )}
@@ -112,11 +113,11 @@ export default function InvalidDocumentsTable() {
   const [data, setData] = useState<InvalidDocument[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [pendingRejectId, setPendingRejectId] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectReasonError, setRejectReasonError] = useState(false);
-  const [rejecting, setRejecting] = useState(false);
+  const [showMarkInvalidConfirm, setShowMarkInvalidConfirm] = useState(false);
+  const [pendingMarkInvalidId, setPendingMarkInvalidId] = useState<string | null>(null);
+  const [markInvalidReason, setMarkInvalidReason] = useState("");
+  const [markInvalidReasonError, setMarkInvalidReasonError] = useState(false);
+  const [markingInvalid, setMarkingInvalid] = useState(false);
 
   // Missing Fields modal state
   const [showFieldsModal, setShowFieldsModal] = useState(false);
@@ -133,7 +134,7 @@ export default function InvalidDocumentsTable() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
         const response = await axios.get<{ data: InvalidDocument[]; total: number }>(
-          `${apiUrl}/upload-invalid`,
+          `${apiUrl}/invalid-documents`,
         );
         setData(response.data.data);
       } catch (error) {
@@ -155,25 +156,25 @@ export default function InvalidDocumentsTable() {
     setActiveRecord(null);
   }
 
-  async function handleRejectConfirm() {
-    if (pendingRejectId === null) return;
+  async function handleMarkInvalidConfirm() {
+    if (pendingMarkInvalidId === null) return;
 
-    if (!rejectReason.trim()) {
-      setRejectReasonError(true);
+    if (!markInvalidReason.trim()) {
+      setMarkInvalidReasonError(true);
       return;
     }
 
-    setRejecting(true);
+    setMarkingInvalid(true);
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-      await axios.patch(`${apiUrl}/invalid-documents/${pendingRejectId}/mark-invalid`);
+      await axios.patch(`${apiUrl}/invalid-documents/${pendingMarkInvalidId}/mark-invalid`);
 
-      // Remove the rejected item from local state
-      setData((prev) => prev.filter((r) => r.id !== pendingRejectId));
-      setShowRejectConfirm(false);
-      setPendingRejectId(null);
-      setRejectReason("");
-      setRejectReasonError(false);
+      // Remove the marked-invalid item from local state
+      setData((prev) => prev.filter((r) => r.id !== pendingMarkInvalidId));
+      setShowMarkInvalidConfirm(false);
+      setPendingMarkInvalidId(null);
+      setMarkInvalidReason("");
+      setMarkInvalidReasonError(false);
 
       addNotification?.({
         title: "Document Marked Invalid",
@@ -183,30 +184,31 @@ export default function InvalidDocumentsTable() {
     } catch (error) {
       console.error("Failed to mark document as invalid:", error);
     } finally {
-      setRejecting(false);
+      setMarkingInvalid(false);
     }
   }
 
-  function handleRejectClick(id: string) {
+  function handleMarkInvalidClick(id: string) {
     setShowFieldsModal(false);
     setActiveRecord(null);
-    setRejectReason("");
-    setRejectReasonError(false);
-    setPendingRejectId(id);
-    setShowRejectConfirm(true);
+    setMarkInvalidReason("");
+    setMarkInvalidReasonError(false);
+    setPendingMarkInvalidId(id);
+    setShowMarkInvalidConfirm(true);
   }
 
   function handleProcess(id: string) {
-    void id;
+    const record = data.find((r) => r.id === id);
     setShowFieldsModal(false);
     setActiveRecord(null);
-    navigate("/upload-direct");
+    if (!record) return;
+    navigate("/upload-direct", { state: { invalidDocument: record } });
   }
 
   const filtered = data.filter((r) => {
     const q = search.toLowerCase();
     const matchesSearch = !q || r.fileName.toLowerCase().includes(q);
-    const date = new Date(r.uploadedAt);
+    const date = new Date(r.createdAt);
     const matchesFrom = !filterDateFrom || date >= new Date(filterDateFrom);
     const matchesTo = !filterDateTo || date <= new Date(filterDateTo);
     return matchesSearch && matchesFrom && matchesTo;
@@ -309,18 +311,28 @@ export default function InvalidDocumentsTable() {
                   <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
                     {record.fileName}
                   </p>
-                  <span className="text-[10px] font-semibold text-danger">
+                  <span className="text-danger text-[10px] font-semibold">
                     {record.missingFields.length} missing
                   </span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
+                  {record.uploaderName && (
+                    <div>
+                      <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
+                        Uploader
+                      </p>
+                      <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
+                        {record.uploaderName}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-theme-xs font-medium tracking-wide text-gray-400 uppercase dark:text-gray-500">
                       Uploaded At
                     </p>
                     <p className="text-theme-xs mt-0.5 text-gray-700 dark:text-gray-300">
-                      {formatDateTime(record.uploadedAt)}
+                      {formatDateTime(record.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -347,7 +359,7 @@ export default function InvalidDocumentsTable() {
                       Review
                     </button>
                     <button
-                      onClick={() => handleRejectClick(record.id)}
+                      onClick={() => handleMarkInvalidClick(record.id)}
                       className="text-theme-xs text-danger border-danger/30 hover:bg-danger inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-medium transition-colors duration-150 hover:text-white"
                     >
                       <svg
@@ -363,7 +375,7 @@ export default function InvalidDocumentsTable() {
                           d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      Reject
+                      Mark as Invalid
                     </button>
                   </div>
                 </div>
@@ -376,10 +388,7 @@ export default function InvalidDocumentsTable() {
               <span className="font-medium text-gray-600 dark:text-gray-300">
                 {filtered.length}
               </span>{" "}
-              of{" "}
-              <span className="font-medium text-gray-600 dark:text-gray-300">
-                {data.length}
-              </span>{" "}
+              of <span className="font-medium text-gray-600 dark:text-gray-300">{data.length}</span>{" "}
               records
             </p>
           )}
@@ -391,39 +400,30 @@ export default function InvalidDocumentsTable() {
             <Table>
               <TableHeader className="dark:border-white/[0.05]">
                 <TableRow>
-                  {[
-                    "File Name",
-                    "Missing Field",
-                    "Uploaded At",
-                    "Actions",
-                  ].map((col) => (
-                    <TableCell
-                      key={col}
-                      isHeader
-                      className="text-primary text-theme-xs px-3 py-3 text-start font-semibold whitespace-nowrap dark:text-gray-300"
-                    >
-                      {col}
-                    </TableCell>
-                  ))}
+                  {["File Name", "Uploader", "Missing Field", "Uploaded At", "Actions"].map(
+                    (col) => (
+                      <TableCell
+                        key={col}
+                        isHeader
+                        className="text-primary text-theme-xs px-3 py-3 text-start font-semibold whitespace-nowrap dark:text-gray-300"
+                      >
+                        {col}
+                      </TableCell>
+                    ),
+                  )}
                 </TableRow>
               </TableHeader>
 
               <TableBody className="dark:divide-white/[0.05]">
                 {loading ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="text-theme-sm px-5 py-10 text-center text-gray-400"
-                    >
+                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
                       Loading…
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="text-theme-sm px-5 py-10 text-center text-gray-400"
-                    >
+                    <td colSpan={4} className="text-theme-sm px-5 py-10 text-center text-gray-400">
                       No invalid documents match your filters.
                     </td>
                   </tr>
@@ -437,18 +437,22 @@ export default function InvalidDocumentsTable() {
                         {record.fileName}
                       </TableCell>
 
-                      <TableCell className="text-theme-sm px-3 py-3 text-left font-semibold text-danger dark:text-danger">
+                      <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                        {record.uploaderName || "—"}
+                      </TableCell>
+
+                      <TableCell className="text-theme-sm text-danger dark:text-danger px-3 py-3 text-left font-semibold">
                         {record.missingFields.length}
                       </TableCell>
 
                       <TableCell className="text-theme-sm px-3 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                        {formatDateTime(record.uploadedAt)}
+                        {formatDateTime(record.createdAt)}
                       </TableCell>
 
                       <TableCell className="px-3 py-3">
                         <KebabActionMenu
                           onView={() => handleOpenFieldsModal(record)}
-                          onReject={() => handleRejectClick(record.id)}
+                          onMarkInvalid={() => handleMarkInvalidClick(record.id)}
                         />
                       </TableCell>
                     </TableRow>
@@ -466,9 +470,7 @@ export default function InvalidDocumentsTable() {
                   {filtered.length}
                 </span>{" "}
                 of{" "}
-                <span className="font-medium text-gray-600 dark:text-gray-300">
-                  {data.length}
-                </span>{" "}
+                <span className="font-medium text-gray-600 dark:text-gray-300">{data.length}</span>{" "}
                 records
               </span>
             </div>
@@ -481,23 +483,21 @@ export default function InvalidDocumentsTable() {
         document={activeRecord}
         isOpen={showFieldsModal}
         onClose={handleCloseFieldsModal}
-        onReject={handleRejectClick}
+        onMarkInvalid={handleMarkInvalidClick}
         onProcess={handleProcess}
       />
 
-      {/* ── Reject Confirm Modal ── */}
-      {showRejectConfirm && (
+      {/* ── Mark as Invalid Confirm Modal ── */}
+      {showMarkInvalidConfirm && (
         <div
           className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 px-4"
-          onClick={(e) =>
-            e.target === e.currentTarget && handleRejectConfirm()
-          }
+          onClick={(e) => e.target === e.currentTarget && handleMarkInvalidConfirm()}
         >
           <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-gray-900">
             <div className="px-6 py-5">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-danger/10 dark:bg-danger/20">
+              <div className="bg-danger/10 dark:bg-danger/20 mb-4 flex h-11 w-11 items-center justify-center rounded-full">
                 <svg
-                  className="h-5 w-5 text-danger"
+                  className="text-danger h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -512,35 +512,34 @@ export default function InvalidDocumentsTable() {
               </div>
 
               <h2 className="text-theme-sm font-semibold text-gray-900 dark:text-white/90">
-                Reject document?
+                Mark document as invalid?
               </h2>
               <p className="text-theme-xs mt-1.5 leading-relaxed text-gray-500 dark:text-gray-400">
-                This will mark the document as invalid and return it to the
-                receiver. The receiver will be notified and can fix the missing
-                metadata and re-upload.
+                This will mark the document as invalid and return it to the receiver. The receiver
+                will be notified and can fix the missing metadata and re-upload.
               </p>
 
               <div className="mt-4">
                 <label className="text-theme-xs mb-1.5 block font-medium text-gray-600 dark:text-gray-300">
-                  Reason for rejection <span className="text-danger">*</span>
+                  Reason for marking invalid <span className="text-danger">*</span>
                 </label>
                 <textarea
-                  value={rejectReason}
+                  value={markInvalidReason}
                   onChange={(e) => {
-                    setRejectReason(e.target.value);
-                    if (e.target.value.trim()) setRejectReasonError(false);
+                    setMarkInvalidReason(e.target.value);
+                    if (e.target.value.trim()) setMarkInvalidReasonError(false);
                   }}
                   rows={3}
                   placeholder="e.g. Missing subject line and date received — please resubmit with complete details."
-                  className={`text-theme-sm w-full resize-none rounded-lg border px-3 py-2 text-gray-700 transition focus:outline-none focus:ring-2 dark:bg-white/[0.03] dark:text-gray-200 ${
-                    rejectReasonError
+                  className={`text-theme-sm w-full resize-none rounded-lg border px-3 py-2 text-gray-700 transition focus:ring-2 focus:outline-none dark:bg-white/[0.03] dark:text-gray-200 ${
+                    markInvalidReasonError
                       ? "border-danger focus:border-danger focus:ring-danger/30"
-                      : "border-gray-200 focus:border-secondary focus:ring-secondary/40 dark:border-white/[0.08]"
+                      : "focus:border-secondary focus:ring-secondary/40 border-gray-200 dark:border-white/[0.08]"
                   }`}
                 />
-                {rejectReasonError && (
-                  <p className="text-theme-xs mt-1 text-danger">
-                    A reason is required to reject this document.
+                {markInvalidReasonError && (
+                  <p className="text-theme-xs text-danger mt-1">
+                    A reason is required to mark this document as invalid.
                   </p>
                 )}
               </div>
@@ -549,21 +548,21 @@ export default function InvalidDocumentsTable() {
             <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.05]">
               <button
                 onClick={() => {
-                  setShowRejectConfirm(false);
-                  setPendingRejectId(null);
-                  setRejectReason("");
-                  setRejectReasonError(false);
+                  setShowMarkInvalidConfirm(false);
+                  setPendingMarkInvalidId(null);
+                  setMarkInvalidReason("");
+                  setMarkInvalidReasonError(false);
                 }}
                 className="text-theme-sm rounded-lg border border-gray-200 px-3 py-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:text-gray-400 dark:hover:bg-white/[0.04]"
               >
                 Cancel
               </button>
               <button
-                onClick={handleRejectConfirm}
-                disabled={rejecting}
-                className="text-theme-sm inline-flex items-center gap-1.5 rounded-lg bg-danger px-3 py-2 font-medium text-white transition-colors hover:bg-danger/90 disabled:opacity-50"
+                onClick={handleMarkInvalidConfirm}
+                disabled={markingInvalid}
+                className="text-theme-sm bg-danger hover:bg-danger/90 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 font-medium text-white transition-colors disabled:opacity-50"
               >
-                {rejecting ? "Rejecting…" : "Reject"}
+                {markingInvalid ? "Marking Invalid…" : "Mark as Invalid"}
               </button>
             </div>
           </div>
