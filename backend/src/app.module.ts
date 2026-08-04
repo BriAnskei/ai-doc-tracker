@@ -15,6 +15,8 @@ import { IncomingDocQueue } from './entities/incoming-doc-queue.entity';
 import { getDatabaseConfig } from './config/database.config';
 import { UploadController } from './controllers/upload.controller';
 import { InvalidDocumentsController } from './controllers/invalid-documents.controller';
+import { Division } from './entities/division.entity';
+import { DivisionsController } from './controllers/divisions.controller';
 
 @Module({
   imports: [
@@ -39,9 +41,17 @@ import { InvalidDocumentsController } from './controllers/invalid-documents.cont
       InvalidDocument,
       IncomingDocQueue,
       IncomingDocuments,
+      Division,
     ]),
   ],
-  controllers: [AppController, UploadController, InvalidDocumentsController, DocumentQueueController, AiExtractorController],
+  controllers: [
+    AppController,
+    UploadController,
+    InvalidDocumentsController,
+    DocumentQueueController,
+    AiExtractorController,
+    DivisionsController,
+  ],
   providers: [AppService],
 })
 export class AppModule {}

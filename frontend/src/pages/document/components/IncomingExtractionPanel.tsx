@@ -5,14 +5,14 @@ import EmptyState from "./EmptyState";
 import FieldSkeleton from "./FieldSkeleton";
 import { IncomingMetadata, ExtractionStatus } from "./types";
 import ReactMarkdown from "react-markdown";
+import DivisionMultiSelect from "./DivisionMultiSelect";
 
 interface Props {
   status: ExtractionStatus;
   metadata: IncomingMetadata;
   hasFile: boolean;
-  onFieldChange: (field: keyof IncomingMetadata, value: string) => void;
+  onFieldChange: <K extends keyof IncomingMetadata>(field: K, value: IncomingMetadata[K]) => void;
 }
-
 export default function IncomingExtractionPanel({
   status,
   metadata,
@@ -151,11 +151,10 @@ export default function IncomingExtractionPanel({
               </div>
 
               <SectionDivider label="Requires input" />
-              <Field
+              <DivisionMultiSelect
                 label="Routed To"
                 value={metadata.routedTo}
-                placeholder="e.g. Records Section"
-                onChange={(v: string) => onFieldChange("routedTo", v)}
+                onChange={(divisions) => onFieldChange("routedTo", divisions)}
               />
               <Field
                 label="Notice of Action"
@@ -183,7 +182,7 @@ export default function IncomingExtractionPanel({
         <div className="shrink-0 border-t border-gray-100 pt-4 dark:border-gray-800">
           <button
             type="button"
-            className="bg-[#2563eb] text-theme-sm hover:bg-[#2563eb]/90 focus:ring-[#2563eb]/30 w-full rounded-xl px-4 py-2.5 font-semibold text-white shadow-sm transition focus:ring-2 focus:outline-none active:scale-[0.98]"
+            className="text-theme-sm w-full rounded-xl bg-[#2563eb] px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-[#2563eb]/90 focus:ring-2 focus:ring-[#2563eb]/30 focus:outline-none active:scale-[0.98]"
           >
             Save Document
           </button>
