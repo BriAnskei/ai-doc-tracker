@@ -23,6 +23,7 @@ interface InvalidDocumentResponse {
   fileName: string;
   filePath: string;
   fileUrl: string;
+  documentFileId: string;
   uploaderId: string;
   uploaderName: string;
   missingFields: string[];
@@ -92,6 +93,7 @@ export class InvalidDocumentsController {
       fileUrl: doc.documentFile?.path
         ? `/uploads/${doc.documentFile.path.split('/').pop()}`
         : '',
+      documentFileId: doc.documentFileId,
       uploaderId: doc.documentFile?.uploaderId || '',
       uploaderName: uploaderNames[doc.documentFile?.uploaderId || ''] || '',
       missingFields: doc.missingFields ? JSON.parse(doc.missingFields) : [],
@@ -148,6 +150,7 @@ export class InvalidDocumentsController {
       fileUrl: doc.documentFile?.path
         ? `/uploads/${doc.documentFile.path.split('/').pop()}`
         : '',
+      documentFileId: doc.documentFileId,
       uploaderId: doc.documentFile?.uploaderId || '',
       uploaderName: uploaderNames[doc.documentFile?.uploaderId || ''] || '',
       missingFields: doc.missingFields ? JSON.parse(doc.missingFields) : [],

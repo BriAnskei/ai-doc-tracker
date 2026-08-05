@@ -15,6 +15,7 @@ export interface InvalidDocument {
   createdAt: string;
   missingFields: string[];
   fileUrl: string;
+  documentFileId: string;
   aiResponse: Record<string, string> | null;
   remarks: string | null;
   isMarkInvalid: boolean;

@@ -12,11 +12,13 @@ import { IncomingDocuments } from './entities/incoming-documents.entity';
 import { InvalidDocument } from './entities/invalid-document.entity';
 import { IncomingDocumentFile } from './entities/incoming-document-file.entity';
 import { IncomingDocQueue } from './entities/incoming-doc-queue.entity';
+import { DocumentRouting } from './entities/document-routing.entity';
 import { getDatabaseConfig } from './config/database.config';
 import { UploadController } from './controllers/upload.controller';
 import { InvalidDocumentsController } from './controllers/invalid-documents.controller';
 import { Division } from './entities/division.entity';
 import { DivisionsController } from './controllers/divisions.controller';
+import { IncomingDocumentsController } from './controllers/incoming-documents.controller';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { DivisionsController } from './controllers/divisions.controller';
       IncomingDocQueue,
       IncomingDocuments,
       Division,
+      DocumentRouting,
     ]),
   ],
   controllers: [
@@ -51,6 +54,7 @@ import { DivisionsController } from './controllers/divisions.controller';
     DocumentQueueController,
     AiExtractorController,
     DivisionsController,
+    IncomingDocumentsController,
   ],
   providers: [AppService],
 })

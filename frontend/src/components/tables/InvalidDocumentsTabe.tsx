@@ -10,6 +10,7 @@ export interface InvalidDocument {
   fileName: string;
   uploaderName: string;
   fileUrl: string;
+  documentFileId: string;
   missingFields: string[];
   createdAt: string;
   isMarkInvalid: boolean;

@@ -22,7 +22,7 @@ import { useOutgoingExtraction } from "./components/useOutgoingExtraction";
 
 // Types
 import { DocumentType } from "./components/types";
-import type { InvalidDocument } from "../../tables/InvalidDocumentsTable";
+import { InvalidDocument } from "../../components/tables/InvalidDocumentsTable";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -44,12 +44,14 @@ interface QueueDocument {
 
 export default function DocumentUploadPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const invalidDocument = (location.state as LocationState | null)?.invalidDocument;
   const queueDocument = (location.state as LocationState | null)?.queueDocument;
 
   const [docType, setDocType] = useState<DocumentType>("incoming");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [hydrating, setHydrating] = useState(!!invalidDocument || !!queueDocument);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const incoming = useIncomingExtraction();
   const outgoing = useOutgoingExtraction();
@@ -112,6 +114,7 @@ export default function DocumentUploadPage() {
     async function hydrateFromInvalidDocument(doc: InvalidDocument) {
       setDocType("incoming"); // invalid docs only ever come from the incoming flow
       setHydrating(true);
+      incoming.setStatus("extracting");
 
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -133,7 +136,7 @@ export default function DocumentUploadPage() {
         incoming.updateField("to", ai.to ?? "");
         incoming.updateField("dateReceived", ai.date_received ?? "");
 
-        incoming.setStatus("success");
+        incoming.setStatus("done");
       } catch (error) {
         console.error("Failed to hydrate from invalid document:", error);
         incoming.setStatus("error");
@@ -161,6 +164,7 @@ export default function DocumentUploadPage() {
     async function hydrateFromQueueDocument(doc: QueueDocument) {
       setDocType("incoming"); // queue docs only ever come from the incoming flow
       setHydrating(true);
+      incoming.setStatus("extracting");
 
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -208,7 +212,7 @@ export default function DocumentUploadPage() {
 
         if (aiData.success && aiData.res) {
           incoming.setExtractionField(aiData.res);
-          incoming.setStatus("success");
+          incoming.setStatus("done");
         } else {
           throw new Error(aiData.error || "AI extraction failed");
         }
@@ -242,7 +246,6 @@ export default function DocumentUploadPage() {
       else outgoing.extract(file);
 
       let text = await extractPdfText(file);
-      incoming.setStatus("extracting");
 
       if (!text || text.length <= 50) {
         text = await extractOCR(file);
@@ -268,6 +271,61 @@ export default function DocumentUploadPage() {
     },
     [incoming, outgoing, invalidDocument, queueDocument],
   );
+
+  // Saves the reviewed incoming-document metadata from the upload queue:
+  // marks the queue entry as received, creates the incoming_documents record,
+  // and creates the document_routing rows for the selected divisions.
+  const handleSaveIncomingDocument = useCallback(async () => {
+    if (!queueDocument) return;
+
+    setSaveError(null);
+
+    if (!incoming.metadata.routedTo || incoming.metadata.routedTo.length === 0) {
+      setSaveError("Please select at least one division under Routed To before saving.");
+      return;
+    }
+
+    const result = await incoming.save({
+      queueId: queueDocument.id,
+      documentFileId: queueDocument.fileId,
+    });
+
+    if (result.success) {
+      navigate("/upload-queue", {
+        state: { savedMessage: "Document saved and routed successfully." },
+      });
+    } else {
+      setSaveError(result.message);
+    }
+  }, [incoming, queueDocument, navigate]);
+
+  // Saves the reviewed incoming-document metadata from the invalid documents
+  // flow: deletes the invalid_documents record, creates an incoming_doc_queue
+  // entry (status: received), creates the incoming_documents record, and
+  // creates the document_routing rows. On success, redirects to /incoming.
+  const handleSaveInvalidDocument = useCallback(async () => {
+    if (!invalidDocument) return;
+
+    setSaveError(null);
+
+    if (!incoming.metadata.routedTo || incoming.metadata.routedTo.length === 0) {
+      setSaveError("Please select at least one division under Routed To before saving.");
+      return;
+    }
+
+    const result = await incoming.saveInvalid({
+      invalidDocId: invalidDocument.id,
+      documentFileId: invalidDocument.documentFileId,
+    });
+
+    if (result.success) {
+      navigate("/incoming", {
+        state: { savedMessage: "Document saved and routed successfully." },
+      });
+    } else {
+      setSaveError(result.message);
+    }
+  }, [incoming, invalidDocument, navigate]);
 
   return (
     <div>
@@ -328,6 +386,12 @@ export default function DocumentUploadPage() {
           </span>
         </div>
 
+        {saveError && (
+          <div className="text-theme-sm mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-red-600 dark:border-red-900/40 dark:bg-red-900/10 dark:text-red-400">
+            {saveError}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
             {hydrating ? (
@@ -352,6 +416,14 @@ export default function DocumentUploadPage() {
                 metadata={incoming.metadata}
                 hasFile={!!uploadedFile}
                 onFieldChange={incoming.updateField}
+                onSave={
+                  queueDocument
+                    ? handleSaveIncomingDocument
+                    : invalidDocument
+                      ? handleSaveInvalidDocument
+                      : undefined
+                }
+                saving={incoming.saving}
               />
             ) : (
               <OutgoingExtractionPanel

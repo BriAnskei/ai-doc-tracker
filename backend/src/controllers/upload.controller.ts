@@ -7,6 +7,8 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,10 +16,14 @@ import { multerStorage } from '../config/multer.config';
 import { IncomingDocumentFile } from '../entities/incoming-document-file.entity';
 import { InvalidDocument } from '../entities/invalid-document.entity';
 import { IncomingDocQueue } from '../entities/incoming-doc-queue.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+
+import { DocumentRouting } from '../entities/document-routing.entity';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { GoogleGenAI } from '@google/genai';
+import * as saveIncomingDocumentDto from '../entities/save-incoming-document.dto';
+import { IncomingDocuments } from '../entities/incoming-documents.entity';
 
 interface AiExtractionResult {
   subject: string;
@@ -46,7 +52,13 @@ export class UploadController {
     @InjectRepository(IncomingDocQueue)
     private readonly queueRepository: Repository<IncomingDocQueue>,
 
+    @InjectRepository(IncomingDocuments)
+    private readonly incomingDocumentsRepository: Repository<IncomingDocuments>,
+
     private readonly configService: ConfigService,
+
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   @Post('receiver')
@@ -161,21 +173,205 @@ export class UploadController {
       }));
   }
 
+  @Post('incomming/save')
+  @HttpCode(HttpStatus.CREATED)
+  async saveIncomingDocument(
+    @Body() body: saveIncomingDocumentDto.SaveIncomingDocumentDto,
+  ): Promise<{
+    success: boolean;
+    incomingDocumentId?: string;
+    message: string;
+  }> {
+    const {
+      queueId,
+      documentFileId,
+      subject,
+      from,
+      to,
+      dateReceived,
+      summary,
+      routedTo,
+      noticeOfAction,
+      actionTaken,
+    } = body;
+
+    if (!queueId || !documentFileId) {
+      throw new BadRequestException('queueId and documentFileId are required');
+    }
+    if (!routedTo || routedTo.length === 0) {
+      throw new BadRequestException(
+        'At least one division must be selected in routedTo',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const queueRepo = manager.getRepository(IncomingDocQueue);
+      const incomingRepo = manager.getRepository(IncomingDocuments);
+      const routingRepo = manager.getRepository(DocumentRouting);
+
+      // 1. Load and update the queue entry
+      const queueEntry = await queueRepo.findOne({ where: { id: queueId } });
+      if (!queueEntry) {
+        throw new NotFoundException(`Queue entry ${queueId} not found`);
+      }
+      queueEntry.status = 'received';
+      await queueRepo.save(queueEntry);
+
+      // 2. Create the incoming_documents record
+      const uniqueId = await this.generateUniqueId(
+        manager.getRepository(IncomingDocuments),
+      );
+
+      const incomingDoc = incomingRepo.create({
+        id: uuidv4(),
+        documentFileId,
+        status: 'pending',
+        uniqueId,
+        subject: subject || null,
+        from: from || null,
+        to: to || null,
+        dateReceived: dateReceived ? dateReceived.slice(0, 10) : null, // strip time if datetime-local
+        summary: summary || null,
+        noticeAction: noticeOfAction || null,
+        actionTaken: actionTaken || null,
+      });
+      await incomingRepo.save(incomingDoc);
+
+      // 3. Create document_routing rows, one per division
+      const routingRows = routedTo.map((divisionId) =>
+        routingRepo.create({
+          id: uuidv4(),
+          incomingDocumentId: incomingDoc.id,
+          divisionId,
+        }),
+      );
+      await routingRepo.save(routingRows);
+
+      return {
+        success: true,
+        incomingDocumentId: incomingDoc.id,
+        message: 'Document saved and routed successfully',
+      };
+    });
+  }
+
+  @Post('incomming/save-invalid')
+  @HttpCode(HttpStatus.CREATED)
+  async saveInvalidDocument(
+    @Body() body: saveIncomingDocumentDto.SaveIncomingDocumentDto & { invalidDocId: string },
+  ): Promise<{
+    success: boolean;
+    incomingDocumentId?: string;
+    message: string;
+  }> {
+    const {
+      invalidDocId,
+      documentFileId,
+      subject,
+      from,
+      to,
+      dateReceived,
+      summary,
+      routedTo,
+      noticeOfAction,
+      actionTaken,
+    } = body;
+
+    if (!invalidDocId || !documentFileId) {
+      throw new BadRequestException('invalidDocId and documentFileId are required');
+    }
+    if (!routedTo || routedTo.length === 0) {
+      throw new BadRequestException(
+        'At least one division must be selected in routedTo',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const queueRepo = manager.getRepository(IncomingDocQueue);
+      const incomingRepo = manager.getRepository(IncomingDocuments);
+      const routingRepo = manager.getRepository(DocumentRouting);
+      const invalidDocRepo = manager.getRepository(InvalidDocument);
+
+      // 1. Delete the invalid document record
+      const invalidDoc = await invalidDocRepo.findOne({ where: { id: invalidDocId } });
+      if (!invalidDoc) {
+        throw new NotFoundException(`Invalid document ${invalidDocId} not found`);
+      }
+      await invalidDocRepo.remove(invalidDoc);
+
+      // 2. Create the incoming_doc_queue entry with status 'received'
+      const queueEntry = queueRepo.create({
+        id: uuidv4(),
+        documentFileId,
+        status: 'received',
+      });
+      await queueRepo.save(queueEntry);
+
+      // 3. Create the incoming_documents record
+      const uniqueId = await this.generateUniqueId(incomingRepo);
+
+      const incomingDoc = incomingRepo.create({
+        id: uuidv4(),
+        documentFileId,
+        status: 'pending',
+        uniqueId,
+        subject: subject || null,
+        from: from || null,
+        to: to || null,
+        dateReceived: dateReceived ? dateReceived.slice(0, 10) : null,
+        summary: summary || null,
+        noticeAction: noticeOfAction || null,
+        actionTaken: actionTaken || null,
+      });
+      await incomingRepo.save(incomingDoc);
+
+      // 4. Create document_routing rows, one per division
+      const routingRows = routedTo.map((divisionId) =>
+        routingRepo.create({
+          id: uuidv4(),
+          incomingDocumentId: incomingDoc.id,
+          divisionId,
+        }),
+      );
+      await routingRepo.save(routingRows);
+
+      return {
+        success: true,
+        incomingDocumentId: incomingDoc.id,
+        message: 'Document saved and routed successfully',
+      };
+    });
+  }
+
+  /**
+   * Generates a human-readable ID code in the form YYYY-####, where #### is a
+   * zero-padded sequential counter of incoming_documents created so far this year.
+   */
+  private async generateUniqueId(
+    repo: Repository<IncomingDocuments>,
+  ): Promise<string> {
+    const year = new Date().getFullYear();
+    const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
+    const startOfNextYear = new Date(`${year + 1}-01-01T00:00:00.000Z`);
+
+    const countThisYear = await repo
+      .createQueryBuilder('doc')
+      .where('doc.created_at >= :start AND doc.created_at < :end', {
+        start: startOfYear,
+        end: startOfNextYear,
+      })
+      .getCount();
+
+    const sequence = String(countThisYear + 1).padStart(4, '0');
+    return `${year}-${sequence}`;
+  }
+
   private async extractFieldsWithAi(text: string): Promise<AiExtractionResult> {
     const apiKey = this.configService.get<string>('GOOGLE_AI_KEY');
 
     const ai = new GoogleGenAI({
       apiKey,
     });
-
-    console.log(
-      {
-        keyExists: !!apiKey,
-        keyLength: apiKey?.length,
-        keyStart: apiKey?.substring(0, 5),
-      },
-      apiKey,
-    );
 
     const systemInstruction =
       'You are a document extraction assistant. Extract structured metadata from document text. ' +
@@ -215,7 +411,6 @@ export class UploadController {
         return { subject: '', from: '', to: '', date_received: '' };
       }
 
-      // Parse the JSON response from AI
       const cleaned = candidates.trim();
       const parsed = JSON.parse(cleaned);
 

@@ -7,6 +7,7 @@ export interface FieldProps {
 	type?: string;
 	readOnly?: boolean;
 	systemGenerated?: boolean;
+	loading?: boolean;
 	textarea?: boolean;
 	onChange: (value: string) => void;
 }
@@ -18,6 +19,7 @@ const Field: React.FC<FieldProps> = ({
 	type = "text",
 	readOnly = false,
 	systemGenerated = false,
+	loading = false,
 	textarea = false,
 	onChange,
 }) => {
@@ -33,6 +35,10 @@ const Field: React.FC<FieldProps> = ({
 		}
   `;
 
+	const shimmerClass = loading
+		? "relative overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:animate-shimmer after:bg-gradient-to-r after:from-transparent after:via-white/40 after:to-transparent after:bg-[length:200%_100%]"
+		: "";
+
 	return (
 		<div className="grid grid-cols-[180px_1fr] items-start gap-4">
 			<div className="flex items-center gap-1.5 pt-2">
@@ -45,25 +51,27 @@ const Field: React.FC<FieldProps> = ({
 					</span>
 				)}
 			</div>
-			{textarea ? (
-				<textarea
-					value={value}
-					placeholder={placeholder}
-					readOnly={readOnly || systemGenerated}
-					rows={3}
-					onChange={(e) => onChange(e.target.value)}
-					className={`${baseInput} resize-none py-2`}
-				/>
-			) : (
-				<input
-					type={type}
-					value={value}
-					placeholder={placeholder}
-					readOnly={readOnly || systemGenerated}
-					onChange={(e) => onChange(e.target.value)}
-					className={`${baseInput} h-9`}
-				/>
-			)}
+			<div className={`${shimmerClass} rounded-lg`}>
+				{textarea ? (
+					<textarea
+						value={value}
+						placeholder={placeholder}
+						readOnly={readOnly || systemGenerated}
+						rows={3}
+						onChange={(e) => onChange(e.target.value)}
+						className={`${baseInput} resize-none py-2`}
+					/>
+				) : (
+					<input
+						type={type}
+						value={value}
+						placeholder={placeholder}
+						readOnly={readOnly || systemGenerated}
+						onChange={(e) => onChange(e.target.value)}
+						className={`${baseInput} h-9`}
+					/>
+				)}
+			</div>
 		</div>
 	);
 };

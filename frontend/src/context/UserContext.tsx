@@ -13,7 +13,7 @@ interface RoleUserMap {
 
 export const roleUserMap: RoleUserMap = {
   super_admin: "54191de9-e538-44a5-b5b5-6d70b14cb37c",
-  admin: "bbf01f13-7e98-4128-9606-743e67155344",
+  admin: "bbf01f13-7e98-4128-9606-743e67155344z",
   receiver_officer: "efc6bac3-5b56-4eec-ab4e-d5319b9ec36b",
   division: "802ee72e-eade-45f3-ac9b-1417ff5d3c05",
 };
